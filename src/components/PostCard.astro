@@ -1,0 +1,66 @@
+---
+import { formatDate, getPostImage } from '../lib/utils'
+
+interface Props {
+  title: string
+  slug: string
+  date: Date
+  summary?: string
+  tags?: string[]
+  images?: string | string[]
+}
+
+const { title, slug, date, summary, tags = [], images } = Astro.props
+const imageUrl = getPostImage(images)
+---
+
+<article class="polaroid group">
+  <!-- Washi Tape -->
+  <div class="tape" />
+
+  <!-- Image (4:3 fast quadratisch) -->
+  <a href={`/tiny-house/${slug}/`} class="block overflow-hidden rounded-sm">
+    {imageUrl ? (
+      <img
+        src={imageUrl}
+        alt={title}
+        class="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        loading="lazy"
+        decoding="async"
+      />
+    ) : (
+      <div class="aspect-[4/3] w-full bg-gradient-to-br from-primary-400 to-secondary-400 rounded-sm" />
+    )}
+  </a>
+
+  <!-- Content (unterhalb des Bildes — Polaroid-Weissraum) -->
+  <div class="px-1 pt-3 pb-3">
+    <!-- Titel -->
+    <h3 class="mb-1.5 line-clamp-2 text-[15px] font-bold leading-snug">
+      <a
+        href={`/tiny-house/${slug}/`}
+        class="text-[var(--text)] transition-colors hover:text-primary-500"
+      >
+        {title}
+      </a>
+    </h3>
+
+    <!-- Summary -->
+    {summary && (
+      <p class="mb-2 line-clamp-3 text-xs leading-relaxed text-[var(--text-secondary)]">{summary}</p>
+    )}
+
+    <!-- Date + Weiterlesen -->
+    <div class="flex items-center justify-between">
+      <time class="text-[11px] text-[var(--text-secondary)]" datetime={date.toISOString()}>
+        {formatDate(date)}
+      </time>
+      <a
+        href={`/tiny-house/${slug}/`}
+        class="accent-color text-xs font-semibold transition-all hover:translate-x-0.5"
+      >
+        Weiterlesen →
+      </a>
+    </div>
+  </div>
+</article>

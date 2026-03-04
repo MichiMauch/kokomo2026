@@ -1,0 +1,54 @@
+---
+title: 'Gäste im Tiny House – geht das überhaupt?'
+date: '2026-03-04'
+summary: >-
+  Wo schlafen Gäste auf 36 Quadratmetern? Wie oft kommt das vor? Und braucht
+  man wirklich ein Gästezimmer? Ehrliche Antworten aus unserem Tiny-House-Alltag.
+tags:
+  - Tiny House Alltag
+  - bewusstes wohnen
+  - minimalismus
+  - Real Talk
+  - tiny house
+authors:
+  - default
+draft: false
+images: >-
+  https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/gaeste-im-tiny-house-geht-das-ueberhaupt-titelbild.webp
+---
+
+«Und wenn Besuch kommt – wo schlafen die dann?» Diese Frage gehört zu den absoluten Klassikern, die wir hören, sobald jemand erfährt, dass wir auf 36 Quadratmetern leben. Meistens schwingt ein ungläubiges Lächeln mit. Verständlich. Also reden wir mal darüber.
+
+## Ja, es geht – theoretisch und praktisch
+
+Fangen wir mit den Fakten an: Zwei Gäste könnten bei uns übernachten. Das Sofa lässt sich ausziehen, und mit ein bisschen Tetris-Talent wird aus unserem Wohnbereich ein gemütlicher Schlafplatz. Decken, Kissen, fertig. Technisch gesehen ist das kein Problem.
+
+Aber – und jetzt kommt der ehrliche Teil – wie oft passiert das tatsächlich? Selten. Und das hat weniger mit dem Platz zu tun als mit uns.
+
+## Je älter man wird, desto seltener schläft jemand auf deinem Sofa
+
+Das klingt vielleicht unromantisch, aber es ist die Wahrheit: Mit den Jahren verändern sich Besuche. Früher, in der WG-Zeit, hat man nach einem Abend einfach irgendwo gepennt. Heute trinkt man gemütlich zusammen einen Wein und fährt dann wieder nach Hause.
+
+Das hat mit dem Tiny House rein gar nichts zu tun. Das ist einfach das Leben. Unsere Freunde und Familie haben ihre eigenen Betten, ihre eigenen Routinen. Und mal ehrlich: Wir geniessen es auch, abends zu zweit unsere Ruhe zu haben.
+
+## Braucht man ein Gästezimmer? Nein.
+
+Wir haben uns am Anfang tatsächlich Gedanken gemacht, ob der fehlende Platz für Gäste ein Problem wird. Nach über drei Jahren können wir sagen: überhaupt nicht. Ein Gästezimmer, das 360 Tage im Jahr leer steht, ist in einem normalen Haus schon fragwürdig. In einem Tiny House wäre es absurd.
+
+Was wir stattdessen haben: ein Sofa, das im Notfall zum Bett wird. Das reicht. Für die zwei, drei Mal im Jahr, wo es wirklich vorkommt.
+
+## Was Besuche bei uns wirklich ausmacht
+
+Viel spannender als die Schlaffrage ist, was passiert, wenn Gäste tagsüber vorbeikommen. Denn das kommt regelmässig vor – und es ist jedes Mal schön.
+
+Die Reaktionen beim ersten Besuch sind immer ähnlich: Staunen, Neugier, und dann dieser Moment, in dem jemand sagt: «Es ist viel grösser, als ich dachte.» Oder: «Es fühlt sich gar nicht eng an.» Wir müssen dann immer ein bisschen schmunzeln.
+
+Meistens sitzen wir draussen. Auf der Terrasse, im Garten, am kleinen Tisch. Gerade im Frühling und Sommer ist das perfekt. Bei schlechtem Wetter geht es drinnen – und ja, dann ist es kuschelig. Aber nicht unangenehm.
+
+## Was wir gelernt haben
+
+Besuch im Tiny House hat uns etwas Wichtiges gezeigt: Man braucht keinen grossen Raum, um eine gute Zeit miteinander zu haben. Eigentlich braucht man nur einen Tisch, etwas zu trinken und gute Gespräche.
+
+Und falls doch mal jemand über Nacht bleibt? Dann funktioniert das. Nicht in einem separaten Gästezimmer mit eigenem Bad und Handtuchset. Sondern auf einem ausgezogenen Sofa, mit einer Tasse Kaffee am nächsten Morgen und dem Blick ins Grüne.
+
+Das ist mehr als genug.

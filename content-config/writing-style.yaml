@@ -1,0 +1,58 @@
+## KOKOMO Blog — Schreibstil-Regeln für AI-Generierung
+
+language: "de-CH"
+no_eszett: true          # ss statt ß (z.B. "grossartig", nicht "großartig")
+address: "du"            # Du-Form, Leser direkt angesprochen
+perspective: "wir"       # Sibylle & Michi erzählen gemeinsam
+
+tone:
+  - authentisch
+  - persönlich
+  - nahbar
+  - leicht humorvoll
+  - nicht belehrend
+  - nicht reisserisch
+
+structure:
+  - "Einleitung: persönlicher Einstieg, der neugierig macht"
+  - "H2 Zwischenüberschriften zur Gliederung"
+  - "Kurze Absätze (2-4 Sätze)"
+  - "Praktische Tipps oder Erfahrungen einbauen"
+  - "Persönliches Fazit oder Ausblick am Ende"
+
+content_rules:
+  min_words: 500
+  tags_count: 5
+  summary_length: "160-180 Zeichen"
+  title_max_length: 60
+
+context:
+  project: "KOKOMO — Tiny House in der Schweiz"
+  residents: "Sibylle und Michi"
+  since: "September 2022"
+  manufacturer: "Wohnwagon (Österreich)"
+  topics:
+    - Tiny House Alltag
+    - Nachhaltigkeit & Autarkie
+    - Stromautarkie & Photovoltaik
+    - Regenwassernutzung
+    - Minimalismus
+    - Schweizer Baurecht
+    - Erneuerbare Energien
+    - Bewusstes Wohnen
+    - Garten & Natur
+
+existing_tags:
+  - tiny house
+  - nachhaltigkeit
+  - minimalismus
+  - autarkie
+  - erneuerbare energien
+  - wohnwagon
+  - photovoltaik
+  - regenwasser
+  - schweiz
+  - Tiny House Schweiz
+  - Tiny House Alltag
+  - Stromautarkie
+  - Jahreszeiten

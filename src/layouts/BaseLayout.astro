@@ -1,0 +1,112 @@
+---
+import '../styles/global.css'
+import '@fontsource/poppins/400.css'
+import '@fontsource/poppins/500.css'
+import '@fontsource/poppins/700.css'
+import '@fontsource/roboto/400.css'
+import '@fontsource/roboto/500.css'
+import '@fontsource/roboto/700.css'
+import Header from '../components/Header.astro'
+import Footer from '../components/Footer.astro'
+import AnimatedBackground from '../components/islands/AnimatedBackground'
+import { siteConfig } from '../lib/site-config'
+
+interface Props {
+  title?: string
+  description?: string
+  image?: string
+  article?: boolean
+  noIndex?: boolean
+}
+
+const {
+  title,
+  description = siteConfig.description,
+  image = siteConfig.socialBanner,
+  article = false,
+  noIndex = false,
+} = Astro.props
+
+const pageTitle = title ? `${title} | ${siteConfig.title}` : siteConfig.title
+const canonicalUrl = new URL(Astro.url.pathname, siteConfig.siteUrl).href
+const ogImage = image?.startsWith('http') ? image : new URL(image, siteConfig.siteUrl).href
+---
+
+<!doctype html>
+<html lang={siteConfig.language} class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/static/images/kokomo-bildmarke.svg" />
+
+    <!-- SEO -->
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    {noIndex && <meta name="robots" content="noindex,nofollow" />}
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content={siteConfig.title} />
+    <meta property="og:locale" content={siteConfig.locale} />
+    <meta property="og:type" content={article ? 'article' : 'website'} />
+    <meta property="og:image" content={ogImage} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- RSS -->
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={siteConfig.title}
+      href="/rss.xml"
+    />
+
+    <!-- Dark Mode (inline to prevent flash) -->
+    <script is:inline>
+      ;(function () {
+        const theme = localStorage.getItem('theme')
+        if (
+          theme === 'dark' ||
+          (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        ) {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script>
+
+    <!-- Matomo Analytics -->
+    <script is:inline define:vars={{ matomoUrl: siteConfig.analytics.matomo.url, matomoSiteId: siteConfig.analytics.matomo.siteId }}>
+      var _paq = (window._paq = window._paq || [])
+      _paq.push(['trackPageView'])
+      _paq.push(['enableLinkTracking'])
+      ;(function () {
+        var u = matomoUrl
+        _paq.push(['setTrackerUrl', u + 'matomo.php'])
+        _paq.push(['setSiteId', matomoSiteId])
+        var d = document,
+          g = d.createElement('script'),
+          s = d.getElementsByTagName('script')[0]
+        g.async = true
+        g.src = u + 'matomo.js'
+        s.parentNode.insertBefore(g, s)
+      })()
+    </script>
+  </head>
+  <body class="min-h-screen text-[var(--text)] antialiased">
+    <AnimatedBackground client:visible />
+    <Header />
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <main class="mb-auto">
+        <slot />
+      </main>
+      <Footer />
+    </div>
+  </body>
+</html>

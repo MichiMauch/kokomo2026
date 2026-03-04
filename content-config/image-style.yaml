@@ -1,0 +1,11 @@
+base_style: "editorial photography, warm natural lighting, Swiss countryside, tiny house lifestyle"
+header:
+  aspect_ratio: "16:9"
+  width: 1200
+  height: 675
+  style_suffix: "wide establishing shot, atmospheric, soft focus background"
+inline:
+  aspect_ratio: "4:3"
+  width: 800
+  height: 600
+  style_suffix: "detail shot, authentic, slightly warm color grade"

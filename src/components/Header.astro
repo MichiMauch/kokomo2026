@@ -1,0 +1,137 @@
+---
+import ThemeToggle from './ThemeToggle.astro'
+import Search from './islands/Search'
+import { siteConfig } from '../lib/site-config'
+import { getCollection } from 'astro:content'
+import { getPostImage } from '../lib/utils'
+
+const navLinks = [
+  { href: '/', title: 'Home' },
+  { href: '/ueber-uns/', title: 'Über uns' },
+  { href: '/newsletter/', title: 'Newsletter' },
+]
+
+const currentPath = Astro.url.pathname
+
+// Prepare search data
+const allPosts = await getCollection('posts', ({ data }) => !data.draft)
+const searchData = allPosts.map((post) => ({
+  title: post.data.title,
+  slug: post.slug,
+  summary: post.data.summary || '',
+  tags: post.data.tags,
+  date: post.data.date.toISOString().split('T')[0],
+  image: getPostImage(post.data.images) || '',
+}))
+---
+
+<header class="sticky top-0 z-50 py-4 glass-card !rounded-none !border-x-0 !border-t-0">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+    <!-- Logo -->
+    <a href="/" class="flex items-center gap-3 text-2xl font-normal font-[family-name:var(--font-sans)]">
+      <img
+        src="/static/images/kokomo-bildmarke.svg"
+        alt="KOKOMO"
+        class="h-14 w-14 drop-shadow-md"
+        width="56"
+        height="56"
+      />
+      <span class="hidden sm:inline drop-shadow-sm leading-tight">{siteConfig.headerTitle}</span>
+    </a>
+
+    <!-- Navigation -->
+    <nav class="hidden items-center gap-2 sm:flex">
+      {
+        navLinks.map((link) => (
+          <a
+            href={link.href}
+            class:list={[
+              'rounded-full px-4 py-2 text-sm font-medium transition-all',
+              currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href))
+                ? 'bg-white/80 text-primary-600 shadow-sm dark:bg-slate-800/80 dark:text-primary-400'
+                : 'text-slate-700 hover:bg-white/60 hover:shadow-sm dark:text-slate-200 dark:hover:bg-slate-800/60',
+            ]}
+          >
+            {link.title}
+          </a>
+        ))
+      }
+      <div class="ml-1 flex items-center gap-1">
+        <Search client:load posts={searchData} />
+        <ThemeToggle />
+      </div>
+    </nav>
+
+    <!-- Mobile: Search + Menu -->
+    <div class="flex items-center gap-2 sm:hidden">
+      <Search client:load posts={searchData} />
+      <button
+        id="mobile-menu-btn"
+        class="rounded-full p-2 text-slate-700 hover:bg-white/60 dark:text-slate-200 dark:hover:bg-slate-800/60"
+        aria-label="Menü öffnen"
+      >
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Navigation (glass card only when open) -->
+  <div id="mobile-menu" class="hidden mt-3 glass-card rounded-2xl p-4 sm:hidden">
+    {
+      navLinks.map((link) => (
+        <a
+          href={link.href}
+          class:list={[
+            'block rounded-xl px-4 py-2.5 text-base font-medium transition-colors',
+            currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href))
+              ? 'text-primary-500'
+              : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white',
+          ]}
+        >
+          {link.title}
+        </a>
+      ))
+    }
+    <div class="mt-2 px-4">
+      <ThemeToggle />
+    </div>
+  </div>
+</header>
+
+<script>
+  const btn = document.getElementById('mobile-menu-btn')
+  const menu = document.getElementById('mobile-menu')
+  btn?.addEventListener('click', () => {
+    menu?.classList.toggle('hidden')
+  })
+
+  // Days counter since move-in (17. September 2022)
+  const moveIn = new Date(2022, 8, 17) // Month is 0-indexed
+  const today = new Date()
+  const days = Math.floor((today.getTime() - moveIn.getTime()) / (1000 * 60 * 60 * 24))
+  const daysEl = document.getElementById('days-counter')
+  if (daysEl) daysEl.textContent = `seit ${days} Tagen`
+
+  // Battery charge from Victron API
+  const batteryEl = document.getElementById('battery-status')
+  if (batteryEl) {
+    fetch('/api/battery')
+      .then(r => r.json())
+      .then(data => {
+        if (data.charge != null) {
+          const pct = data.charge
+          const color = pct < 20 ? '#ef4444' : pct < 50 ? '#eab308' : '#22c55e'
+          batteryEl.innerHTML = `
+            <svg width="20" height="12" viewBox="0 0 20 12" fill="none">
+              <rect x="0.5" y="0.5" width="17" height="11" rx="2" stroke="currentColor" stroke-opacity="0.5"/>
+              <rect x="18" y="3" width="2" height="6" rx="1" fill="currentColor" fill-opacity="0.5"/>
+              <rect x="2" y="2" width="${(pct / 100) * 14}" height="8" rx="1" fill="${color}"/>
+            </svg>
+            ${pct} %`
+        }
+      })
+      .catch(() => {})
+  }
+</script>

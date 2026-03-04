@@ -1,0 +1,95 @@
+---
+import { getCollection } from 'astro:content'
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import PostCard from '../../../components/PostCard.astro'
+import Pagination from '../../../components/Pagination.astro'
+import { sortPostsByDate, getTagCounts } from '../../../lib/utils'
+import { siteConfig } from '../../../lib/site-config'
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection('posts', ({ data }) => !data.draft)
+  const tagCounts = getTagCounts(allPosts)
+  const tags = Object.keys(tagCounts)
+
+  const paths = []
+
+  for (const tag of tags) {
+    const tagPosts = sortPostsByDate(
+      allPosts.filter((post) => post.data.tags.includes(tag))
+    )
+    const totalPages = Math.ceil(tagPosts.length / siteConfig.postsPerPage)
+
+    // Page 1 (no page param in URL)
+    paths.push({
+      params: { tag, page: undefined },
+      props: {
+        tag,
+        posts: tagPosts.slice(0, siteConfig.postsPerPage),
+        currentPage: 1,
+        totalPages,
+        totalPosts: tagPosts.length,
+      },
+    })
+
+    // Pages 2+
+    for (let page = 2; page <= totalPages; page++) {
+      const start = (page - 1) * siteConfig.postsPerPage
+      paths.push({
+        params: { tag, page: `page/${page}` },
+        props: {
+          tag,
+          posts: tagPosts.slice(start, start + siteConfig.postsPerPage),
+          currentPage: page,
+          totalPages,
+          totalPosts: tagPosts.length,
+        },
+      })
+    }
+  }
+
+  return paths
+}
+
+const { tag, posts, currentPage, totalPages, totalPosts } = Astro.props
+---
+
+<BaseLayout
+  title={`Tag: ${tag}`}
+  description={`${totalPosts} Beiträge zum Thema "${tag}" — KOKOMO House Blog`}
+>
+  <div class="py-8">
+    <div class="mb-8">
+      <a
+        href="/tags/"
+        class="mb-2 inline-flex items-center gap-1 text-sm text-[var(--text-secondary)] transition-colors hover:text-primary-500"
+      >
+        &larr; Alle Tags
+      </a>
+      <h1 class="text-3xl font-bold md:text-4xl">
+        <span class="text-[var(--text-secondary)]">Tag:</span> {tag}
+      </h1>
+      <p class="mt-2 text-[var(--text-secondary)]">
+        {totalPosts} {totalPosts === 1 ? 'Beitrag' : 'Beiträge'}
+      </p>
+    </div>
+
+    <div class="fotowand grid gap-10 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3 lg:gap-10">
+      {posts.map((post) => (
+        <PostCard
+          title={post.data.title}
+          slug={post.slug}
+          date={post.data.date}
+          summary={post.data.summary}
+          tags={post.data.tags}
+          images={post.data.images}
+        />
+      ))}
+    </div>
+
+    <Pagination
+      currentPage={currentPage}
+      totalPages={totalPages}
+      basePath={`/tags/${tag}/`}
+    />
+  </div>
+</BaseLayout>

@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:kokomo.house)",
+      "Bash(find /Users/michaelmauch/Documents/Development/cmi-dashboard-next/app/api -name \"route.ts\" -o -name \"route.js\" | xargs ls -la)",
+      "Bash(node -e \"const pkg = require\\('./package.json'\\); console.log\\('astro:', pkg.dependencies?.astro || pkg.devDependencies?.astro\\)\")",
+      "Bash(find /Users/michaelmauch/Documents/Development/kokomo2026/src/components -type f \\\\\\( -name \"*.astro\" -o -name \"*.tsx\" -o -name \"*.ts\" -o -name \"*.jsx\" -o -name \"*.js\" \\\\\\) | xargs basename -a | sort)",
+      "Bash(gh repo list michaelmauch --all --limit 100 2>/dev/null)",
+      "Bash(gh api user/repos --paginate 2>/dev/null | grep -i \"kokomo\\\\|name\" | head -50)",
+      "Bash(gh api user/repos --paginate --jq '.[] | .name' 2>/dev/null | grep -i kokomo)",
+      "Bash(gh issue list --repo MichiMauch/kokomo --state all --limit 100 2>/dev/null)",
+      "Bash(gh issue list --repo MichiMauch/kokomo-admin --state all --limit 100 2>/dev/null)",
+      "Bash(gh issue list --repo MichiMauch/kokomo-new --state all --limit 100 2>/dev/null)",
+      "Bash(gh issue list --repo MichiMauch/kokomo --state all --limit 500 2>/dev/null | wc -l)",
+      "Bash(gh issue view 65 --repo MichiMauch/kokomo --comments 2>/dev/null | head -100)",
+      "Bash(gh issue view 64 --repo MichiMauch/kokomo --comments 2>/dev/null | head -100)",
+      "Bash(gh api repos/MichiMauch/kokomo/issues 2>/dev/null | head -300)",
+      "Bash(gh api repos/MichiMauch/kokomo/issues/65 2>/dev/null)",
+      "Bash(npm run import-comments 2>&1)",
+      "Bash(turso db list 2>&1)",
+      "Bash(turso db tokens create kokomo 2>&1)",
+      "Bash(turso db shell kokomo \"SELECT id, post_slug, parent_id, author_name, approved, substr\\(content, 1, 60\\) as content_preview FROM comments ORDER BY id\" 2>&1)",
+      "Bash(turso db shell kokomo \"DELETE FROM comments WHERE id = 9\" 2>&1)",
+      "Bash(kill %1 2>/dev/null; true)",
+      "Bash(turso db shell kokomo \"SELECT post_slug, COUNT\\(*\\) as count, SUM\\(approved\\) as approved_count FROM comments GROUP BY post_slug ORDER BY count DESC\" 2>&1)",
+      "Bash(npm install openai)",
+      "Bash(npx tsc --noEmit --skipLibCheck --moduleResolution bundler --module esnext --target esnext --jsx react-jsx --baseUrl . --paths '{\"@/*\":[\"src/*\"]}' src/lib/openai.ts src/lib/turso.ts 2>&1 | head -30)",
+      "Bash(GEMINI_API_KEY=AIzaSyAGeD90CKihWR8O_5T1bFHqXFynt-OTde4 npx tsx pipeline/generate-images.ts \"Two coffee cups on a small wooden table inside a cozy tiny house, morning light streaming through a window, a neatly folded blanket on a compact sofa suggesting an overnight guest, editorial photography, warm natural lighting, Swiss countryside, tiny house lifestyle, wide establishing shot, atmospheric, soft focus background\" header gaeste-im-tiny-house-geht-das-ueberhaupt)",
+      "Bash(npx tsx pipeline/generate-images.ts \"Two coffee cups on a small wooden table inside a cozy tiny house, morning light streaming through a window, a neatly folded blanket on a compact sofa suggesting an overnight guest, editorial photography, warm natural lighting, Swiss countryside, tiny house lifestyle, wide establishing shot, atmospheric, soft focus background\" header gaeste-im-tiny-house-geht-das-ueberhaupt)",
+      "Bash(curl -s \"https://generativelanguage.googleapis.com/v1beta/models?key=AIzaSyAGeD90CKihWR8O_5T1bFHqXFynt-OTde4\" | python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(m['name']\\) for m in data.get\\('models',[]\\) if 'image' in m['name'].lower\\(\\) or 'imagen' in m['name'].lower\\(\\) or 'flash' in m['name'].lower\\(\\)]\")",
+      "Bash(ls -la /Users/michaelmauch/Documents/Development/kokomo2026/.git 2>/dev/null; git -C /Users/michaelmauch/Documents/Development/kokomo2026 status 2>&1 | head -5)",
+      "Bash(head -40 /Users/michaelmauch/Documents/Development/kokomo2026/src/pages/api/comments/[slug].ts)",
+      "WebSearch",
+      "Bash(git rm --cached .env.local && git commit -m \"Remove .env.local from tracking\")"
+    ]
+  }
+}

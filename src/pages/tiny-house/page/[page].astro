@@ -1,0 +1,84 @@
+---
+import { getCollection } from 'astro:content'
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import PostCard from '../../../components/PostCard.astro'
+import Pagination from '../../../components/Pagination.astro'
+import { sortPostsByDate, getTagCounts } from '../../../lib/utils'
+import { siteConfig } from '../../../lib/site-config'
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection('posts', ({ data }) => !data.draft)
+  const sortedPosts = sortPostsByDate(allPosts)
+  const totalPages = Math.ceil(sortedPosts.length / siteConfig.postsPerPage)
+
+  // Generate pages 2, 3, 4, etc. (page 1 is handled by /tiny-house/index.astro)
+  return Array.from({ length: totalPages - 1 }, (_, i) => {
+    const page = i + 2
+    const start = (page - 1) * siteConfig.postsPerPage
+    return {
+      params: { page: String(page) },
+      props: {
+        posts: sortedPosts.slice(start, start + siteConfig.postsPerPage),
+        currentPage: page,
+        totalPages,
+      },
+    }
+  })
+}
+
+const { posts, currentPage, totalPages } = Astro.props
+const allPosts = await getCollection('posts', ({ data }) => !data.draft)
+const tagCounts = getTagCounts(allPosts)
+const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1])
+---
+
+<BaseLayout
+  title={`Blog — Seite ${currentPage}`}
+  description={`Seite ${currentPage} von ${totalPages} — Alle Blogbeiträge von KOKOMO House`}
+>
+  <div class="py-8">
+    <h1 class="mb-8 text-3xl font-bold md:text-4xl">Blog</h1>
+
+    <div class="flex flex-col gap-8 lg:flex-row">
+      <!-- Posts Grid -->
+      <div class="flex-1">
+        <div class="fotowand grid gap-10 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3 lg:gap-10">
+          {posts.map((post) => (
+            <PostCard
+              title={post.data.title}
+              slug={post.slug}
+              date={post.data.date}
+              summary={post.data.summary}
+              tags={post.data.tags}
+              images={post.data.images}
+            />
+          ))}
+        </div>
+
+        <Pagination currentPage={currentPage} totalPages={totalPages} basePath="/tiny-house/" />
+      </div>
+
+      <!-- Tag Sidebar -->
+      {sortedTags.length > 0 && (
+        <aside class="hidden w-64 shrink-0 lg:block">
+          <div class="sticky top-24">
+            <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+              Tags
+            </h3>
+            <div class="flex flex-wrap gap-2">
+              {sortedTags.map(([tag, count]) => (
+                <a
+                  href={`/tags/${tag}/`}
+                  class="glass-card inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm text-[var(--text-secondary)] transition-colors hover:text-primary-500"
+                >
+                  {tag}
+                  <span class="text-xs opacity-60">({count})</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </aside>
+      )}
+    </div>
+  </div>
+</BaseLayout>

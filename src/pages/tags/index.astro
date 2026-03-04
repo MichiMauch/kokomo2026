@@ -1,0 +1,29 @@
+---
+import { getCollection } from 'astro:content'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { getTagCounts } from '../../lib/utils'
+
+const allPosts = await getCollection('posts', ({ data }) => !data.draft)
+const tagCounts = getTagCounts(allPosts)
+const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1])
+---
+
+<BaseLayout title="Tags" description="Alle Tags — KOKOMO House Blog">
+  <div class="py-8">
+    <h1 class="mb-8 text-3xl font-bold md:text-4xl">Tags</h1>
+
+    <div class="flex flex-wrap gap-3">
+      {sortedTags.map(([tag, count]) => (
+        <a
+          href={`/tags/${tag}/`}
+          class="glass-card group inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all hover:shadow-md hover:text-primary-500"
+        >
+          <span>{tag}</span>
+          <span class="rounded-full bg-[var(--bg-secondary)] px-2 py-0.5 text-xs text-[var(--text-secondary)] group-hover:bg-primary-500/20 group-hover:text-primary-600">
+            {count}
+          </span>
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

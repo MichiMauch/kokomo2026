@@ -1,0 +1,250 @@
+---
+import { formatDate, getPostImage, getReadingTime } from '../lib/utils'
+import { siteConfig } from '../lib/site-config'
+import GalleryLightbox from '../components/islands/GalleryLightbox'
+import CommentSection from '../components/islands/CommentSection'
+import YouTubeEmbed from '../components/YouTubeEmbed.astro'
+import type { CollectionEntry } from 'astro:content'
+
+interface Props {
+  post: CollectionEntry<'posts'>
+  headings: Array<{ depth: number; slug: string; text: string }>
+  prevPost?: CollectionEntry<'posts'> | null
+  nextPost?: CollectionEntry<'posts'> | null
+}
+
+const { post, headings, prevPost, nextPost } = Astro.props
+const { title, date, tags, images, summary, authors, youtube } = post.data
+const imageUrl = getPostImage(images)
+const prevImage = prevPost ? getPostImage(prevPost.data.images) : null
+const nextImage = nextPost ? getPostImage(nextPost.data.images) : null
+const readingTime = getReadingTime(post.body || '')
+
+// JSON-LD Structured Data
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: title,
+  description: summary,
+  image: imageUrl,
+  datePublished: date.toISOString(),
+  author: {
+    '@type': 'Person',
+    name: siteConfig.author,
+    url: siteConfig.siteUrl,
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: siteConfig.title,
+    logo: {
+      '@type': 'ImageObject',
+      url: `${siteConfig.siteUrl}${siteConfig.siteLogo}`,
+    },
+  },
+}
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+<GalleryLightbox client:visible />
+
+<article class="my-8">
+  <div class="flex flex-col gap-8 lg:flex-row">
+    <!-- Sidebar (links auf Desktop, unten auf Mobile) -->
+    <aside class="hidden w-56 shrink-0 lg:block">
+      <div class="sticky top-24 space-y-4">
+        <!-- Card 1: Inhaltsverzeichnis -->
+        {headings.length > 0 && (
+          <div class="glass-card rounded-2xl p-4">
+            <nav>
+              <h4 class="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+                Inhalt
+              </h4>
+              <ul class="space-y-1.5 text-sm">
+                {headings
+                  .filter((h) => h.depth <= 3)
+                  .map((heading) => (
+                    <li class={heading.depth === 3 ? 'ml-3' : ''}>
+                      <a
+                        href={`#${heading.slug}`}
+                        class="text-[var(--text-secondary)] transition-colors hover:text-primary-500"
+                      >
+                        {heading.text}
+                      </a>
+                    </li>
+                  ))}
+              </ul>
+            </nav>
+          </div>
+        )}
+
+        <!-- Card 2: Navigation (Übersicht + Prev/Next) -->
+        <div class="glass-card rounded-2xl p-4 space-y-3">
+          <a
+            href="/tiny-house/"
+            class="flex items-center gap-1.5 text-sm font-medium text-primary-500 transition-colors hover:text-primary-600"
+          >
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Zur Übersicht
+          </a>
+
+          {prevPost && (
+            <a
+              href={`/tiny-house/${prevPost.slug}/`}
+              class="group block rounded-lg p-2 transition-colors hover:bg-white/50 dark:hover:bg-slate-800/50"
+            >
+              <span class="text-xs uppercase tracking-wider opacity-60">← Vorheriger</span>
+              <p class="mt-0.5 line-clamp-2 text-sm font-medium">{prevPost.data.title}</p>
+            </a>
+          )}
+
+          {nextPost && (
+            <a
+              href={`/tiny-house/${nextPost.slug}/`}
+              class="group block rounded-lg p-2 transition-colors hover:bg-white/50 dark:hover:bg-slate-800/50"
+            >
+              <span class="text-xs uppercase tracking-wider opacity-60">Nächster →</span>
+              <p class="mt-0.5 line-clamp-2 text-sm font-medium">{nextPost.data.title}</p>
+            </a>
+          )}
+        </div>
+      </div>
+    </aside>
+
+    <!-- Hauptinhalt -->
+    <div class="min-w-0 flex-1">
+      <div class="glass-card rounded-2xl p-6 md:p-8">
+        <!-- Header: Hero mit Overlay oder Fallback -->
+        <header class="mb-8">
+          {imageUrl ? (
+            <!-- Hero mit Overlay -->
+            <div class="relative mx-auto max-w-3xl overflow-hidden rounded-xl">
+              <img
+                src={imageUrl}
+                alt={title}
+                class="aspect-[16/9] w-full object-cover"
+                loading="eager"
+                decoding="async"
+              />
+              <!-- Gradient Overlay -->
+              <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <!-- Text Overlay -->
+              <div class="absolute inset-x-0 bottom-0 p-5 md:p-7">
+                <div class="mb-2 flex items-center gap-3 text-sm text-white/80">
+                  <time class="font-medium" datetime={date.toISOString()}>
+                    {formatDate(date)}
+                  </time>
+                  <span>·</span>
+                  <span>{readingTime}</span>
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight text-white md:text-3xl lg:text-4xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
+                  {title}
+                </h1>
+              </div>
+            </div>
+          ) : (
+            <!-- Fallback ohne Bild -->
+            <div class="mx-auto max-w-3xl">
+              <div class="mb-4 flex items-center gap-3 text-sm">
+                <time class="font-medium text-primary-500" datetime={date.toISOString()}>
+                  {formatDate(date)}
+                </time>
+                <span class="text-[var(--text-secondary)]">·</span>
+                <span class="text-[var(--text-secondary)]">{readingTime}</span>
+              </div>
+              <h1 class="text-3xl font-bold tracking-tight font-[family-name:var(--font-sans)] md:text-4xl lg:text-[2.75rem] lg:leading-tight">
+                {title}
+              </h1>
+            </div>
+          )}
+        </header>
+
+        <!-- YouTube Embed -->
+        {youtube && (
+          <div class="mx-auto mb-8 max-w-3xl">
+            <YouTubeEmbed videoId={youtube} title={title} />
+          </div>
+        )}
+
+        <!-- Prose Content -->
+        <div class="mx-auto max-w-3xl">
+          <div class="prose prose-lg max-w-none dark:prose-invert">
+            <slot />
+          </div>
+        </div>
+
+        <!-- Tags (am Ende des Artikels) -->
+        {tags.length > 0 && (
+          <div class="mx-auto mt-8 max-w-3xl flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <a
+                href={`/tags/${tag}/`}
+                class="rounded-full bg-primary-500/10 px-3 py-1 text-xs font-medium text-primary-600 transition-colors hover:bg-primary-500/20 dark:text-primary-400"
+              >
+                {tag}
+              </a>
+            ))}
+          </div>
+        )}
+
+        <!-- Kommentare -->
+        <div class="mx-auto mt-12 max-w-3xl">
+          <CommentSection client:visible slug={post.slug} />
+        </div>
+
+        <!-- Navigation (unterhalb des Contents) -->
+        <div class="mt-12 border-t border-[var(--border)]/30 pt-8">
+          <!-- Prev/Next -->
+          <div class="flex flex-col gap-3 sm:flex-row sm:justify-between">
+            {prevPost ? (
+              <a
+                href={`/tiny-house/${prevPost.slug}/`}
+                class="glass-card group flex-1 overflow-hidden rounded-xl p-3 transition-all hover:shadow-lg hover:shadow-primary-500/10"
+              >
+                <div class="flex items-center gap-3">
+                  {prevImage ? (
+                    <img src={prevImage} alt="" class="h-14 w-14 shrink-0 rounded-lg object-cover" loading="lazy" />
+                  ) : (
+                    <div class="h-14 w-14 shrink-0 rounded-lg bg-gradient-to-br from-primary-400/30 to-secondary-400/30" />
+                  )}
+                  <div>
+                    <span class="text-xs text-[var(--text-secondary)]">&larr; Vorheriger</span>
+                    <p class="mt-1 line-clamp-2 text-sm font-medium text-[var(--text)] group-hover:text-primary-500">
+                      {prevPost.data.title}
+                    </p>
+                  </div>
+                </div>
+              </a>
+            ) : (
+              <div class="flex-1" />
+            )}
+            {nextPost ? (
+              <a
+                href={`/tiny-house/${nextPost.slug}/`}
+                class="glass-card group flex-1 overflow-hidden rounded-xl p-3 text-right transition-all hover:shadow-lg hover:shadow-primary-500/10"
+              >
+                <div class="flex items-center gap-3">
+                  <div class="flex-1">
+                    <span class="text-xs text-[var(--text-secondary)]">Nächster &rarr;</span>
+                    <p class="mt-1 line-clamp-2 text-sm font-medium text-[var(--text)] group-hover:text-primary-500">
+                      {nextPost.data.title}
+                    </p>
+                  </div>
+                  {nextImage ? (
+                    <img src={nextImage} alt="" class="h-14 w-14 shrink-0 rounded-lg object-cover" loading="lazy" />
+                  ) : (
+                    <div class="h-14 w-14 shrink-0 rounded-lg bg-gradient-to-br from-primary-400/30 to-secondary-400/30" />
+                  )}
+                </div>
+              </a>
+            ) : (
+              <div class="flex-1" />
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</article>

@@ -1,0 +1,52 @@
+# ==============================
+# KOKOMO Content Brief
+# ==============================
+# Dieser Brief kann mit /publish oder dem Pipeline-Orchestrator verarbeitet werden:
+#   npx tsx pipeline/publish.ts src/content/briefs/example.yaml
+#
+# Felder:
+#   title       — Titel des Blogposts (Pflicht)
+#   summary     — 160-180 Zeichen (Pflicht)
+#   tags        — Array mit 5 Tags (Pflicht)
+#   body        — Vollständiger Blogpost-Text als Markdown (Pflicht)
+#   image_prompt — Englischer Prompt für Gemini-Bildgenerierung (optional)
+#   image_url   — Vorhandene Bild-URL, überspringt Generierung (optional)
+#   youtube     — YouTube Video-ID (optional)
+#   date        — YYYY-MM-DD, default: heute (optional)
+#   draft       — true/false, default: false (optional)
+
+# --- Beispiel: Ideen-Phase (Kurzbrief) ---
+# topic: "Tiny House Garten winterfest machen"
+# angle: "Was wir dieses Jahr anders gemacht haben"
+# mood: "praktisch, persönlich, ein bisschen selbstironisch"
+# key_points:
+#   - "Hochbeet abdecken — was funktioniert hat"
+#   - "Bewässerung winterfest machen"
+#   - "Der Fehler mit den Kräutern letztes Jahr"
+# status: idea
+
+# --- Beispiel: Publish-Ready Brief ---
+title: "Unser Garten wird winterfest"
+summary: "Hochbeete abdecken, Bewässerung sichern, Kräuter retten: Wie wir unseren Tiny-House-Garten auf den Winter vorbereiten — und was wir letztes Jahr falsch gemacht haben."
+tags: ["Tiny House Alltag", "Garten", "Jahreszeiten", "nachhaltigkeit", "schweiz"]
+image_prompt: "A small raised garden bed next to a wooden tiny house in Swiss countryside, autumn leaves on the ground, gardening tools leaning against the bed, warm golden hour light, cozy atmosphere"
+draft: true
+body: |
+  Der Herbst ist da — und mit ihm die Frage: Was machen wir mit dem Garten?
+
+  ## Die Lektion vom letzten Jahr
+
+  Letztes Jahr haben wir gedacht, die Kräuter überleben den Winter schon irgendwie.
+  Spoiler: Haben sie nicht. Zumindest nicht alle.
+
+  ## Hochbeete winterfest machen
+
+  Dieses Jahr sind wir schlauer. Unser Plan in drei Schritten...
+
+  ## Die Bewässerung nicht vergessen
+
+  Was viele vergessen: Auch die Bewässerung muss winterfest werden...
+
+  ## Unser Fazit
+
+  Es braucht nicht viel, um den Garten gut durch den Winter zu bringen.

@@ -1,0 +1,8 @@
+{
+  "redirects": [
+    { "source": "/ueber-uns-kokomo", "destination": "/ueber-uns/", "permanent": true },
+    { "source": "/was-kostet-unser-tiny-house", "destination": "/tiny-house/unser-leben-im-tiny-house-zwei-jahre-spaeter/", "permanent": true },
+    { "source": "/was-fasziniert-uns-an-einem-tiny-house", "destination": "/", "permanent": true },
+    { "source": "/tiny-house", "destination": "/", "permanent": true }
+  ]
+}

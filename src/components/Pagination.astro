@@ -1,0 +1,47 @@
+---
+interface Props {
+  currentPage: number
+  totalPages: number
+  basePath: string
+}
+
+const { currentPage, totalPages, basePath } = Astro.props
+const prevUrl = currentPage > 1 ? (currentPage === 2 ? basePath : `${basePath}page/${currentPage - 1}/`) : null
+const nextUrl = currentPage < totalPages ? `${basePath}page/${currentPage + 1}/` : null
+---
+
+{totalPages > 1 && (
+  <nav class="mt-14 flex items-center justify-between" aria-label="Seitennavigation">
+    {prevUrl ? (
+      <a
+        href={prevUrl}
+        class="glass-card group inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition-all hover:text-primary-500 hover:shadow-md"
+      >
+        <svg class="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Vorherige
+      </a>
+    ) : (
+      <span />
+    )}
+
+    <span class="text-sm text-[var(--text-secondary)]">
+      Seite {currentPage} von {totalPages}
+    </span>
+
+    {nextUrl ? (
+      <a
+        href={nextUrl}
+        class="glass-card group inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition-all hover:text-primary-500 hover:shadow-md"
+      >
+        Nächste
+        <svg class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
+    ) : (
+      <span />
+    )}
+  </nav>
+)}

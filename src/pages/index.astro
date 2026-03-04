@@ -1,0 +1,81 @@
+---
+import { getCollection } from 'astro:content'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import PostCard from '../components/PostCard.astro'
+import { sortPostsByDate } from '../lib/utils'
+import { siteConfig } from '../lib/site-config'
+
+const allPosts = await getCollection('posts', ({ data }) => !data.draft)
+const sortedPosts = sortPostsByDate(allPosts)
+---
+
+<BaseLayout>
+  <!-- Hero Section -->
+  <section class="py-10 md:py-16 text-center">
+    <div class="mx-auto max-w-3xl">
+      <h1 class="mb-3 text-4xl font-bold tracking-tight font-[family-name:var(--font-sans)] md:text-5xl lg:text-6xl">
+        <span class="text-gradient">{siteConfig.title}</span>
+      </h1>
+      <div class="mb-5 flex items-center justify-center gap-3 text-sm text-[var(--text-secondary)]">
+        <span id="days-counter"></span>
+        <span id="battery-status" class="flex items-center gap-1"></span>
+      </div>
+      <p class="text-lg leading-relaxed text-[var(--text-secondary)] md:text-xl">
+        <strong class="text-[var(--text)]">Brauchen wir wirklich 100 Quadratmeter, um zufrieden und glücklich zu sein?</strong>
+        <br />Seit September 2022 leben wir in unserem Tiny House KOKOMO. Erfahre auf unserem Blog alles über das Leben in einem Tiny House auf 36m².
+      </p>
+    </div>
+  </section>
+
+  <!-- Fotowand: Polaroid-Karten -->
+  <section class="mb-16">
+    <div class="fotowand grid gap-10 px-2 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3 lg:gap-10">
+      {sortedPosts.map((post, i) => (
+        <div data-post-index={i} class={i >= 9 ? 'hidden' : ''}>
+          <PostCard
+            title={post.data.title}
+            slug={post.slug}
+            date={post.data.date}
+            summary={post.data.summary}
+            tags={post.data.tags}
+            images={post.data.images}
+          />
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Load More -->
+  <section class="mb-20 text-center">
+    <div id="load-more-wrapper">
+      <button
+        id="load-more"
+        class="group inline-flex items-center gap-2 rounded-full bg-primary-500 px-8 py-3 font-medium text-white transition-all hover:bg-primary-600 hover:shadow-lg hover:shadow-primary-500/20 cursor-pointer"
+      >
+        Weitere Beiträge laden
+        <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+        </svg>
+      </button>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const BATCH = 9
+  let visible = 9
+  const btn = document.getElementById('load-more')
+  const wrapper = document.getElementById('load-more-wrapper')
+  const posts = document.querySelectorAll('[data-post-index]')
+
+  if (posts.length <= BATCH) wrapper?.classList.add('hidden')
+
+  btn?.addEventListener('click', () => {
+    const next = Math.min(visible + BATCH, posts.length)
+    for (let i = visible; i < next; i++) {
+      posts[i].classList.remove('hidden')
+    }
+    visible = next
+    if (visible >= posts.length) wrapper?.classList.add('hidden')
+  })
+</script>

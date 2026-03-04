@@ -1,0 +1,73 @@
+---
+import { formatDate, getPostImage } from '../lib/utils'
+
+interface Props {
+  title: string
+  slug: string
+  date: Date
+  summary?: string
+  tags?: string[]
+  images?: string | string[]
+}
+
+const { title, slug, date, summary, tags = [], images } = Astro.props
+const imageUrl = getPostImage(images)
+---
+
+<article class="group relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--bg)]">
+  <div class="grid gap-0 md:grid-cols-2">
+    <!-- Image -->
+    {imageUrl && (
+      <a href={`/tiny-house/${slug}/`} class="block overflow-hidden">
+        <img
+          src={imageUrl}
+          alt={title}
+          class="aspect-video h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 md:aspect-auto"
+          loading="eager"
+          decoding="async"
+        />
+      </a>
+    )}
+
+    <!-- Content -->
+    <div class="flex flex-col justify-center p-6 md:p-10">
+      {tags.length > 0 && (
+        <div class="mb-3 flex flex-wrap gap-2">
+          {tags.slice(0, 3).map((tag) => (
+            <a
+              href={`/tags/${tag}/`}
+              class="rounded-full bg-primary-500/10 px-3 py-1 text-xs font-medium text-primary-600 transition-colors hover:bg-primary-500/20 dark:text-primary-400"
+            >
+              {tag}
+            </a>
+          ))}
+        </div>
+      )}
+
+      <h2 class="mb-3 text-2xl font-bold leading-tight md:text-3xl">
+        <a
+          href={`/tiny-house/${slug}/`}
+          class="text-[var(--text)] transition-colors hover:text-primary-500"
+        >
+          {title}
+        </a>
+      </h2>
+
+      {summary && (
+        <p class="mb-4 text-[var(--text-secondary)]">{summary}</p>
+      )}
+
+      <div class="flex items-center gap-4">
+        <time class="text-sm text-[var(--text-secondary)]" datetime={date.toISOString()}>
+          {formatDate(date)}
+        </time>
+        <a
+          href={`/tiny-house/${slug}/`}
+          class="text-sm font-medium text-primary-500 transition-colors hover:text-primary-600"
+        >
+          Weiterlesen &rarr;
+        </a>
+      </div>
+    </div>
+  </div>
+</article>

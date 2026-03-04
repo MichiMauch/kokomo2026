@@ -1,0 +1,126 @@
+/**
+ * Turso database client for the comment system
+ * Stores and retrieves blog post comments
+ */
+
+import { createClient, type Client } from '@libsql/client'
+
+let client: Client | null = null
+
+function getClient(): Client {
+  if (client) return client
+
+  const url = import.meta.env.TURSO_DB_URL
+  const authToken = import.meta.env.TURSO_DB_TOKEN
+
+  if (!url || !authToken) {
+    throw new Error('TURSO_DB_URL and TURSO_DB_TOKEN must be set')
+  }
+
+  client = createClient({ url, authToken })
+  return client
+}
+
+export interface Comment {
+  id: number
+  post_slug: string
+  parent_id: number | null
+  author_name: string
+  content: string
+  created_at: string
+}
+
+export interface AdminComment extends Comment {
+  author_email: string
+  approved: number
+  imported_from: string | null
+}
+
+export async function getCommentsBySlug(slug: string): Promise<Comment[]> {
+  const db = getClient()
+
+  const result = await db.execute({
+    sql: `SELECT id, post_slug, parent_id, author_name, content, created_at
+          FROM comments
+          WHERE post_slug = ? AND approved = 1
+          ORDER BY created_at ASC`,
+    args: [slug],
+  })
+
+  return result.rows.map((row) => ({
+    id: row.id as number,
+    post_slug: row.post_slug as string,
+    parent_id: row.parent_id as number | null,
+    author_name: row.author_name as string,
+    content: row.content as string,
+    created_at: row.created_at as string,
+  }))
+}
+
+export async function createComment(data: {
+  post_slug: string
+  parent_id: number | null
+  author_name: string
+  author_email: string
+  content: string
+}): Promise<number> {
+  const db = getClient()
+
+  const result = await db.execute({
+    sql: `INSERT INTO comments (post_slug, parent_id, author_name, author_email, content, approved)
+          VALUES (?, ?, ?, ?, ?, 0)`,
+    args: [data.post_slug, data.parent_id, data.author_name, data.author_email, data.content],
+  })
+
+  return Number(result.lastInsertRowid)
+}
+
+export async function getAllComments(): Promise<AdminComment[]> {
+  const db = getClient()
+
+  const result = await db.execute(
+    `SELECT id, post_slug, parent_id, author_name, author_email, content, approved, imported_from, created_at
+     FROM comments
+     ORDER BY created_at DESC`,
+  )
+
+  return result.rows.map((row) => ({
+    id: row.id as number,
+    post_slug: row.post_slug as string,
+    parent_id: row.parent_id as number | null,
+    author_name: row.author_name as string,
+    author_email: (row.author_email as string) || '',
+    content: row.content as string,
+    approved: row.approved as number,
+    imported_from: row.imported_from as string | null,
+    created_at: row.created_at as string,
+  }))
+}
+
+export async function approveComment(id: number): Promise<void> {
+  const db = getClient()
+  await db.execute({ sql: 'UPDATE comments SET approved = 1 WHERE id = ?', args: [id] })
+}
+
+export async function deleteComment(id: number): Promise<void> {
+  const db = getClient()
+  await db.execute({ sql: 'DELETE FROM comments WHERE parent_id = ?', args: [id] })
+  await db.execute({ sql: 'DELETE FROM comments WHERE id = ?', args: [id] })
+}
+
+export async function createApprovedReply(data: {
+  post_slug: string
+  parent_id: number
+  author_name: string
+  content: string
+}): Promise<number> {
+  const db = getClient()
+
+  const result = await db.execute({
+    sql: `INSERT INTO comments (post_slug, parent_id, author_name, author_email, content, approved)
+          VALUES (?, ?, ?, '', ?, 1)`,
+    args: [data.post_slug, data.parent_id, data.author_name, data.content],
+  })
+
+  return Number(result.lastInsertRowid)
+}

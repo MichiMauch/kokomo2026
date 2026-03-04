@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { siteConfig } from '../lib/site-config'
+---
+
+<BaseLayout title="Über uns" description="Sibylle & Michi — die Menschen hinter KOKOMO House">
+  <div class="my-8 flex gap-10">
+    <aside class="hidden w-56 shrink-0 lg:block">
+      <div class="sticky top-24">
+        <div class="polaroid" style="--rotation: -1.5deg">
+          <div class="tape"></div>
+          <img
+            src="https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/TinyHouse_170722_21.webp"
+            alt="Sibylle & Michi"
+            class="aspect-[4/3] w-full object-cover rounded-sm"
+            width="224" height="168"
+          />
+          <div class="px-1 pt-2 pb-2 text-center">
+            <p class="text-xs font-medium text-[var(--text-secondary)]">Sibylle & Michi</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <article class="glass-card min-w-0 flex-1 rounded-2xl p-6 md:p-8">
+      <div class="max-w-3xl">
+        <h1 class="mb-8 text-3xl font-bold tracking-tight md:text-4xl">Über uns</h1>
+
+        <div class="prose prose-lg max-w-none dark:prose-invert">
+          <p>
+            Wir sind <strong>Sibylle und Michi</strong> – beide berufstätig, beide gerne draussen, beide überraschend gut auf kleinem Raum.
+          </p>
+
+          <p>
+            Gefunden haben wir uns 2006, geheiratet 2018 – und seitdem teilen wir nicht nur den Alltag, sondern auch eine ziemlich ähnliche Vorstellung davon, wie das Leben aussehen soll: viel draussen, wenig Überfluss, gutes Essen.
+          </p>
+
+          <p>
+            Wandern, Gravel-Bike, Campen, Backen, Kochen und das eine oder andere DIY-Projekt füllen unsere freie Zeit – manchmal gleichzeitig, manchmal nacheinander, immer mit einer gewissen Begeisterung.
+          </p>
+
+          <p>
+            Den entscheidenden Gedanken hat uns unser Wohnmobil eingepflanzt. Im Sommer 2018 kauften wir es – und auf unserer ersten grossen Reise an die Nordsee stellten wir fest: Wenig Platz stört uns nicht. Im Gegenteil. Die Hausarbeit ist in Minuten erledigt, man ist fast immer draussen, und die Erholung setzt sofort ein. Irgendwann auf dieser Reise stellten wir uns die Frage, ob wir wirklich 100 Quadratmeter brauchen, um glücklich zu sein.
+          </p>
+
+          <p>
+            Die Antwort kennen wir seit September 2022: Nein. Seitdem leben wir in unserem Tiny House <strong>KOKOMO</strong> – und vermissen die grosse Wohnung kein bisschen.
+          </p>
+
+          <h2>Kontakt</h2>
+          <p>
+            Du erreichst uns per E-Mail unter{' '}
+            <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>{' '}
+            oder auf{' '}
+            <a href={siteConfig.instagram!} target="_blank" rel="noopener noreferrer">Instagram</a>.
+          </p>
+        </div>
+      </div>
+    </article>
+  </div>
+</BaseLayout>
