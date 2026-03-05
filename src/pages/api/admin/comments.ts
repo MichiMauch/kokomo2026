@@ -12,8 +12,13 @@ export const GET: APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({ error: 'Nicht autorisiert.' }), { status: 401, headers })
   }
 
-  const comments = await getAllComments()
-  return new Response(JSON.stringify({ comments }), { status: 200, headers })
+  try {
+    const comments = await getAllComments()
+    return new Response(JSON.stringify({ comments }), { status: 200, headers })
+  } catch (err: any) {
+    console.error('[admin/comments GET]', err)
+    return new Response(JSON.stringify({ error: 'Kommentare konnten nicht geladen werden.', detail: err?.message || String(err) }), { status: 500, headers })
+  }
 }
 
 export const POST: APIRoute = async ({ request }) => {
