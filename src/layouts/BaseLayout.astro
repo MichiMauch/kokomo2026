@@ -30,6 +30,33 @@ const {
 const pageTitle = title ? `${title} | ${siteConfig.title}` : siteConfig.title
 const canonicalUrl = new URL(Astro.url.pathname, siteConfig.siteUrl).href
 const ogImage = image?.startsWith('http') ? image : new URL(image, siteConfig.siteUrl).href
+
+// Auto-generate BreadcrumbList for non-article pages (articles have their own in PostLayout)
+const pathSegments = Astro.url.pathname.replace(/\/$/, '').split('/').filter(Boolean)
+const breadcrumbNames: Record<string, string> = {
+  'tiny-house': 'Blog',
+  'ueber-uns': 'Über uns',
+  'newsletter': 'Newsletter',
+  'tags': 'Tags',
+  'page': 'Seite',
+}
+const breadcrumbItems = [
+  { name: 'Home', url: siteConfig.siteUrl },
+  ...pathSegments.map((seg, i) => ({
+    name: breadcrumbNames[seg] || decodeURIComponent(seg).replace(/-/g, ' '),
+    url: `${siteConfig.siteUrl}/${pathSegments.slice(0, i + 1).join('/')}/`,
+  })),
+]
+const breadcrumbLd = !article && pathSegments.length > 0 ? {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: breadcrumbItems.map((item, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: item.name,
+    item: item.url,
+  })),
+} : null
 ---
 
 <!doctype html>
@@ -59,6 +86,9 @@ const ogImage = image?.startsWith('http') ? image : new URL(image, siteConfig.si
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+
+    <!-- Breadcrumb JSON-LD -->
+    {breadcrumbLd && <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />}
 
     <!-- RSS -->
     <link
@@ -106,7 +136,43 @@ const ogImage = image?.startsWith('http') ? image : new URL(image, siteConfig.si
       <main class="mb-auto">
         <slot />
       </main>
+      <div class="page-curtain" id="page-curtain"></div>
       <Footer />
     </div>
+    <script is:inline>
+      (function () {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        var curtain = document.getElementById('page-curtain');
+        if (!curtain) return;
+
+        if (sessionStorage.getItem('navigating')) {
+          sessionStorage.removeItem('navigating');
+          curtain.style.transform = 'translateX(0)';
+          curtain.offsetHeight;
+          curtain.classList.add('wipe-out');
+        }
+
+        document.addEventListener('click', function (e) {
+          var link = e.target.closest('a');
+          if (!link) return;
+          var href = link.getAttribute('href');
+          if (!href) return;
+          if (link.target === '_blank') return;
+          if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+          if (href.startsWith('http') && !href.startsWith(window.location.origin)) return;
+
+          e.preventDefault();
+          sessionStorage.setItem('navigating', '1');
+          curtain.classList.remove('wipe-out');
+          curtain.style.transform = '';
+          curtain.offsetHeight;
+          curtain.classList.add('wipe-in');
+          curtain.addEventListener('animationend', function onEnd() {
+            curtain.removeEventListener('animationend', onEnd);
+            window.location.href = href;
+          });
+        });
+      })();
+    </script>
   </body>
 </html>

@@ -21,7 +21,6 @@ config({ path: resolve(process.cwd(), '.env') })
 
 const R2_PUBLIC_URL =
   process.env.CLOUDFLARE_R2_URL ||
-  process.env.NEXT_PUBLIC_CLOUDFLARE_R2_URL ||
   'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev'
 
 function getContentType(filename: string): string {

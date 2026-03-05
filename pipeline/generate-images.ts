@@ -52,14 +52,34 @@ export async function generateImage(
   const ai = new GoogleGenAI({ apiKey })
   const cfg = getImageConfig(type)
 
-  // Build the full prompt
+  // Dynamic prompting: pick random lighting mood and color palette
+  const lightingMoods: string[] = imageStyle.lighting_moods || []
+  const colorPalettes: string[] = imageStyle.color_palettes || []
+  const randomLighting = lightingMoods.length
+    ? lightingMoods[Math.floor(Math.random() * lightingMoods.length)]
+    : ''
+  const randomPalette = colorPalettes.length
+    ? colorPalettes[Math.floor(Math.random() * colorPalettes.length)]
+    : ''
+
+  // Build the full prompt with composition layering:
+  // 1. Base style (camera, lens, general look)
+  // 2. Type-specific suffix (composition, focal length)
+  // 3. Dynamic lighting mood
+  // 4. Dynamic color palette
+  // 5. Scene-specific prompt (subject, action, environment)
+  // 6. Technical constraints
+  const negativePrompt = imageStyle.negative_prompt || ''
+
   const fullPrompt = [
     imageStyle.base_style,
     cfg.style_suffix,
+    randomLighting ? `Lighting: ${randomLighting}` : '',
+    randomPalette ? `Color palette: ${randomPalette}` : '',
     prompt,
     `Aspect ratio: ${cfg.width}x${cfg.height}`,
-    'No text overlays, no watermarks, no logos',
-  ].join('. ')
+    negativePrompt ? `Avoid: ${negativePrompt}` : '',
+  ].filter(Boolean).join('. ')
 
   console.log(`🎨 Generating ${type} image for "${slug}"...`)
   console.log(`   Prompt: ${fullPrompt.slice(0, 120)}...`)

@@ -109,13 +109,34 @@ export default function GalleryLightbox() {
         </button>
       )}
 
-      {/* Image */}
-      <img
-        src={currentSrc}
-        alt={currentAlt}
-        className="max-h-[85vh] max-w-[90vw] rounded-lg object-contain"
-        loading="eager"
-      />
+      {/* Polaroid Frame */}
+      <div
+        className="relative flex flex-col items-center"
+        style={{
+          background: 'rgba(255,255,255,0.95)',
+          padding: '16px 16px 48px 16px',
+          borderRadius: '8px',
+          boxShadow: '0 25px 60px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.2)',
+          maxWidth: '90vw',
+          maxHeight: '90vh',
+        }}
+      >
+        <img
+          src={currentSrc}
+          alt={currentAlt}
+          className="rounded object-contain"
+          style={{ maxHeight: 'calc(85vh - 64px)', maxWidth: 'calc(90vw - 32px)' }}
+          loading="eager"
+        />
+        {currentAlt && (
+          <p
+            className="absolute bottom-3 left-0 right-0 text-center text-sm text-gray-500"
+            style={{ fontFamily: "'Caveat', 'Segoe Print', cursive", fontSize: '1rem' }}
+          >
+            {currentAlt}
+          </p>
+        )}
+      </div>
 
       {/* Next Button */}
       {allImages.length > 1 && (

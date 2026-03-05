@@ -108,6 +108,28 @@ export async function deleteComment(id: number): Promise<void> {
   await db.execute({ sql: 'DELETE FROM comments WHERE id = ?', args: [id] })
 }
 
+export async function getCommentById(id: number): Promise<AdminComment | null> {
+  const db = getClient()
+  const result = await db.execute({
+    sql: `SELECT id, post_slug, parent_id, author_name, author_email, content, approved, imported_from, created_at
+          FROM comments WHERE id = ?`,
+    args: [id],
+  })
+  if (result.rows.length === 0) return null
+  const row = result.rows[0]
+  return {
+    id: row.id as number,
+    post_slug: row.post_slug as string,
+    parent_id: row.parent_id as number | null,
+    author_name: row.author_name as string,
+    author_email: (row.author_email as string) || '',
+    content: row.content as string,
+    approved: row.approved as number,
+    imported_from: row.imported_from as string | null,
+    created_at: row.created_at as string,
+  }
+}
+
 export async function createApprovedReply(data: {
   post_slug: string
   parent_id: number

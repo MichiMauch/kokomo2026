@@ -9,6 +9,7 @@
 
 import { writeFileSync, existsSync } from 'fs'
 import { resolve } from 'path'
+import { fixUmlauts, hasUmlautIssues } from '../src/lib/fix-umlauts.js'
 
 export interface PostData {
   title: string
@@ -74,6 +75,14 @@ export function createPostFile(data: PostData): {
   filePath: string
   content: string
 } {
+  // Fix missing umlauts (safety net for AI-generated content)
+  if (hasUmlautIssues(data.title + ' ' + data.summary + ' ' + data.body)) {
+    data.title = fixUmlauts(data.title)
+    data.summary = fixUmlauts(data.summary)
+    data.body = fixUmlauts(data.body)
+    console.log('🔤 Umlaute automatisch repariert (ae→ä, oe→ö, ue→ü)')
+  }
+
   const slug = slugify(data.title)
   const postsDir = resolve(process.cwd(), 'src/content/posts')
   const filePath = resolve(postsDir, `${slug}.md`)

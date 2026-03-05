@@ -2,6 +2,7 @@
 
 language: "de-CH"
 no_eszett: true          # ss statt ß (z.B. "grossartig", nicht "großartig")
+use_real_umlauts: true   # IMMER echte Umlaute ä, ö, ü verwenden — NIEMALS ae, oe, ue als Ersatz (z.B. "Frühling" nicht "Fruehling", "schön" nicht "schoen", "Türe" nicht "Tuere")
 address: "du"            # Du-Form, Leser direkt angesprochen
 perspective: "wir"       # Sibylle & Michi erzählen gemeinsam
 
@@ -16,7 +17,11 @@ tone:
 structure:
   - "Einleitung: persönlicher Einstieg, der neugierig macht"
   - "H2 Zwischenüberschriften zur Gliederung"
-  - "Kurze Absätze (2-4 Sätze)"
+  - "Absätze unterschiedlicher Länge (mal 1 Satz, mal 4-5 Sätze)"
+  - "Aufzählungen (Bullet Points oder nummerierte Listen) für Tipps, Schritte oder Vergleiche"
+  - "**Fettschrift** für Schlüsselbegriffe oder wichtige Aussagen"
+  - "Gelegentlich ein kurzes Zitat oder direkte Rede einbauen (z.B. «So haben wir das erlebt»)"
+  - "Abschnitte in Länge variieren — nicht jeder H2-Abschnitt gleich lang"
   - "Praktische Tipps oder Erfahrungen einbauen"
   - "Persönliches Fazit oder Ausblick am Ende"
 
@@ -56,3 +61,54 @@ existing_tags:
   - Tiny House Alltag
   - Stromautarkie
   - Jahreszeiten
+
+post_types:
+  erzaehlung:
+    label: "Erzählung"
+    description: "Persönliche Geschichte mit rotem Faden"
+    prompt: |
+      Schreibe einen erzählenden Blogpost im Stil einer persönlichen Geschichte.
+      - Chronologischer Aufbau mit Spannungsbogen
+      - Szenen lebendig beschreiben, Sinneseindrücke einbauen
+      - Direkte Rede oder Zitate verwenden (z.B. «Das hätten wir nie gedacht»)
+      - Absätze stark variieren (mal 1 Satz für Wirkung, mal 4-5 für Szenenbeschreibung)
+      - **Fettschrift** sparsam für emotionale Höhepunkte
+      - Persönliches Fazit mit Reflexion am Ende
+
+  listenpost:
+    label: "Listen-Post"
+    description: "Nummerierte Tipps oder Aufzählung"
+    prompt: |
+      Schreibe einen Listen-Blogpost mit nummerierten Punkten.
+      - Knackige Einleitung (2-3 Sätze), die das Thema einrahmt
+      - Nummerierte H2-Überschriften (z.B. «## 1. Tipp-Titel»)
+      - Pro Punkt: kurze Erklärung + konkretes Beispiel aus unserem Alltag
+      - **Fettschrift** für den Kerntipp jedes Punktes
+      - Gelegentlich Unter-Bullet-Points für Details
+      - Kurzes Fazit am Ende, das die wichtigsten Punkte zusammenfasst
+
+  anleitung:
+    label: "Anleitung"
+    description: "Schritt-für-Schritt-Guide"
+    prompt: |
+      Schreibe eine praktische Schritt-für-Schritt-Anleitung.
+      - Einleitung: Warum ist das Thema relevant, was wird das Ergebnis sein
+      - Optional: Materialliste oder Voraussetzungen als Bullet Points
+      - Nummerierte Schritte als H2-Überschriften
+      - Pro Schritt: klare Anweisung + persönlicher Erfahrungstipp
+      - **Fettschrift** für wichtige Warnungen oder Schlüsselschritte
+      - Hilfreiche Hinweise in kurzen Einschüben (z.B. «Tipp: ...»)
+      - Fazit mit Zusammenfassung und Ermutigung
+
+  erfahrungsbericht:
+    label: "Erfahrungsbericht"
+    description: "Reflexion, Rückblick oder Vergleich"
+    prompt: |
+      Schreibe einen reflektierenden Erfahrungsbericht.
+      - Einstieg: Situation oder Ausgangslage beschreiben
+      - Vorher/Nachher-Kontrast einbauen
+      - Ehrliche Einschätzung — auch Herausforderungen und Fehler benennen
+      - Lessons Learned als Bullet Points oder Fettschrift hervorheben
+      - Gelegentlich rhetorische Fragen an den Leser
+      - Zahlen, Daten oder Zeiträume konkret nennen
+      - Persönliches Fazit: Was würden wir anders machen, was empfehlen wir

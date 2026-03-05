@@ -1,11 +1,63 @@
-base_style: "editorial photography, warm natural lighting, Swiss countryside, tiny house lifestyle"
+base_style: >-
+  editorial photography shot on Sony A7IV with 35mm f/1.4 lens,
+  warm golden-hour natural lighting with soft directional side light,
+  global illumination with natural soft shadows,
+  shallow depth of field with creamy bokeh at f/1.8,
+  muted warm color grading with slightly desaturated greens and lifted shadows,
+  Swiss countryside tiny house lifestyle,
+  authentic candid moment without any posing or staging,
+  clean composition without cluttered background,
+  natural skin texture with visible pores without any airbrushing
+
 header:
   aspect_ratio: "16:9"
   width: 1200
   height: 675
-  style_suffix: "wide establishing shot, atmospheric, soft focus background"
+  style_suffix: >-
+    wide establishing shot at 24mm focal length,
+    atmospheric perspective with foreground interest,
+    soft focus background separating subject from environment,
+    rule of thirds composition with leading lines,
+    film grain texture reminiscent of Kodak Portra 400,
+    without any motion blur, without text or typography
+
 inline:
   aspect_ratio: "4:3"
   width: 800
   height: 600
-  style_suffix: "detail shot, authentic, slightly warm color grade"
+  style_suffix: >-
+    detail close-up shot at 50mm focal length,
+    authentic documentary style,
+    natural window light with volumetric lighting and soft shadows,
+    shallow depth of field isolating the subject,
+    without any motion blur, without text or typography
+
+negative_prompt: >-
+  artificial looking, plastic skin, overly smooth, airbrushed,
+  oversaturated colors, HDR look, stock photo, staged,
+  perfect symmetry, uncanny valley, waxy skin, hyper-realistic render,
+  text overlays, watermarks, logos, lens flare, vignette,
+  instagram filter, overprocessed, cartoon, illustration,
+  blurry, low quality, deformed hands, extra fingers
+
+# Dynamic prompting: random lighting moods and color palettes
+# appended at generation time to prevent uniform AI look
+lighting_moods:
+  - "golden hour warm side light with long shadows"
+  - "overcast diffused soft light, flat and even"
+  - "backlit rim light with lens warmth"
+  - "morning blue-hour light with cool undertones"
+  - "dappled sunlight through leaves creating natural patterns"
+  - "late afternoon volumetric light through window"
+  - "soft reflected light from snow, bright and clean"
+  - "cloudy day with silver-grey ambient light"
+
+color_palettes:
+  - "warm earth tones, amber and olive"
+  - "muted teal and warm orange"
+  - "monochromatic warm browns with cream highlights"
+  - "soft sage green and natural wood tones"
+  - "dusty rose and warm grey"
+  - "golden wheat and sky blue"
+  - "forest green and warm copper"
+  - "lavender and soft morning gold"

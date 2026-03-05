@@ -5,7 +5,6 @@ interface Props {
 }
 
 const { videoId, title = 'YouTube Video' } = Astro.props
-const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
 ---
 
 <div class="youtube-embed-wrapper my-8">
@@ -14,7 +13,7 @@ const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
     <button
       class="youtube-placeholder"
       aria-label={`Video abspielen: ${title}`}
-      style={`background-image: url(${thumbnailUrl})`}
+      data-video-id-thumb={videoId}
     >
       <div class="youtube-play-btn">
         <svg viewBox="0 0 68 48" width="68" height="48">
@@ -64,9 +63,27 @@ const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
 
 <script>
   document.querySelectorAll('.youtube-embed').forEach((container) => {
-    const btn = container.querySelector('.youtube-placeholder')
+    const btn = container.querySelector('.youtube-placeholder') as HTMLButtonElement
     const videoId = container.getAttribute('data-video-id')
     if (!btn || !videoId) return
+
+    // Load best available thumbnail with fallback
+    const sizes = ['maxresdefault', 'sddefault', 'hqdefault', 'mqdefault']
+    function tryThumb(i: number) {
+      if (i >= sizes.length) return
+      const img = new Image()
+      img.onload = function () {
+        // maxresdefault returns a 120x90 grey placeholder if unavailable
+        if (img.naturalWidth <= 120 && i < sizes.length - 1) {
+          tryThumb(i + 1)
+        } else {
+          btn.style.backgroundImage = `url(${img.src})`
+        }
+      }
+      img.onerror = function () { tryThumb(i + 1) }
+      img.src = `https://img.youtube.com/vi/${videoId}/${sizes[i]}.jpg`
+    }
+    tryThumb(0)
 
     btn.addEventListener('click', () => {
       const iframe = document.createElement('iframe')

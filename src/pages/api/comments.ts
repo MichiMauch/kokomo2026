@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro'
 import { createComment, approveComment, createApprovedReply } from '../../lib/turso'
 import { moderateComment } from '../../lib/openai'
+import { notifyNewComment, notifyCommentReply } from '../../lib/notify'
 
 export const prerender = false
 
@@ -76,11 +77,31 @@ export const POST: APIRoute = async ({ request }) => {
             author_name: 'Kokomo',
             content: moderation.reply,
           })
+
+          // Notify the commenter about the AI reply
+          notifyCommentReply({
+            postSlug: trimmedSlug,
+            originalAuthorName: author_name.trim(),
+            originalAuthorEmail: author_email.trim(),
+            originalContent: trimmedContent,
+            replyAuthorName: 'Kokomo',
+            replyContent: moderation.reply,
+          }).catch((err) => console.error('[comments/POST] reply notification failed:', err))
         }
       }
     } catch (err) {
       console.error('[comments/POST] AI moderation failed, manual review needed:', err)
     }
+
+    // Send notification email (non-blocking)
+    notifyNewComment({
+      postSlug: trimmedSlug,
+      authorName: author_name.trim(),
+      authorEmail: author_email.trim(),
+      content: trimmedContent,
+      autoApproved,
+      isReply: !!parent_id,
+    }).catch((err) => console.error('[comments/POST] notification failed:', err))
 
     return new Response(
       JSON.stringify({

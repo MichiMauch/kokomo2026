@@ -90,7 +90,7 @@ Schreibe einen vollständigen Blogpost basierend auf dem Thema. Der Post muss:
 - Ungefähr ${wordCount} Wörter haben
 - In der Du-Form geschrieben sein
 - Aus der Wir-Perspektive (Sibylle & Michi)
-- ss statt ß verwenden (Schweizer Deutsch)
+- ss statt ß verwenden (Schweizer Deutsch), aber IMMER echte Umlaute ä, ö, ü verwenden — NIEMALS ae, oe, ue als Ersatz für Umlaute schreiben (z.B. "Frühling" statt "Fruehling", "Türe" statt "Tuere", "schön" statt "schoen")
 - Persönliche Erfahrungen einbauen
 - Die Struktur und den Stil des Post-Typs "${postTypeLabel}" konsequent umsetzen
 - Ein persönliches Fazit haben

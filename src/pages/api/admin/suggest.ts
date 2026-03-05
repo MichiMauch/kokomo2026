@@ -48,7 +48,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     const openai = new OpenAI({ apiKey })
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-5.2',
       temperature: 0.9,
       response_format: { type: 'json_object' },
       messages: [

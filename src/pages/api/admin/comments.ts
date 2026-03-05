@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro'
-import { getAllComments, approveComment, deleteComment, createApprovedReply } from '../../../lib/turso'
+import { getAllComments, approveComment, deleteComment, createApprovedReply, getCommentById } from '../../../lib/turso'
 import { isAuthenticated } from '../../../lib/admin-auth'
+import { notifyCommentApproved, notifyCommentReply } from '../../../lib/notify'
 
 export const prerender = false
 
@@ -33,28 +34,56 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     switch (action) {
-      case 'approve':
+      case 'approve': {
+        const comment = await getCommentById(id)
         await approveComment(id)
+
+        // Notify commenter that their comment was approved
+        if (comment && comment.author_email) {
+          notifyCommentApproved({
+            postSlug: comment.post_slug,
+            authorName: comment.author_name,
+            authorEmail: comment.author_email,
+            content: comment.content,
+          }).catch((err) => console.error('[admin/comments] approval notification failed:', err))
+        }
+
         return new Response(JSON.stringify({ ok: true }), { status: 200, headers })
+      }
 
       case 'delete':
         await deleteComment(id)
         return new Response(JSON.stringify({ ok: true }), { status: 200, headers })
 
-      case 'reply':
+      case 'reply': {
         if (!content || !post_slug) {
           return new Response(
             JSON.stringify({ error: 'content und post_slug sind fuer Antworten erforderlich.' }),
             { status: 400, headers },
           )
         }
+        const parentComment = await getCommentById(id)
         const replyId = await createApprovedReply({
           post_slug,
           parent_id: id,
           author_name: 'Michi',
           content,
         })
+
+        // Notify original commenter about the reply
+        if (parentComment && parentComment.author_email) {
+          notifyCommentReply({
+            postSlug: post_slug,
+            originalAuthorName: parentComment.author_name,
+            originalAuthorEmail: parentComment.author_email,
+            originalContent: parentComment.content,
+            replyAuthorName: 'Michi',
+            replyContent: content,
+          }).catch((err) => console.error('[admin/comments] reply notification failed:', err))
+        }
+
         return new Response(JSON.stringify({ ok: true, replyId }), { status: 201, headers })
+      }
 
       default:
         return new Response(JSON.stringify({ error: `Unbekannte Aktion: ${action}` }), {

@@ -28,7 +28,6 @@ vorkommt.
 
 {% youtube fJWmbLS2_ec %}
 
-> Video: [Auf YouTube ansehen](https://www.youtube.com/watch?v=fJWmbLS2_ec)
 
 In unseren Flitterwochen, welche wir ebenfalls rund um die Karibik verbringen
 durften, hörten wir oft diesen Song. Er ist unbeschwert, frei, leicht und es

@@ -49,7 +49,6 @@ Noch weiter gedacht hat das Projekt **Haus "Aqua" in Zofingen**, das komplett oh
 
 {% youtube ruaIfBWJtIE %}
 
-> Video: [Auf YouTube ansehen](https://www.youtube.com/watch?v=ruaIfBWJtIE)
 
 ### Fazit
 

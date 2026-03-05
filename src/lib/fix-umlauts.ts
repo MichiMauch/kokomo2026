@@ -1,0 +1,222 @@
+/**
+ * Fix missing German umlauts in AI-generated text.
+ *
+ * Some LLMs replace ä/ö/ü with ae/oe/ue. This function detects
+ * and repairs common German words where this substitution occurred.
+ *
+ * Strategy: dictionary-based replacement of known German words/stems
+ * to avoid false positives (e.g. "Abenteuer" should NOT become "Abenteür").
+ */
+
+// Word stems/patterns where ae/oe/ue should be ä/ö/ü
+// Format: [pattern to find, replacement]
+// Uses word-boundary-aware matching
+const UMLAUT_REPLACEMENTS: [RegExp, string][] = [
+  // ü replacements (ue → ü)
+  [/\bFrueh/g, 'Früh'],
+  [/\bfrueh/g, 'früh'],
+  [/\bGruen/g, 'Grün'],
+  [/\bgruen/g, 'grün'],
+  [/\bTuer(e?n?)\b/g, 'Tür$1'],
+  [/\btuer(e?n?)\b/g, 'tür$1'],
+  [/\bfueh(l|r|rt|lt|re|le)/g, 'füh$1'],
+  [/\bFueh(l|r|rt|lt|re|le)/g, 'Füh$1'],
+  [/\bspuer/g, 'spür'],
+  [/\bSpuer/g, 'Spür'],
+  [/\bgelueft/g, 'gelüft'],
+  [/\blueft/g, 'lüft'],
+  [/\bLueft/g, 'Lüft'],
+  [/\bzurueck/g, 'zurück'],
+  [/\bZurueck/g, 'Zurück'],
+  [/\bmuess/g, 'müss'],
+  [/\bMuess/g, 'Müss'],
+  [/\bmoeg/g, 'mög'],
+  [/\bMoeg/g, 'Mög'],
+  [/\bmoech/g, 'möch'],
+  [/\bMoech/g, 'Möch'],
+  [/\bkoennt/g, 'könnt'],
+  [/\bKoennt/g, 'Könnt'],
+  [/\bkoennen/g, 'können'],
+  [/\bKoennen/g, 'Können'],
+  [/\bueber/g, 'über'],
+  [/\bUeber/g, 'Über'],
+  [/\bduen/g, 'dün'],
+  [/\bDuen/g, 'Dün'],
+  [/\bBluet/g, 'Blüt'],
+  [/\bbluet/g, 'blüt'],
+  [/\bkuech/g, 'küch'],
+  [/\bKuech/g, 'Küch'],
+  [/\bwuerd/g, 'würd'],
+  [/\bWuerd/g, 'Würd'],
+  [/\bwuensch/g, 'wünsch'],
+  [/\bWuensch/g, 'Wünsch'],
+  [/\bnatuerl/g, 'natürl'],
+  [/\bNatuerl/g, 'Natürl'],
+  [/\bgenueg/g, 'genüg'],
+  [/\bGenueg/g, 'Genüg'],
+  [/\bStueck/g, 'Stück'],
+  [/\bstueck/g, 'stück'],
+  [/\bGlueck/g, 'Glück'],
+  [/\bglueck/g, 'glück'],
+  [/\bvergnueg/g, 'vergnüg'],
+  [/\bpruef/g, 'prüf'],
+  [/\bPruef/g, 'Prüf'],
+  [/\bSued/g, 'Süd'],
+  [/\bsued/g, 'süd'],
+  [/\bkuehl/g, 'kühl'],
+  [/\bKuehl/g, 'Kühl'],
+  [/\bbuech/g, 'büch'],
+  [/\bBuech/g, 'Büch'],
+  [/\bschuett/g, 'schütt'],
+  [/\bSchuett/g, 'Schütt'],
+  [/\bGefuehl/g, 'Gefühl'],
+  [/\bgefuehl/g, 'gefühl'],
+  [/\bPflaenzchen/g, 'Pflänzchen'],
+  [/\bpflaenzchen/g, 'pflänzchen'],
+
+  // ä replacements (ae → ä)
+  [/\blaeng/g, 'läng'],
+  [/\bLaeng/g, 'Läng'],
+  [/\bspaet/g, 'spät'],
+  [/\bSpaet/g, 'Spät'],
+  [/\bnaech/g, 'nächs'],
+  [/\bNaech/g, 'Nächs'],
+  [/\bnaem/g, 'näm'],
+  [/\bNaem/g, 'Näm'],
+  [/\bNaeh/g, 'Näh'],
+  [/\bnaeh/g, 'näh'],
+  [/\bKraeu/g, 'Kräu'],
+  [/\bkraeu/g, 'kräu'],
+  [/\bsaeh/g, 'säh'],
+  [/\bsaen\b/g, 'säen'],
+  [/\bSaen\b/g, 'Säen'],
+  [/\bHaend/g, 'Händ'],
+  [/\bhaend/g, 'händ'],
+  [/\bHaeck/g, 'Häck'],
+  [/\bhaeck/g, 'häck'],
+  [/\bAbfaell/g, 'Abfäll'],
+  [/\babfaell/g, 'abfäll'],
+  [/\bPlaen/g, 'Plän'],
+  [/\bplaen/g, 'plän'],
+  [/\bPlaetz/g, 'Plätz'],
+  [/\bplaetz/g, 'plätz'],
+  [/\bGedraeng/g, 'Gedräng'],
+  [/\bgedraeng/g, 'gedräng'],
+  [/\bzusaetz/g, 'zusätz'],
+  [/\bZusaetz/g, 'Zusätz'],
+  [/\bwaehr/g, 'währ'],
+  [/\bWaehr/g, 'Währ'],
+  [/\bErwaerm/g, 'Erwärm'],
+  [/\berwaerm/g, 'erwärm'],
+  [/\bWaerm/g, 'Wärm'],
+  [/\bwaerm/g, 'wärm'],
+  [/\bErklaer/g, 'Erklär'],
+  [/\berklaer/g, 'erklär'],
+  [/\bjaehr/g, 'jähr'],
+  [/\bJaehr/g, 'Jähr'],
+  [/\bgaenz/g, 'gänz'],
+  [/\bGaenz/g, 'Gänz'],
+  [/\bmaenn/g, 'männ'],
+  [/\bMaenn/g, 'Männ'],
+  [/\bstaend/g, 'ständ'],
+  [/\bStaend/g, 'Ständ'],
+  [/\bSchaed/g, 'Schäd'],
+  [/\bschaed/g, 'schäd'],
+  [/\bDaech/g, 'Däch'],
+  [/\bdaech/g, 'däch'],
+  [/\bBaeum/g, 'Bäum'],
+  [/\bbaeum/g, 'bäum'],
+  [/\bRaeum/g, 'Räum'],
+  [/\braeum/g, 'räum'],
+  [/\bGaert/g, 'Gärt'],
+  [/\bgaert/g, 'gärt'],
+  [/\bGaest/g, 'Gäst'],
+  [/\bgaest/g, 'gäst'],
+  [/\baend/g, 'änd'],
+  [/\bAend/g, 'Änd'],
+  [/\baelt/g, 'ält'],
+  [/\bAelt/g, 'Ält'],
+  [/\baerger/g, 'ärger'],
+  [/\bAerger/g, 'Ärger'],
+  [/\baehn/g, 'ähn'],
+  [/\bAehn/g, 'Ähn'],
+
+  // ö replacements (oe → ö)
+  [/\bploetz/g, 'plötz'],
+  [/\bPloetz/g, 'Plötz'],
+  [/\bToepf/g, 'Töpf'],
+  [/\btoepf/g, 'töpf'],
+  [/\bschoen/g, 'schön'],
+  [/\bSchoen/g, 'Schön'],
+  [/\bgroess/g, 'gröss'],
+  [/\bGroess/g, 'Gröss'],
+  [/\bgroeb/g, 'gröb'],
+  [/\bGroeb/g, 'Gröb'],
+  [/\bhoer/g, 'hör'],
+  [/\bHoer/g, 'Hör'],
+  [/\bgehoer/g, 'gehör'],
+  [/\bGehoer/g, 'Gehör'],
+  [/\bnoetig/g, 'nötig'],
+  [/\bNoetig/g, 'Nötig'],
+  [/\bmoeg/g, 'mög'],
+  [/\bMoeg/g, 'Mög'],
+  [/\bkoenig/g, 'könig'],
+  [/\bKoenig/g, 'König'],
+  [/\bvoell/g, 'völl'],
+  [/\bVoell/g, 'Völl'],
+  [/\bwoech/g, 'wöch'],
+  [/\bWoech/g, 'Wöch'],
+  [/\bgewoeh/g, 'gewöh'],
+  [/\bGewoeh/g, 'Gewöh'],
+  [/\bStoer/g, 'Stör'],
+  [/\bstoer/g, 'stör'],
+  [/\bZerstoer/g, 'Zerstör'],
+  [/\bzerstoer/g, 'zerstör'],
+  [/\bfoerd/g, 'förd'],
+  [/\bFoerd/g, 'Förd'],
+  [/\bboes/g, 'bös'],
+  [/\bBoes/g, 'Bös'],
+  [/\bhoeh/g, 'höh'],
+  [/\bHoeh/g, 'Höh'],
+  [/\boeff/g, 'öff'],
+  [/\bOeff/g, 'Öff'],
+  [/\boekol/g, 'ökol'],
+  [/\bOekol/g, 'Ökol'],
+  [/\boester/g, 'öster'],
+  [/\bOester/g, 'Öster'],
+]
+
+/**
+ * Detect and fix missing umlauts in German text.
+ * Returns the corrected text.
+ */
+export function fixUmlauts(text: string): string {
+  let result = text
+  for (const [pattern, replacement] of UMLAUT_REPLACEMENTS) {
+    result = result.replace(pattern, replacement)
+  }
+  return result
+}
+
+/**
+ * Check if text likely has umlaut issues (ae/oe/ue used instead of ä/ö/ü).
+ * Returns true if suspicious patterns are found.
+ */
+export function hasUmlautIssues(text: string): boolean {
+  // Check for common German words with missing umlauts
+  const suspicious = [
+    /\bFrueh[a-z]/i,
+    /\bTuere?\b/i,
+    /\bfuehl/i,
+    /\bploetz/i,
+    /\bschoene?[rns]?\b/i,
+    /\bueber[a-z]/i,
+    /\bkoennt/i,
+    /\bmuess/i,
+    /\bspaet/i,
+    /\bnaech/i,
+    /\bzurueck/i,
+    /\bgroess/i,
+  ]
+  return suspicious.some((p) => p.test(text))
+}

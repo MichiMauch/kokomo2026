@@ -27,7 +27,6 @@ Für die, die lieber kurz ein Video schauen, hier bitte.
 
 {% youtube aycJcrpM82M %}
 
-> Video: [Auf YouTube ansehen](https://www.youtube.com/watch?v=aycJcrpM82M)
 
 ## 1\. Wäsche auch im Winter draussen aufhängen
 

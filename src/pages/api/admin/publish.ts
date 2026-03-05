@@ -5,6 +5,7 @@ import { uploadBufferToR2 } from '../../../lib/r2'
 import { GoogleGenAI, Modality } from '@google/genai'
 import { parse as parseYaml } from 'yaml'
 import sharp from 'sharp'
+import { fixUmlauts, hasUmlautIssues } from '../../../lib/fix-umlauts'
 
 export const prerender = false
 
@@ -165,12 +166,26 @@ export const POST: APIRoute = async ({ request }) => {
       }
     }
 
+    // Fix missing umlauts (safety net for AI-generated content)
+    let fixedTitle = body.title
+    let fixedSummary = body.summary
+    let fixedBody = body.body
+    let umlautsFixed = false
+
+    if (hasUmlautIssues(body.title + ' ' + body.summary + ' ' + body.body)) {
+      fixedTitle = fixUmlauts(body.title)
+      fixedSummary = fixUmlauts(body.summary)
+      fixedBody = fixUmlauts(body.body)
+      umlautsFixed = true
+      console.log('[admin/publish] Umlaute automatisch repariert (ae→ä, oe→ö, ue→ü)')
+    }
+
     // Build markdown content
     const postContent = buildPostContent({
-      title: body.title,
-      summary: body.summary,
+      title: fixedTitle,
+      summary: fixedSummary,
       tags: body.tags,
-      body: body.body,
+      body: fixedBody,
       imageUrl,
     })
 
@@ -185,6 +200,7 @@ export const POST: APIRoute = async ({ request }) => {
         githubUrl: htmlUrl,
         postUrl: `https://www.kokomo.house/tiny-house/${slug}`,
         ...(imageError && { imageError }),
+        ...(umlautsFixed && { umlautsFixed: true }),
       }),
       { status: 201, headers }
     )
