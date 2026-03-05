@@ -13,9 +13,9 @@ export const GET: APIRoute = async () => {
         'Cache-Control': 'public, max-age=60',
       },
     })
-  } catch (err) {
+  } catch (err: any) {
     console.error('[battery]', err)
-    return new Response(JSON.stringify({ error: 'Failed to fetch battery data' }), {
+    return new Response(JSON.stringify({ error: 'Failed to fetch battery data', detail: err?.message || String(err) }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     })
