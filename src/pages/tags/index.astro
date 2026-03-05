@@ -1,7 +1,9 @@
 ---
+export const prerender = true
 import { getCollection } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { getTagCounts } from '../../lib/utils'
+import { siteConfig } from '../../lib/site-config'
 
 const allPosts = await getCollection('posts', ({ data }) => !data.draft)
 const tagCounts = getTagCounts(allPosts)
@@ -9,6 +11,16 @@ const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1])
 ---
 
 <BaseLayout title="Tags" description="Alle Tags — KOKOMO House Blog">
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    '@id': `${siteConfig.siteUrl}/tags/`,
+    url: `${siteConfig.siteUrl}/tags/`,
+    name: 'Tags — KOKOMO House Blog',
+    description: 'Alle Tags — KOKOMO House Blog',
+    isPartOf: { '@id': `${siteConfig.siteUrl}/#website` },
+  })} />
+
   <div class="py-8">
     <h1 class="mb-8 text-3xl font-bold md:text-4xl">Tags</h1>
 

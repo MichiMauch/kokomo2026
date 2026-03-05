@@ -1,10 +1,21 @@
 ---
+export const prerender = true
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { siteConfig } from '../lib/site-config'
 import NewsletterForm from '../components/islands/NewsletterForm'
 ---
 
 <BaseLayout title="Newsletter" description="Melde dich für den KOKOMO House Newsletter an und bleibe über Tiny House Themen informiert.">
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': `${siteConfig.siteUrl}/newsletter/`,
+    url: `${siteConfig.siteUrl}/newsletter/`,
+    name: 'Newsletter — KOKOMO House',
+    description: 'Melde dich für den KOKOMO House Newsletter an und bleibe über Tiny House Themen informiert.',
+    isPartOf: { '@id': `${siteConfig.siteUrl}/#website` },
+  })} />
+
   <div class="my-8 flex gap-10">
     <aside class="hidden w-56 shrink-0 lg:block">
       <div class="sticky top-24">

@@ -1,4 +1,5 @@
 ---
+export const prerender = true
 import { getCollection } from 'astro:content'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import PostCard from '../../../components/PostCard.astro'
@@ -36,6 +37,16 @@ const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1])
   title={`Blog — Seite ${currentPage}`}
   description={`Seite ${currentPage} von ${totalPages} — Alle Blogbeiträge von KOKOMO House`}
 >
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    '@id': `${siteConfig.siteUrl}/tiny-house/page/${currentPage}/`,
+    url: `${siteConfig.siteUrl}/tiny-house/page/${currentPage}/`,
+    name: `Blog — Seite ${currentPage} — KOKOMO House`,
+    description: `Seite ${currentPage} von ${totalPages} — Alle Blogbeiträge von KOKOMO House`,
+    isPartOf: { '@id': `${siteConfig.siteUrl}/tiny-house/`, '@type': 'Blog' },
+  })} />
+
   <div class="py-8">
     <h1 class="mb-8 text-3xl font-bold md:text-4xl">Blog</h1>
 

@@ -1,9 +1,29 @@
 ---
+export const prerender = true
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { siteConfig } from '../lib/site-config'
 ---
 
 <BaseLayout title="Über uns" description="Sibylle & Michi — die Menschen hinter KOKOMO House">
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    '@id': `${siteConfig.siteUrl}/ueber-uns/`,
+    url: `${siteConfig.siteUrl}/ueber-uns/`,
+    name: 'Über uns — KOKOMO House',
+    description: 'Sibylle & Michi — die Menschen hinter KOKOMO House',
+    isPartOf: { '@id': `${siteConfig.siteUrl}/#website` },
+    about: {
+      '@type': 'Organization',
+      name: siteConfig.title,
+      url: siteConfig.siteUrl,
+      founder: [
+        { '@type': 'Person', name: 'Sibylle' },
+        { '@type': 'Person', name: 'Michi' },
+      ],
+    },
+  })} />
+
   <div class="my-8 flex gap-10">
     <aside class="hidden w-56 shrink-0 lg:block">
       <div class="sticky top-24">

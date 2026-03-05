@@ -1,4 +1,5 @@
 ---
+export const prerender = true
 import { getCollection } from 'astro:content'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import PostCard from '../components/PostCard.astro'
@@ -10,19 +11,65 @@ const sortedPosts = sortPostsByDate(allPosts)
 ---
 
 <BaseLayout>
+  <!-- JSON-LD: WebSite + Organization -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': `${siteConfig.siteUrl}/#website`,
+        url: siteConfig.siteUrl,
+        name: siteConfig.title,
+        description: siteConfig.description,
+        inLanguage: siteConfig.language,
+        publisher: { '@id': `${siteConfig.siteUrl}/#organization` },
+      },
+      {
+        '@type': 'Organization',
+        '@id': `${siteConfig.siteUrl}/#organization`,
+        name: siteConfig.title,
+        url: siteConfig.siteUrl,
+        logo: {
+          '@type': 'ImageObject',
+          url: `${siteConfig.siteUrl}${siteConfig.siteLogo}`,
+        },
+        sameAs: [
+          siteConfig.instagram,
+          siteConfig.facebook,
+          siteConfig.linkedin,
+        ].filter(Boolean),
+      },
+      {
+        '@type': 'CollectionPage',
+        '@id': `${siteConfig.siteUrl}/`,
+        url: `${siteConfig.siteUrl}/`,
+        name: siteConfig.title,
+        description: siteConfig.description,
+        isPartOf: { '@id': `${siteConfig.siteUrl}/#website` },
+      },
+    ],
+  })} />
+
   <!-- Hero Section -->
   <section class="py-10 md:py-16 text-center">
     <div class="mx-auto max-w-3xl">
       <h1 class="mb-3 text-4xl font-bold tracking-tight font-[family-name:var(--font-sans)] md:text-5xl lg:text-6xl">
-        <span class="text-gradient">{siteConfig.title}</span>
+        <span class="text-gradient title-wave" aria-label={siteConfig.title}>
+          {siteConfig.title.split('').map((char, i) => (
+            <span
+              class="title-wave-char"
+              style={`--wave-delay: ${i * 0.06}s`}
+            >{char === ' ' ? '\u00A0' : char}</span>
+          ))}
+        </span>
       </h1>
       <div class="mb-5 flex items-center justify-center gap-3 text-sm text-[var(--text-secondary)]">
         <span id="days-counter"></span>
         <span id="battery-status" class="flex items-center gap-1"></span>
       </div>
       <p class="text-lg leading-relaxed text-[var(--text-secondary)] md:text-xl">
-        <strong class="text-[var(--text)]">Brauchen wir wirklich 100 Quadratmeter, um zufrieden und glücklich zu sein?</strong>
-        <br />Seit September 2022 leben wir in unserem Tiny House KOKOMO. Erfahre auf unserem Blog alles über das Leben in einem Tiny House auf 36m².
+        <strong class="text-[var(--text)]"><span id="typewriter" class="typewriter"></span></strong>
+        <br /><span id="typewriter-sub" class="typewriter"></span>
       </p>
     </div>
   </section>
@@ -78,4 +125,41 @@ const sortedPosts = sortPostsByDate(allPosts)
     visible = next
     if (visible >= posts.length) wrapper?.classList.add('hidden')
   })
+
+  // Typewriter
+  const line1 = 'Brauchen wir wirklich 100 Quadratmeter, um zufrieden und glücklich zu sein?'
+  const line2 = 'Seit September 2022 leben wir in unserem Tiny House KOKOMO. Erfahre auf unserem Blog alles über das Leben in einem Tiny House auf 36m².'
+  const el1 = document.getElementById('typewriter')
+  const el2 = document.getElementById('typewriter-sub')
+
+  function typeText(el: HTMLElement, text: string, speed: number): Promise<void> {
+    return new Promise((resolve) => {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        el.textContent = text
+        el.classList.add('done')
+        resolve()
+        return
+      }
+      el.classList.add('typing')
+      let i = 0
+      function tick() {
+        el.textContent = text.slice(0, i + 1)
+        i++
+        if (i < text.length) {
+          setTimeout(tick, speed)
+        } else {
+          el.classList.remove('typing')
+          el.classList.add('done')
+          resolve()
+        }
+      }
+      tick()
+    })
+  }
+
+  // Sofort starten
+  ;(async () => {
+    if (el1) await typeText(el1, line1, 35)
+    if (el2) await typeText(el2, line2, 20)
+  })()
 </script>
