@@ -1,4 +1,4 @@
-import { useState, useEffect, type FormEvent } from 'react'
+import React, { useState, useEffect, useRef, type FormEvent } from 'react'
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -24,6 +24,7 @@ interface PublishResult {
   imageUrl: string | null
   githubUrl: string
   postUrl: string
+  imageError?: string
 }
 
 type Phase = 'checking' | 'login' | 'idle' | 'suggesting' | 'suggestions' | 'generating' | 'editor' | 'publishing' | 'published'
@@ -145,15 +146,18 @@ function PostEditor({
   onPublish,
   onBack,
   publishing,
+  targetWordCount,
 }: {
   draft: PostDraft
   onChange: (d: PostDraft) => void
   onPublish: () => void
   onBack: () => void
   publishing: boolean
+  targetWordCount: number
 }) {
   const wordCount = draft.body.trim().split(/\s+/).filter(Boolean).length
   const summaryLen = draft.summary.length
+  const isInRange = wordCount >= targetWordCount * 0.9 && wordCount <= targetWordCount * 1.1
 
   return (
     <div className="space-y-5">
@@ -218,8 +222,7 @@ function PostEditor({
       {/* Body */}
       <div>
         <label className="mb-1 block text-xs font-medium text-[var(--text-secondary)]">
-          Body ({wordCount} Wörter)
-          {wordCount < 500 && <span className="ml-2 text-amber-500">min. 500 empfohlen</span>}
+          Body (<span className={isInRange ? 'text-emerald-500' : 'text-amber-500'}>{wordCount}</span> / {targetWordCount} Wörter)
         </label>
         <textarea
           value={draft.body}
@@ -266,6 +269,67 @@ function PostEditor({
   )
 }
 
+// ─── Word Count Selector ─────────────────────────────────────
+
+const WORD_COUNT_OPTIONS = [350, 700, 1200] as const
+type WordCountOption = typeof WORD_COUNT_OPTIONS[number]
+
+function WordCountSelector({ value, onChange }: { value: WordCountOption; onChange: (v: WordCountOption) => void }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-xs font-medium text-[var(--text-secondary)]">Wortanzahl:</span>
+      <div className="flex gap-1">
+        {WORD_COUNT_OPTIONS.map((opt) => (
+          <button
+            key={opt}
+            onClick={() => onChange(opt)}
+            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+              value === opt
+                ? 'bg-primary-500 text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
+            }`}
+          >
+            {opt}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─── Post Type Selector ──────────────────────────────────────
+
+const POST_TYPES = [
+  { value: 'erzaehlung', label: 'Erzählung', icon: '📖' },
+  { value: 'listenpost', label: 'Listen-Post', icon: '📋' },
+  { value: 'anleitung', label: 'Anleitung', icon: '🔧' },
+  { value: 'erfahrungsbericht', label: 'Erfahrungsbericht', icon: '💡' },
+] as const
+type PostType = typeof POST_TYPES[number]['value']
+
+function PostTypeSelector({ value, onChange }: { value: PostType; onChange: (v: PostType) => void }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-xs font-medium text-[var(--text-secondary)]">Post-Typ:</span>
+      <div className="flex flex-wrap gap-1">
+        {POST_TYPES.map((pt) => (
+          <button
+            key={pt.value}
+            onClick={() => onChange(pt.value)}
+            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+              value === pt.value
+                ? 'bg-primary-500 text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
+            }`}
+          >
+            {pt.icon} {pt.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ─── Main Component ──────────────────────────────────────────
 
 export default function AdminContent() {
@@ -275,6 +339,46 @@ export default function AdminContent() {
   const [draft, setDraft] = useState<PostDraft>({ title: '', summary: '', tags: [], body: '', image_prompt: '' })
   const [publishResult, setPublishResult] = useState<PublishResult | null>(null)
   const [customTopic, setCustomTopic] = useState('')
+  const [wordCount, setWordCount] = useState<WordCountOption>(700)
+  const [postType, setPostType] = useState<PostType>('erzaehlung')
+  const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null)
+  const [customInstructions, setCustomInstructions] = useState('')
+  const [isListening, setIsListening] = useState(false)
+  const recognitionRef = useRef<SpeechRecognition | null>(null)
+
+  const speechSupported = typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
+
+  function toggleListening() {
+    if (isListening) {
+      recognitionRef.current?.stop()
+      return
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) return
+    const recognition = new SpeechRecognition()
+    recognition.lang = 'de-DE'
+    recognition.continuous = true
+    recognition.interimResults = true
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          const transcript = event.results[i][0].transcript.trim()
+          if (transcript) {
+            setCustomTopic((prev) => (prev ? prev + ' ' : '') + transcript)
+          }
+        }
+      }
+    }
+    recognition.onend = () => setIsListening(false)
+    recognition.onerror = () => setIsListening(false)
+    recognitionRef.current = recognition
+    recognition.start()
+    setIsListening(true)
+  }
+
+  useEffect(() => {
+    return () => { recognitionRef.current?.stop() }
+  }, [])
 
   // Check auth on mount
   useEffect(() => {
@@ -325,11 +429,16 @@ export default function AdminContent() {
             description: suggestion.description,
             tags: suggestion.tags,
             key_points: suggestion.key_points,
+            word_count: wordCount,
+            post_type: postType,
+            ...(customInstructions.trim() && { custom_instructions: customInstructions.trim() }),
           }
         : {
             title: customTopic,
             description: customTopic,
             tags: [],
+            word_count: wordCount,
+            post_type: postType,
           }
 
       const res = await fetch('/api/admin/generate', {
@@ -398,6 +507,9 @@ export default function AdminContent() {
     setDraft({ title: '', summary: '', tags: [], body: '', image_prompt: '' })
     setPublishResult(null)
     setCustomTopic('')
+    setPostType('erzaehlung')
+    setSelectedSuggestion(null)
+    setCustomInstructions('')
     setError('')
   }
 
@@ -437,13 +549,41 @@ export default function AdminContent() {
 
           <div className="glass-card rounded-2xl p-6 shadow-sm">
             <h3 className="mb-3 text-base font-semibold text-[var(--text)]">Eigenes Thema</h3>
-            <textarea
-              value={customTopic}
-              onChange={(e) => setCustomTopic(e.target.value)}
-              placeholder="Beschreibe das gewünschte Thema…"
-              rows={3}
-              className="mb-3 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-400/30 dark:border-slate-600/50 dark:bg-slate-800/50 dark:text-white dark:placeholder-slate-500 dark:focus:border-primary-500 dark:focus:ring-primary-500/30"
-            />
+            <div className="relative mb-3">
+              <textarea
+                value={customTopic}
+                onChange={(e) => setCustomTopic(e.target.value)}
+                placeholder="Beschreibe das gewünschte Thema…"
+                rows={3}
+                className="w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2.5 pr-12 text-sm text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-400/30 dark:border-slate-600/50 dark:bg-slate-800/50 dark:text-white dark:placeholder-slate-500 dark:focus:border-primary-500 dark:focus:ring-primary-500/30"
+              />
+              {speechSupported && (
+                <button
+                  type="button"
+                  onClick={toggleListening}
+                  title={isListening ? 'Aufnahme stoppen' : 'Spracheingabe starten'}
+                  className={`absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full transition-all ${
+                    isListening
+                      ? 'animate-pulse bg-red-500 text-white shadow-md'
+                      : 'bg-slate-200 text-slate-500 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-slate-600'
+                  }`}
+                >
+                  {isListening ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+                      <rect x="6" y="6" width="12" height="12" rx="2" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+                      <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.93V21h2v-3.07A7 7 0 0 0 19 11h-2Z" />
+                    </svg>
+                  )}
+                </button>
+              )}
+            </div>
+            <div className="mb-3 space-y-3">
+              <WordCountSelector value={wordCount} onChange={setWordCount} />
+              <PostTypeSelector value={postType} onChange={setPostType} />
+            </div>
             <button
               onClick={() => handleGenerate()}
               disabled={!customTopic.trim()}
@@ -482,12 +622,42 @@ export default function AdminContent() {
             </button>
           </div>
           {suggestions.map((s, i) => (
-            <SuggestionCard
-              key={i}
-              suggestion={s}
-              onSelect={() => handleGenerate(s)}
-              disabled={phase !== 'suggestions'}
-            />
+            <React.Fragment key={i}>
+              <SuggestionCard
+                suggestion={s}
+                onSelect={() => { setSelectedSuggestion(s); setCustomInstructions('') }}
+                disabled={phase !== 'suggestions'}
+              />
+              {selectedSuggestion === s && (
+                <div className="glass-card rounded-2xl p-6 shadow-sm">
+                  <textarea
+                    value={customInstructions}
+                    onChange={(e) => setCustomInstructions(e.target.value)}
+                    placeholder="Eigene Erfahrungen, Stichworte oder Anweisungen…"
+                    rows={3}
+                    className="mb-4 w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-400/30 dark:border-slate-600/50 dark:bg-slate-800/50 dark:text-white dark:placeholder-slate-500 dark:focus:border-primary-500 dark:focus:ring-primary-500/30"
+                  />
+                  <div className="mb-4 space-y-3">
+                    <WordCountSelector value={wordCount} onChange={setWordCount} />
+                    <PostTypeSelector value={postType} onChange={setPostType} />
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => handleGenerate(selectedSuggestion)}
+                      className="rounded-full bg-primary-500 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-600 hover:shadow-md"
+                    >
+                      Post generieren
+                    </button>
+                    <button
+                      onClick={() => setSelectedSuggestion(null)}
+                      className="rounded-full border border-slate-300 px-5 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
+                    >
+                      Abbrechen
+                    </button>
+                  </div>
+                </div>
+              )}
+            </React.Fragment>
           ))}
         </div>
       )}
@@ -508,6 +678,7 @@ export default function AdminContent() {
           onPublish={handlePublish}
           onBack={() => setPhase(suggestions.length > 0 ? 'suggestions' : 'idle')}
           publishing={false}
+          targetWordCount={wordCount}
         />
       )}
 
@@ -540,6 +711,11 @@ export default function AdminContent() {
                 className="mx-auto rounded-xl shadow-md"
                 style={{ maxWidth: '100%', maxHeight: 300 }}
               />
+            </div>
+          )}
+          {publishResult.imageError && (
+            <div className="mb-4 rounded-xl border border-amber-200/50 bg-amber-50/60 px-4 py-3 text-sm text-amber-700 dark:border-amber-800/50 dark:bg-amber-900/20 dark:text-amber-300">
+              {publishResult.imageError}
             </div>
           )}
           <div className="mb-6 space-y-2 text-sm">

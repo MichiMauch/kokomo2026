@@ -93,6 +93,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Optional: Generate image
     let imageUrl: string | undefined
+    let imageError: string | undefined
 
     if (body.image_prompt && !body.skip_image) {
       try {
@@ -119,14 +120,16 @@ export const POST: APIRoute = async ({ request }) => {
           const fullPrompt = [
             imageStyle.base_style,
             cfg.style_suffix,
-            mood,
-            palette,
+            mood ? `Lighting: ${mood}` : '',
+            palette ? `Color palette: ${palette}` : '',
             body.image_prompt,
             `Aspect ratio: ${cfg.width}x${cfg.height}`,
             imageStyle.negative_prompt ? `Avoid: ${imageStyle.negative_prompt}` : 'No text overlays, no watermarks, no logos',
           ]
             .filter(Boolean)
             .join('. ')
+
+          console.log('[admin/publish] Prompt:', fullPrompt.slice(0, 200) + '...')
 
           const ai = new GoogleGenAI({ apiKey: geminiKey })
           const response = await ai.models.generateContent({
@@ -153,11 +156,12 @@ export const POST: APIRoute = async ({ request }) => {
 
             const filename = `${slug}-titelbild.webp`
             imageUrl = await uploadBufferToR2(optimized, filename)
+            console.log('[admin/publish] Image uploaded:', imageUrl)
           }
         }
       } catch (err: any) {
         console.warn('[admin/publish] Image generation failed:', err.message)
-        // Continue without image
+        imageError = `Bildgenerierung fehlgeschlagen: ${err.message}`
       }
     }
 
@@ -180,6 +184,7 @@ export const POST: APIRoute = async ({ request }) => {
         imageUrl: imageUrl || null,
         githubUrl: htmlUrl,
         postUrl: `https://www.kokomo.house/tiny-house/${slug}`,
+        ...(imageError && { imageError }),
       }),
       { status: 201, headers }
     )
