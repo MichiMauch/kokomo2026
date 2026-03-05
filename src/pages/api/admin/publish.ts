@@ -97,9 +97,10 @@ export const POST: APIRoute = async ({ request }) => {
     if (body.image_prompt && !body.skip_image) {
       try {
         const geminiKey = import.meta.env.GOOGLE_GEMINI_API_KEY
+        console.log('[admin/publish] Gemini key available:', !!geminiKey, 'length:', geminiKey?.length ?? 0)
         if (geminiKey) {
           // Load image style config
-          let imageStyle: any = { base_style: '', header: { width: 1200, height: 675, style_suffix: '' } }
+          let imageStyle: any = { base_style: '', header: { width: 1200, height: 675, style_suffix: '' }, lighting_moods: [], color_palettes: [], negative_prompt: '' }
           try {
             const raw = await getFileContent('content-config/image-style.yaml')
             imageStyle = parseYaml(raw)
@@ -107,19 +108,29 @@ export const POST: APIRoute = async ({ request }) => {
 
           const cfg = imageStyle.header || { width: 1200, height: 675, style_suffix: '' }
 
+          // Random dynamic elements (wie in pipeline/generate-images.ts)
+          const mood = imageStyle.lighting_moods?.length
+            ? imageStyle.lighting_moods[Math.floor(Math.random() * imageStyle.lighting_moods.length)]
+            : ''
+          const palette = imageStyle.color_palettes?.length
+            ? imageStyle.color_palettes[Math.floor(Math.random() * imageStyle.color_palettes.length)]
+            : ''
+
           const fullPrompt = [
             imageStyle.base_style,
             cfg.style_suffix,
+            mood,
+            palette,
             body.image_prompt,
             `Aspect ratio: ${cfg.width}x${cfg.height}`,
-            'No text overlays, no watermarks, no logos',
+            imageStyle.negative_prompt ? `Avoid: ${imageStyle.negative_prompt}` : 'No text overlays, no watermarks, no logos',
           ]
             .filter(Boolean)
             .join('. ')
 
           const ai = new GoogleGenAI({ apiKey: geminiKey })
           const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash-preview-05-20',
+            model: 'gemini-2.5-flash-image',
             contents: fullPrompt,
             config: {
               responseModalities: [Modality.TEXT, Modality.IMAGE],
@@ -128,6 +139,10 @@ export const POST: APIRoute = async ({ request }) => {
 
           const parts = response.candidates?.[0]?.content?.parts || []
           const imagePart = parts.find((p: any) => p.inlineData?.mimeType?.startsWith('image/'))
+
+          if (!imagePart) {
+            console.warn('[admin/publish] Gemini returned no image part. Parts:', parts.map((p: any) => p.text ? 'text' : p.inlineData?.mimeType ?? 'unknown'))
+          }
 
           if (imagePart?.inlineData?.data) {
             const imageBuffer = Buffer.from(imagePart.inlineData.data, 'base64')

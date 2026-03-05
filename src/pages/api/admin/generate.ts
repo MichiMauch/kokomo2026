@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro'
 import { isAuthenticated } from '../../../lib/admin-auth'
 import { getFileContent } from '../../../lib/github'
 import OpenAI from 'openai'
+import yaml from 'yaml'
 
 export const prerender = false
 
@@ -11,6 +12,8 @@ interface GenerateRequest {
   tags: string[]
   key_points?: string[]
   custom_instructions?: string
+  word_count?: number
+  post_type?: 'erzaehlung' | 'listenpost' | 'anleitung' | 'erfahrungsbericht'
 }
 
 export const POST: APIRoute = async ({ request }) => {
@@ -46,9 +49,26 @@ export const POST: APIRoute = async ({ request }) => {
       imageStyle = 'editorial photography, warm natural lighting, Swiss countryside'
     }
 
+    const wordCount = body.word_count && [350, 700, 1200].includes(body.word_count) ? body.word_count : 700
+
+    // Parse post type from writing style YAML
+    const postType = body.post_type || 'erzaehlung'
+    let postTypeLabel = 'Erzählung'
+    let postTypePrompt = ''
+    try {
+      const parsed = yaml.parse(writingStyle)
+      const typeConfig = parsed?.post_types?.[postType]
+      if (typeConfig) {
+        postTypeLabel = typeConfig.label || postTypeLabel
+        postTypePrompt = typeConfig.prompt || ''
+      }
+    } catch {
+      // fallback: no type-specific prompt
+    }
+
     const openai = new OpenAI({ apiKey })
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-5.2',
       temperature: 0.7,
       response_format: { type: 'json_object' },
       messages: [
@@ -60,17 +80,19 @@ Die Bewohner sind Sibylle und Michi, seit September 2022 im Tiny House (Wohnwago
 Schreibstil:
 ${writingStyle}
 
+Post-Typ: ${postTypeLabel}
+${postTypePrompt}
+
 Bildstil:
 ${imageStyle}
 
 Schreibe einen vollständigen Blogpost basierend auf dem Thema. Der Post muss:
-- Mindestens 500 Wörter haben
+- Ungefähr ${wordCount} Wörter haben
 - In der Du-Form geschrieben sein
 - Aus der Wir-Perspektive (Sibylle & Michi)
 - ss statt ß verwenden (Schweizer Deutsch)
 - Persönliche Erfahrungen einbauen
-- H2-Zwischenüberschriften haben
-- Kurze Absätze (2-4 Sätze)
+- Die Struktur und den Stil des Post-Typs "${postTypeLabel}" konsequent umsetzen
 - Ein persönliches Fazit haben
 
 Antworte als JSON:
@@ -79,7 +101,7 @@ Antworte als JSON:
   "summary": "SEO-Summary (160-180 Zeichen)",
   "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"],
   "body": "Der vollständige Blogpost in Markdown (nur Body, kein Frontmatter)",
-  "image_prompt": "Englischer Prompt für Header-Bild (editorial photography style)"
+  "image_prompt": "WICHTIG: Der image_prompt MUSS ein ausführlicher, technischer Absatz sein (mindestens 80 Wörter, besser 120+). KEINE Komma-Listen! Schreibe wie ein Fotograf, der ein Shooting-Briefing verfasst. Strukturiere in zusammenhängenden Sätzen mit diesen Layern: 1) SUBJEKT & AKTION: Konkretes Hauptobjekt mit spezifischer Pose/Geste/Aktivität — nicht generisch. 2) UMGEBUNG: Detaillierte Szene (z.B. 'lived-in tiny house kitchen with wooden countertop, herbs on windowsill, morning light streaming through linen curtains'). 3) KAMERA & OPTIK: Exakte technische Parameter — Brennweite (35mm, 50mm, 85mm), Blende (f/1.4, f/1.8, f/2.8), Perspektive (low angle, eye level, overhead), Tiefenschärfe mit Bokeh-Beschreibung. 4) LICHT: Physikalisch präzise Lichtführung mit Begriffen wie 'global illumination', 'volumetric lighting', 'soft directional side light', 'backlit rim light with lens warmth' — NICHT nur 'warm natural lighting'. 5) CONSTRAINTS: Nutze 'without'-Formulierungen zur negativen Steuerung: 'without any motion blur', 'without text or typography', 'clean composition without cluttered background', 'without any artificial looking skin or plastic texture'. VERBOTEN: Generische Adjektive wie 'beautiful', 'stunning', 'amazing', 'cozy'. Jedes Wort muss technische oder kompositorische Bedeutung haben."
 }`,
         },
         {
