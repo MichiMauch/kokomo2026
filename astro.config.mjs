@@ -38,7 +38,9 @@ export default defineConfig({
     react(),
   ],
 
-  adapter: vercel(),
+  adapter: vercel({
+    maxDuration: 60,
+  }),
 
   markdown: {
     shikiConfig: {

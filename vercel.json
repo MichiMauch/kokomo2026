@@ -1,10 +1,5 @@
 {
   "framework": "astro",
-  "functions": {
-    "api/admin/suggest.func": { "maxDuration": 60 },
-    "api/admin/generate.func": { "maxDuration": 60 },
-    "api/admin/publish.func": { "maxDuration": 60 }
-  },
   "redirects": [
     { "source": "/ueber-uns-kokomo", "destination": "/ueber-uns/", "permanent": true },
     { "source": "/was-kostet-unser-tiny-house", "destination": "/tiny-house/unser-leben-im-tiny-house-zwei-jahre-spaeter/", "permanent": true },
