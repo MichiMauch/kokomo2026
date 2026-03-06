@@ -28,6 +28,10 @@ const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null
   description={post.data.summary}
   image={typeof post.data.images === 'string' ? post.data.images : post.data.images?.[0]}
   article={true}
+  publishedTime={post.data.date}
+  modifiedTime={post.data.lastmod}
+  tags={post.data.tags}
+  author="Sibylle & Michi"
 >
   <PostLayout post={post} headings={headings} prevPost={prevPost} nextPost={nextPost}>
     <Content />
