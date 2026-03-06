@@ -3,6 +3,19 @@ import { ImageResponse } from '@vercel/og'
 import { siteConfig } from '../../lib/site-config'
 import { OG_HOME_IMAGE } from '../../lib/og-home-image'
 
+/** Buffer an ImageResponse so the reply includes content-length (required by Facebook). */
+async function bufferedImageResponse(html: any, opts: { width: number; height: number }) {
+  const imgRes = new ImageResponse(html, opts)
+  const buffer = await imgRes.arrayBuffer()
+  return new Response(buffer, {
+    headers: {
+      'content-type': 'image/png',
+      'content-length': buffer.byteLength.toString(),
+      'cache-control': 'public, max-age=86400, s-maxage=604800',
+    },
+  })
+}
+
 export const prerender = false
 
 // Kokomo Bildmarke SVG as base64 data URI
@@ -378,7 +391,7 @@ export const GET: APIRoute = async ({ request }) => {
       },
     }
 
-    return new ImageResponse(html, { width: 1200, height: 630 })
+    return bufferedImageResponse(html, { width: 1200, height: 630 })
   }
 
   // --- ARTICLE / DEFAULT layout ---
@@ -581,8 +594,5 @@ export const GET: APIRoute = async ({ request }) => {
     },
   }
 
-  return new ImageResponse(html, {
-    width: 1200,
-    height: 630,
-  })
+  return bufferedImageResponse(html, { width: 1200, height: 630 })
 }
