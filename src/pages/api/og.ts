@@ -35,6 +35,19 @@ export const GET: APIRoute = async ({ request }) => {
   const title = searchParams.get('title') || siteConfig.title
   const description = searchParams.get('description') || ''
   const imageUrl = searchParams.get('image') || ''
+  const dateParam = searchParams.get('date') || ''
+
+  // Format date to German locale (e.g. "5. März 2026")
+  let formattedDate = ''
+  if (dateParam) {
+    try {
+      formattedDate = new Date(dateParam).toLocaleDateString('de-CH', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })
+    } catch { /* ignore */ }
+  }
 
   // Fetch and encode the post image if provided
   let imageDataUri: string | null = null
@@ -114,6 +127,24 @@ export const GET: APIRoute = async ({ request }) => {
                     maxWidth: imageDataUri ? '58%' : '100%',
                   },
                   children: [
+                    ...(formattedDate
+                      ? [
+                          {
+                            type: 'div',
+                            props: {
+                              style: {
+                                fontSize: 16,
+                                fontWeight: '600',
+                                color: '#0ea5e9',
+                                textTransform: 'uppercase' as const,
+                                letterSpacing: '0.05em',
+                                marginBottom: 12,
+                              },
+                              children: formattedDate,
+                            },
+                          },
+                        ]
+                      : []),
                     {
                       type: 'div',
                       props: {
