@@ -2,7 +2,7 @@ export const siteConfig = {
   title: 'KOKOMO House',
   author: 'Sibylle & Michi',
   headerTitle: 'KOKOMO House',
-  description: 'Der Tiny House Blog',
+  description: 'Brauchen wir wirklich 100 Quadratmeter, um zufrieden und glücklich zu sein? Seit September 2022 leben wir in unserem Tiny House KOKOMO. Erfahre auf unserem Blog alles über das Leben in einem Tiny House auf 36m².',
   language: 'de-CH',
   locale: 'de-CH',
   siteUrl: 'https://www.kokomo.house',
