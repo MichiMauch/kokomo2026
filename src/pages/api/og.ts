@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro'
 import { ImageResponse } from '@vercel/og'
 import { siteConfig } from '../../lib/site-config'
+import { OG_HOME_IMAGE } from '../../lib/og-home-image'
 
 export const prerender = false
 
@@ -166,114 +167,152 @@ export const GET: APIRoute = async ({ request }) => {
           fontFamily: 'sans-serif',
         },
         children: [
-          // Main Card
+          // Main Card: Text left, Image right
           {
             type: 'div',
             props: {
               style: {
                 display: 'flex',
-                flexDirection: 'column',
                 flex: 1,
                 backgroundColor: 'rgba(255, 255, 255, 0.88)',
                 borderRadius: 24,
-                padding: '44px 54px',
-                justifyContent: 'center',
+                overflow: 'hidden',
                 boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
               },
               children: [
-                // Logo + Title row
+                // Left: Content
                 {
                   type: 'div',
                   props: {
                     style: {
                       display: 'flex',
-                      alignItems: 'center',
-                      marginBottom: 28,
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      padding: '36px 44px',
+                      flex: '1 1 58%',
+                      maxWidth: '58%',
                     },
                     children: [
-                      {
-                        type: 'img',
-                        props: {
-                          src: LOGO_SVG,
-                          width: 56,
-                          height: 70,
-                          style: { marginRight: 20 },
-                        },
-                      },
-                      {
-                        type: 'div',
-                        props: {
-                          style: {
-                            fontSize: 56,
-                            fontWeight: 'bold',
-                            color: '#0f172a',
-                            letterSpacing: '-0.02em',
-                          },
-                          children: title,
-                        },
-                      },
-                    ],
-                  },
-                },
-                // Stats row: Days + Battery
-                {
-                  type: 'div',
-                  props: {
-                    style: {
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 24,
-                      marginBottom: 28,
-                    },
-                    children: [
-                      // Days pill
+                      // Logo + Title row
                       {
                         type: 'div',
                         props: {
                           style: {
                             display: 'flex',
                             alignItems: 'center',
-                            backgroundColor: 'rgba(14, 165, 233, 0.1)',
-                            padding: '8px 20px',
-                            borderRadius: 30,
-                            fontSize: 18,
-                            fontWeight: '600',
-                            color: '#0369a1',
+                            marginBottom: 22,
                           },
-                          children: `🏡 Seit ${daysCount} Tagen im Tiny House`,
+                          children: [
+                            {
+                              type: 'img',
+                              props: {
+                                src: LOGO_SVG,
+                                width: 46,
+                                height: 58,
+                                style: { marginRight: 16 },
+                              },
+                            },
+                            {
+                              type: 'div',
+                              props: {
+                                style: {
+                                  fontSize: 46,
+                                  fontWeight: 'bold',
+                                  color: '#0f172a',
+                                  letterSpacing: '-0.02em',
+                                },
+                                children: title,
+                              },
+                            },
+                          ],
                         },
                       },
-                      // Battery pill
-                      ...(batteryCharge !== null
-                        ? [
+                      // Stats row: Days + Battery
+                      {
+                        type: 'div',
+                        props: {
+                          style: {
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 16,
+                            marginBottom: 22,
+                          },
+                          children: [
+                            // Days pill
                             {
                               type: 'div',
                               props: {
                                 style: {
                                   display: 'flex',
                                   alignItems: 'center',
-                                  backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                                  padding: '8px 20px',
+                                  backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                                  padding: '6px 16px',
                                   borderRadius: 30,
+                                  fontSize: 16,
+                                  fontWeight: '600',
+                                  color: '#0369a1',
                                 },
-                                children: [buildBatteryBar(batteryCharge)],
+                                children: `🏡 Seit ${daysCount} Tagen`,
                               },
                             },
-                          ]
-                        : []),
+                            // Battery pill
+                            ...(batteryCharge !== null
+                              ? [
+                                  {
+                                    type: 'div',
+                                    props: {
+                                      style: {
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                        padding: '6px 16px',
+                                        borderRadius: 30,
+                                      },
+                                      children: [buildBatteryBar(batteryCharge)],
+                                    },
+                                  },
+                                ]
+                              : []),
+                          ],
+                        },
+                      },
+                      // Description
+                      {
+                        type: 'div',
+                        props: {
+                          style: {
+                            fontSize: 20,
+                            color: '#475569',
+                            lineHeight: 1.5,
+                          },
+                          children: description || 'Seit September 2022 leben wir in unserem Tiny House auf 36m². Erfahre alles über unseren Alltag, Autarkie und nachhaltiges Wohnen.',
+                        },
+                      },
                     ],
                   },
                 },
-                // Description
+                // Right: KOKOMO House photo
                 {
                   type: 'div',
                   props: {
                     style: {
-                      fontSize: 24,
-                      color: '#475569',
-                      lineHeight: 1.5,
+                      display: 'flex',
+                      flex: '1 1 42%',
+                      maxWidth: '42%',
                     },
-                    children: description || 'Seit September 2022 leben wir in unserem Tiny House auf 36m². Erfahre alles über unseren Alltag, Autarkie und nachhaltiges Wohnen.',
+                    children: [
+                      {
+                        type: 'img',
+                        props: {
+                          src: OG_HOME_IMAGE,
+                          style: {
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                          },
+                        },
+                      },
+                    ],
                   },
                 },
               ],
