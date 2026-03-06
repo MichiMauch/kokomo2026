@@ -1,5 +1,8 @@
 {
   "framework": "astro",
+  "rewrites": [
+    { "source": "/api/og.png", "destination": "/api/og" }
+  ],
   "redirects": [
     { "source": "/ueber-uns-kokomo", "destination": "/ueber-uns/", "permanent": true },
     { "source": "/was-kostet-unser-tiny-house", "destination": "/tiny-house/unser-leben-im-tiny-house-zwei-jahre-spaeter/", "permanent": true },

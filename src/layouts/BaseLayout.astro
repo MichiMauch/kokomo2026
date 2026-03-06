@@ -44,8 +44,8 @@ const postImage = image?.startsWith('http') ? image : image && image !== siteCon
 const ogDate = publishedTime ? publishedTime.toISOString().split('T')[0] : ''
 const isHomepage = !title
 const ogImage = isHomepage
-  ? `${siteConfig.siteUrl}/api/og?title=${encodeURIComponent(siteConfig.title)}&description=${encodeURIComponent(description)}&homepage=1`
-  : `${siteConfig.siteUrl}/api/og?title=${encodeURIComponent(title!)}&description=${encodeURIComponent(description)}${postImage ? `&image=${encodeURIComponent(postImage)}` : ''}${ogDate ? `&date=${ogDate}` : ''}`
+  ? `${siteConfig.siteUrl}/api/og.png?title=${encodeURIComponent(siteConfig.title)}&description=${encodeURIComponent(description)}&homepage=1`
+  : `${siteConfig.siteUrl}/api/og.png?title=${encodeURIComponent(title!)}&description=${encodeURIComponent(description)}${postImage ? `&image=${encodeURIComponent(postImage)}` : ''}${ogDate ? `&date=${ogDate}` : ''}`
 
 // Auto-generate BreadcrumbList for non-article pages (articles have their own in PostLayout)
 const pathSegments = Astro.url.pathname.replace(/\/$/, '').split('/').filter(Boolean)
