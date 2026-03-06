@@ -16,8 +16,8 @@ export const siteConfig = {
   theme: 'system' as 'system' | 'dark' | 'light',
   analytics: {
     matomo: {
-      siteId: '2',
-      url: 'https://analytics.kokomo.house/matomo/',
+      siteId: '1',
+      url: '//matomo.kokomo.house/',
     },
   },
 } as const
