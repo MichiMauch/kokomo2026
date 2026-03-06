@@ -39,7 +39,9 @@ const pageTitle = title ? `${title} | ${siteConfig.title}` : siteConfig.title
 const canonicalUrl = new URL(Astro.url.pathname, siteConfig.siteUrl).href
 
 // OG Image: always use dynamic /api/og endpoint for consistent branded previews
-const ogImage = `${siteConfig.siteUrl}/api/og?title=${encodeURIComponent(title || siteConfig.title)}&description=${encodeURIComponent(description)}`
+// If a post image is provided, pass it along so it appears in the OG card
+const postImage = image?.startsWith('http') ? image : image && image !== siteConfig.socialBanner ? new URL(image, siteConfig.siteUrl).href : ''
+const ogImage = `${siteConfig.siteUrl}/api/og?title=${encodeURIComponent(title || siteConfig.title)}&description=${encodeURIComponent(description)}${postImage ? `&image=${encodeURIComponent(postImage)}` : ''}`
 
 // Auto-generate BreadcrumbList for non-article pages (articles have their own in PostLayout)
 const pathSegments = Astro.url.pathname.replace(/\/$/, '').split('/').filter(Boolean)
