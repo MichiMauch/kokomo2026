@@ -11,10 +11,20 @@ async function fetchImageAsBase64(url: string): Promise<string | null> {
   try {
     const res = await fetch(url)
     if (!res.ok) return null
-    const buffer = await res.arrayBuffer()
-    const contentType = res.headers.get('content-type') || 'image/webp'
-    const base64 = Buffer.from(buffer).toString('base64')
-    return `data:${contentType};base64,${base64}`
+    const buffer = Buffer.from(await res.arrayBuffer())
+
+    // Satori only supports PNG/JPEG – convert WebP via sharp
+    let pngBuffer: Buffer
+    try {
+      const sharp = (await import('sharp')).default
+      pngBuffer = await sharp(buffer).resize(504, null, { fit: 'inside' }).png({ quality: 85 }).toBuffer()
+    } catch {
+      // If sharp fails, try raw (works if already PNG/JPEG)
+      pngBuffer = buffer
+    }
+
+    const base64 = pngBuffer.toString('base64')
+    return `data:image/png;base64,${base64}`
   } catch {
     return null
   }
