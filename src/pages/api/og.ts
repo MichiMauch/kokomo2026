@@ -169,10 +169,7 @@ export const GET: APIRoute = async ({ request }) => {
                                 color: '#64748b',
                                 lineHeight: 1.5,
                               },
-                              children:
-                                description.length > 130
-                                  ? description.substring(0, 130) + '…'
-                                  : description,
+                              children: description,
                             },
                           },
                         ]
