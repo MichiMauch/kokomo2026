@@ -42,7 +42,10 @@ const canonicalUrl = new URL(Astro.url.pathname, siteConfig.siteUrl).href
 // If a post image is provided, pass it along so it appears in the OG card
 const postImage = image?.startsWith('http') ? image : image && image !== siteConfig.socialBanner ? new URL(image, siteConfig.siteUrl).href : ''
 const ogDate = publishedTime ? publishedTime.toISOString().split('T')[0] : ''
-const ogImage = `${siteConfig.siteUrl}/api/og?title=${encodeURIComponent(title || siteConfig.title)}&description=${encodeURIComponent(description)}${postImage ? `&image=${encodeURIComponent(postImage)}` : ''}${ogDate ? `&date=${ogDate}` : ''}`
+const isHomepage = !title
+const ogImage = isHomepage
+  ? `${siteConfig.siteUrl}/api/og?title=${encodeURIComponent(siteConfig.title)}&description=${encodeURIComponent(description)}&homepage=1`
+  : `${siteConfig.siteUrl}/api/og?title=${encodeURIComponent(title!)}&description=${encodeURIComponent(description)}${postImage ? `&image=${encodeURIComponent(postImage)}` : ''}${ogDate ? `&date=${ogDate}` : ''}`
 
 // Auto-generate BreadcrumbList for non-article pages (articles have their own in PostLayout)
 const pathSegments = Astro.url.pathname.replace(/\/$/, '').split('/').filter(Boolean)

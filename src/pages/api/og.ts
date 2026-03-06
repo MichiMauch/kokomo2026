@@ -30,12 +30,99 @@ async function fetchImageAsBase64(url: string): Promise<string | null> {
   }
 }
 
+async function fetchBatteryCharge(): Promise<number | null> {
+  try {
+    const { getBatteryCharge } = await import('../../lib/victron')
+    return await getBatteryCharge()
+  } catch {
+    return null
+  }
+}
+
+function buildBatteryBar(pct: number) {
+  const color = pct < 20 ? '#ef4444' : pct < 50 ? '#eab308' : '#22c55e'
+  return {
+    type: 'div',
+    props: {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+      },
+      children: [
+        // Battery icon (simplified SVG-like with divs)
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              position: 'relative' as const,
+            },
+            children: [
+              // Battery body
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    width: 36,
+                    height: 18,
+                    border: '2px solid #94a3b8',
+                    borderRadius: 4,
+                    padding: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                  },
+                  children: [
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          width: `${(pct / 100) * 28}px`,
+                          height: 10,
+                          backgroundColor: color,
+                          borderRadius: 2,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              // Battery tip
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    width: 4,
+                    height: 8,
+                    backgroundColor: '#94a3b8',
+                    borderRadius: '0 2px 2px 0',
+                    marginLeft: 1,
+                  },
+                },
+              },
+            ],
+          },
+        },
+        {
+          type: 'div',
+          props: {
+            style: { fontSize: 18, fontWeight: '600', color: '#334155' },
+            children: `${pct} %`,
+          },
+        },
+      ],
+    },
+  }
+}
+
 export const GET: APIRoute = async ({ request }) => {
   const { searchParams } = new URL(request.url)
   const title = searchParams.get('title') || siteConfig.title
   const description = searchParams.get('description') || ''
   const imageUrl = searchParams.get('image') || ''
   const dateParam = searchParams.get('date') || ''
+  const isHomepage = searchParams.get('homepage') === '1'
 
   // Format date to German locale (e.g. "5. März 2026")
   let formattedDate = ''
@@ -49,12 +136,199 @@ export const GET: APIRoute = async ({ request }) => {
     } catch { /* ignore */ }
   }
 
+  // Homepage: fetch live data
+  let daysCount = 0
+  let batteryCharge: number | null = null
+  if (isHomepage) {
+    const moveIn = new Date(2022, 8, 17) // 17. September 2022
+    daysCount = Math.floor((Date.now() - moveIn.getTime()) / (1000 * 60 * 60 * 24))
+    batteryCharge = await fetchBatteryCharge()
+  }
+
   // Fetch and encode the post image if provided
   let imageDataUri: string | null = null
   if (imageUrl) {
     imageDataUri = await fetchImageAsBase64(imageUrl)
   }
 
+  // --- HOMEPAGE layout ---
+  if (isHomepage) {
+    const html = {
+      type: 'div',
+      props: {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          width: '100%',
+          height: '100%',
+          background: 'linear-gradient(135deg, #5eead4 0%, #a7f3d0 30%, #bef264 70%, #d9f99d 100%)',
+          padding: 50,
+          fontFamily: 'sans-serif',
+        },
+        children: [
+          // Main Card
+          {
+            type: 'div',
+            props: {
+              style: {
+                display: 'flex',
+                flexDirection: 'column',
+                flex: 1,
+                backgroundColor: 'rgba(255, 255, 255, 0.88)',
+                borderRadius: 24,
+                padding: '44px 54px',
+                justifyContent: 'center',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
+              },
+              children: [
+                // Logo + Title row
+                {
+                  type: 'div',
+                  props: {
+                    style: {
+                      display: 'flex',
+                      alignItems: 'center',
+                      marginBottom: 28,
+                    },
+                    children: [
+                      {
+                        type: 'img',
+                        props: {
+                          src: LOGO_SVG,
+                          width: 56,
+                          height: 70,
+                          style: { marginRight: 20 },
+                        },
+                      },
+                      {
+                        type: 'div',
+                        props: {
+                          style: {
+                            fontSize: 56,
+                            fontWeight: 'bold',
+                            color: '#0f172a',
+                            letterSpacing: '-0.02em',
+                          },
+                          children: title,
+                        },
+                      },
+                    ],
+                  },
+                },
+                // Stats row: Days + Battery
+                {
+                  type: 'div',
+                  props: {
+                    style: {
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 24,
+                      marginBottom: 28,
+                    },
+                    children: [
+                      // Days pill
+                      {
+                        type: 'div',
+                        props: {
+                          style: {
+                            display: 'flex',
+                            alignItems: 'center',
+                            backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                            padding: '8px 20px',
+                            borderRadius: 30,
+                            fontSize: 18,
+                            fontWeight: '600',
+                            color: '#0369a1',
+                          },
+                          children: `🏡 Seit ${daysCount} Tagen im Tiny House`,
+                        },
+                      },
+                      // Battery pill
+                      ...(batteryCharge !== null
+                        ? [
+                            {
+                              type: 'div',
+                              props: {
+                                style: {
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                  padding: '8px 20px',
+                                  borderRadius: 30,
+                                },
+                                children: [buildBatteryBar(batteryCharge)],
+                              },
+                            },
+                          ]
+                        : []),
+                    ],
+                  },
+                },
+                // Description
+                {
+                  type: 'div',
+                  props: {
+                    style: {
+                      fontSize: 24,
+                      color: '#475569',
+                      lineHeight: 1.5,
+                    },
+                    children: description || 'Seit September 2022 leben wir in unserem Tiny House auf 36m². Erfahre alles über unseren Alltag, Autarkie und nachhaltiges Wohnen.',
+                  },
+                },
+              ],
+            },
+          },
+          // Footer
+          {
+            type: 'div',
+            props: {
+              style: {
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginTop: 24,
+              },
+              children: [
+                {
+                  type: 'div',
+                  props: {
+                    style: {
+                      fontSize: 19,
+                      color: '#334155',
+                      backgroundColor: 'rgba(255,255,255,0.6)',
+                      padding: '8px 20px',
+                      borderRadius: 30,
+                      display: 'flex',
+                      alignItems: 'center',
+                    },
+                    children: 'www.kokomo.house',
+                  },
+                },
+                {
+                  type: 'div',
+                  props: {
+                    style: {
+                      fontSize: 17,
+                      color: '#0369a1',
+                      backgroundColor: 'rgba(14, 165, 233, 0.15)',
+                      padding: '8px 20px',
+                      borderRadius: 30,
+                    },
+                    children: 'Tiny House Blog',
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    }
+
+    return new ImageResponse(html, { width: 1200, height: 630 })
+  }
+
+  // --- ARTICLE / DEFAULT layout ---
   const html = {
     type: 'div',
     props: {
