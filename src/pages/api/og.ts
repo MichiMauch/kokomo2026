@@ -173,6 +173,7 @@ export const GET: APIRoute = async ({ request }) => {
             props: {
               style: {
                 display: 'flex',
+                alignItems: 'stretch',
                 flex: 1,
                 backgroundColor: 'rgba(255, 255, 255, 0.88)',
                 borderRadius: 24,
@@ -276,18 +277,47 @@ export const GET: APIRoute = async ({ request }) => {
                           ],
                         },
                       },
-                      // Description
+                      // Leading question (bold)
                       {
                         type: 'div',
                         props: {
                           style: {
-                            fontSize: 20,
-                            color: '#475569',
-                            lineHeight: 1.5,
+                            fontSize: 22,
+                            fontWeight: 'bold',
+                            color: '#0f172a',
+                            lineHeight: 1.4,
+                            marginBottom: 8,
                           },
-                          children: description || 'Seit September 2022 leben wir in unserem Tiny House auf 36m². Erfahre alles über unseren Alltag, Autarkie und nachhaltiges Wohnen.',
+                          children: 'Brauchen wir wirklich 100 Quadratmeter, um zufrieden und glücklich zu sein?',
                         },
                       },
+                      // Description (first sentence bold)
+                      (() => {
+                        const desc = description || 'Seit September 2022 leben wir in unserem Tiny House auf 36m². Erfahre alles über unseren Alltag, Autarkie und nachhaltiges Wohnen.'
+                        const match = desc.match(/^(.*?[.!?])\s*(.*)$/)
+                        const firstSentence = match ? match[1] : desc
+                        const rest = match ? match[2] : ''
+                        return {
+                          type: 'div',
+                          props: {
+                            style: {
+                              fontSize: 20,
+                              color: '#475569',
+                              lineHeight: 1.5,
+                            },
+                            children: [
+                              {
+                                type: 'span',
+                                props: {
+                                  style: { fontWeight: 'bold' },
+                                  children: firstSentence,
+                                },
+                              },
+                              ...(rest ? [{ type: 'span', props: { children: ' ' + rest } }] : []),
+                            ],
+                          },
+                        }
+                      })(),
                     ],
                   },
                 },
@@ -299,12 +329,15 @@ export const GET: APIRoute = async ({ request }) => {
                       display: 'flex',
                       flex: '1 1 42%',
                       maxWidth: '42%',
+                      overflow: 'hidden',
                     },
                     children: [
                       {
                         type: 'img',
                         props: {
                           src: OG_HOME_IMAGE,
+                          width: 504,
+                          height: 530,
                           style: {
                             width: '100%',
                             height: '100%',
