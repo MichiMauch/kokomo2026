@@ -1,0 +1,28 @@
+---
+interface Props {
+  color?: 'red' | 'blue' | 'green' | 'beige'
+}
+
+const colorMap = {
+  red:   ['#ff6b6b', '#e63946', '#9b1b2a'],
+  blue:  ['#66d4ff', '#00b2ff', '#006090'],
+  green: ['#66ffaa', '#00e070', '#008040'],
+  beige: ['#f0d8a8', '#e6c288', '#9a7030'],
+}
+
+const { color = 'red' } = Astro.props
+const [light, mid, dark] = colorMap[color]
+const id = `ph${Math.random().toString(36).slice(2, 8)}`
+---
+<svg class="pin" viewBox="0 0 32 48" width="20" height="30" aria-hidden="true">
+  <defs>
+    <radialGradient id={id} cx="40%" cy="35%">
+      <stop offset="0%" stop-color={light}/>
+      <stop offset="50%" stop-color={mid}/>
+      <stop offset="100%" stop-color={dark}/>
+    </radialGradient>
+  </defs>
+  <line x1="16" y1="24" x2="17" y2="44" stroke="#aaa" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="16" cy="14" r="12" fill={`url(#${id})`}/>
+  <circle cx="12" cy="10" r="4" fill="white" opacity="0.25"/>
+</svg>

@@ -1,5 +1,6 @@
 ---
 import { formatDate, getPostImage } from '../lib/utils'
+import Pin from './Pin.astro'
 
 interface Props {
   title: string
@@ -8,15 +9,15 @@ interface Props {
   summary?: string
   tags?: string[]
   images?: string | string[]
+  pinColor?: 'red' | 'blue' | 'green' | 'beige'
 }
 
-const { title, slug, date, summary, tags = [], images } = Astro.props
+const { title, slug, date, summary, tags = [], images, pinColor = 'blue' } = Astro.props
 const imageUrl = getPostImage(images)
 ---
 
 <article class="polaroid group">
-  <!-- Washi Tape -->
-  <div class="tape" />
+  <Pin color={pinColor} />
 
   <!-- Image (4:3 fast quadratisch) -->
   <a href={`/tiny-house/${slug}/`} class="block overflow-hidden rounded-sm">

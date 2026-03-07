@@ -375,63 +375,41 @@ body {
     0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Tape decoration — semi-transparent washi tape pinning the Polaroid */
-.tape {
+/* Pin decoration — SVG pushpin */
+.pin {
   position: absolute;
-  top: -8px;
+  top: -12px;
   left: 50%;
-  transform: translateX(-50%) rotate(var(--tape-rotation, -2deg));
-  width: 64px;
-  height: 18px;
-  opacity: 0.7;
+  transform: translateX(-50%);
   z-index: 2;
-  border-radius: 1px;
   pointer-events: none;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
 }
 
-/* Fotowand: Rotation + tape color patterns */
+/* Fotowand: Rotation patterns */
 .fotowand > *:nth-child(8n + 1) {
   --rotation: -2.5deg;
-  --tape-rotation: 3deg;
 }
 .fotowand > *:nth-child(8n + 2) {
   --rotation: 1.8deg;
-  --tape-rotation: -2deg;
 }
 .fotowand > *:nth-child(8n + 3) {
   --rotation: -1.2deg;
-  --tape-rotation: 4deg;
 }
 .fotowand > *:nth-child(8n + 4) {
   --rotation: 2.8deg;
-  --tape-rotation: -3deg;
 }
 .fotowand > *:nth-child(8n + 5) {
   --rotation: -0.6deg;
-  --tape-rotation: 1.5deg;
 }
 .fotowand > *:nth-child(8n + 6) {
   --rotation: 2deg;
-  --tape-rotation: -1deg;
 }
 .fotowand > *:nth-child(8n + 7) {
   --rotation: -3deg;
-  --tape-rotation: 2.5deg;
 }
 .fotowand > *:nth-child(8n + 8) {
   --rotation: 1.2deg;
-  --tape-rotation: -4deg;
-}
-
-/* Tape colors: Blue / Green / Beige rotation */
-.fotowand > *:nth-child(3n + 1) .tape {
-  background: #00b2ff;
-}
-.fotowand > *:nth-child(3n + 2) .tape {
-  background: #00ff7f;
-}
-.fotowand > *:nth-child(3n + 3) .tape {
-  background: #e6c288;
 }
 
 /* Accent text color matches tape */
@@ -452,20 +430,6 @@ body {
 }
 .dark .fotowand > *:nth-child(3n + 3) .accent-color {
   color: #e6c288;
-}
-
-/* Tape position variety */
-.fotowand > *:nth-child(4n + 1) .tape {
-  left: 45%;
-}
-.fotowand > *:nth-child(4n + 2) .tape {
-  left: 55%;
-}
-.fotowand > *:nth-child(4n + 3) .tape {
-  left: 50%;
-}
-.fotowand > *:nth-child(4n + 4) .tape {
-  left: 48%;
 }
 
 /* Mobile: reduce rotations slightly */
@@ -590,6 +554,71 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .typewriter.typing::after { animation: none; }
+}
+
+/* ===== Glossary Tooltips ===== */
+.glossary-term {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--color-primary-500);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 2px;
+  color: inherit;
+  position: relative;
+  cursor: help;
+}
+
+.glossary-term:hover {
+  text-decoration-color: var(--color-primary-600);
+}
+
+.glossary-term::after {
+  content: attr(data-glossary-definition);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 300px;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.06);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+  z-index: 50;
+  white-space: normal;
+}
+
+.dark .glossary-term::after {
+  background: rgba(15, 23, 42, 0.95);
+  border-color: rgba(51, 65, 85, 0.5);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.glossary-term:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* On mobile, show tooltip below to avoid clipping at top */
+@media (max-width: 640px) {
+  .glossary-term::after {
+    bottom: auto;
+    top: calc(100% + 8px);
+    left: 0;
+    transform: none;
+    max-width: 250px;
+  }
 }
 
 /* ===== Utility ===== */

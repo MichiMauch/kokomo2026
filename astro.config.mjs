@@ -25,6 +25,9 @@ export default defineConfig({
         if (item.url === 'https://www.kokomo.house/') {
           item.priority = 1.0
           item.changefreq = 'daily'
+        } else if (item.url.includes('/glossar')) {
+          item.priority = 0.7
+          item.changefreq = 'monthly'
         } else if (item.url.includes('/tiny-house/') && !item.url.includes('/page/')) {
           item.priority = 0.8
           item.changefreq = 'weekly'

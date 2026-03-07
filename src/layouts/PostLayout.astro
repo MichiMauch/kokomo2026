@@ -1,9 +1,10 @@
 ---
-import { formatDate, getPostImage, getReadingTime } from '../lib/utils'
+import { formatDate, getPostImage, getReadingTime, truncate } from '../lib/utils'
 import { siteConfig } from '../lib/site-config'
 import GalleryLightbox from '../components/islands/GalleryLightbox'
 import CommentSection from '../components/islands/CommentSection'
 import YouTubeEmbed from '../components/YouTubeEmbed.astro'
+import { getGlossaryTerms, slugifyTerm } from '../lib/glossary'
 import type { CollectionEntry } from 'astro:content'
 
 interface Props {
@@ -108,11 +109,19 @@ const faqLd = faqItems.length >= 2 ? {
     },
   })),
 } : null
+
+// Glossary data for client-side tooltip injection
+const glossaryData = getGlossaryTerms().map((t) => ({
+  t: t.term,
+  s: slugifyTerm(t.term),
+  d: truncate(t.definition, 200),
+}))
 ---
 
 <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
 {faqLd && <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />}
+<script type="application/json" id="glossary-data" set:html={JSON.stringify(glossaryData)} />
 
 <GalleryLightbox client:load />
 
@@ -450,7 +459,75 @@ document.addEventListener('DOMContentLoaded', () => {
   );
 
   prose.querySelectorAll(':scope > *').forEach((el) => observer.observe(el));
+
+  // 3) Glossary Tooltips: link first occurrence of each term
+  injectGlossaryTooltips(prose);
 });
+
+function injectGlossaryTooltips(prose: Element) {
+  const dataEl = document.getElementById('glossary-data');
+  if (!dataEl) return;
+  const terms: { t: string; s: string; d: string }[] = JSON.parse(dataEl.textContent || '[]');
+  if (!terms.length) return;
+
+  // Sort longer terms first to prevent partial matches
+  terms.sort((a, b) => b.t.length - a.t.length);
+
+  const matched = new Set<string>();
+  const allowedParents = new Set(['P', 'LI', 'DD']);
+
+  const walker = document.createTreeWalker(prose, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      const parent = node.parentElement;
+      if (!parent) return NodeFilter.FILTER_REJECT;
+      // Skip headings, code, links, existing glossary terms
+      const tag = parent.tagName;
+      if (['A', 'CODE', 'PRE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(tag)) {
+        return NodeFilter.FILTER_REJECT;
+      }
+      // Check if any ancestor is an allowed container
+      let el: HTMLElement | null = parent;
+      while (el && el !== prose) {
+        if (allowedParents.has(el.tagName)) return NodeFilter.FILTER_ACCEPT;
+        el = el.parentElement;
+      }
+      return NodeFilter.FILTER_REJECT;
+    },
+  });
+
+  const textNodes: Text[] = [];
+  let node: Node | null;
+  while ((node = walker.nextNode())) textNodes.push(node as Text);
+
+  for (const textNode of textNodes) {
+    for (const { t: term, s: slug, d: def } of terms) {
+      if (matched.has(term)) continue;
+      const text = textNode.textContent || '';
+      const regex = new RegExp(`\\b${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+      const match = text.match(regex);
+      if (!match || match.index === undefined) continue;
+
+      matched.add(term);
+
+      const before = text.slice(0, match.index);
+      const matchedText = text.slice(match.index, match.index + match[0].length);
+      const after = text.slice(match.index + match[0].length);
+
+      const link = document.createElement('a');
+      link.href = `/glossar/#${slug}`;
+      link.className = 'glossary-term';
+      link.setAttribute('data-glossary-definition', def);
+      link.textContent = matchedText;
+
+      const parent = textNode.parentNode!;
+      if (before) parent.insertBefore(document.createTextNode(before), textNode);
+      parent.insertBefore(link, textNode);
+      if (after) parent.insertBefore(document.createTextNode(after), textNode);
+      parent.removeChild(textNode);
+      break; // Move to next text node since this one was split
+    }
+  }
+}
 
 function isSoloImageParagraph(el: Element): boolean {
   if (el.tagName !== 'P') return false;

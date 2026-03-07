@@ -1,0 +1,31 @@
+---
+export const prerender = false
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { confirmSubscriber } from '../../lib/newsletter'
+
+const token = Astro.url.searchParams.get('token')
+let success = false
+
+if (token) {
+  success = await confirmSubscriber(token)
+}
+
+if (success) {
+  return Astro.redirect('/newsletter/bestaetigt')
+}
+---
+
+<BaseLayout title="Ungültiger Link" noIndex>
+  <div class="py-24 text-center">
+    <h1 class="text-2xl font-bold text-[var(--text)]">Ungültiger oder abgelaufener Link</h1>
+    <p class="mt-4 text-[var(--text-secondary)]">
+      Dieser Bestätigungslink ist nicht mehr gültig. Bitte melde dich erneut an.
+    </p>
+    <a
+      href="/"
+      class="mt-6 inline-block rounded-full bg-primary-500 px-6 py-3 text-sm font-medium text-white"
+    >
+      Zur Startseite
+    </a>
+  </div>
+</BaseLayout>

@@ -1,0 +1,200 @@
+---
+export const prerender = true
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { siteConfig } from '../lib/site-config'
+import { getGlossaryByLetter, getGlossaryTerms, slugifyTerm } from '../lib/glossary'
+
+const glossaryByLetter = getGlossaryByLetter()
+const allTerms = getGlossaryTerms()
+const letters = [...glossaryByLetter.keys()].sort()
+
+// Schema.org DefinedTermSet
+const definedTermSetLd = {
+  '@context': 'https://schema.org',
+  '@type': 'DefinedTermSet',
+  '@id': `${siteConfig.siteUrl}/glossar/`,
+  name: 'Tiny House Glossar',
+  description: 'Umfassendes Glossar mit Tiny-House-Begriffen von A bis Z.',
+  url: `${siteConfig.siteUrl}/glossar/`,
+  inLanguage: siteConfig.language,
+  hasDefinedTerm: allTerms.map((t) => ({
+    '@type': 'DefinedTerm',
+    name: t.term,
+    description: t.definition,
+    url: `${siteConfig.siteUrl}/glossar/#${slugifyTerm(t.term)}`,
+    inDefinedTermSet: `${siteConfig.siteUrl}/glossar/`,
+  })),
+}
+---
+
+<BaseLayout
+  title="Tiny House Glossar"
+  description="Umfassendes Glossar mit Tiny-House-Begriffen von A bis Z: Autarkie, Komposttoilette, Off-Grid und mehr."
+>
+  <script type="application/ld+json" set:html={JSON.stringify(definedTermSetLd)} />
+
+  <div class="my-8 flex flex-col gap-8 lg:flex-row">
+    <!-- Sidebar: A-Z Navigation -->
+    <aside class="w-full shrink-0 lg:w-56 lg:block">
+      <div class="sticky top-24">
+        <div class="glass-card rounded-2xl p-4">
+          <!-- Mobile: collapsible -->
+          <button
+            id="az-toggle"
+            class="flex w-full items-center justify-between lg:hidden"
+            aria-expanded="false"
+            aria-controls="az-nav"
+          >
+            <h4 class="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+              A–Z Navigation
+            </h4>
+            <svg class="h-4 w-4 text-[var(--text-secondary)] transition-transform" id="az-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <!-- Desktop: always-visible label -->
+          <h4 class="mb-2 hidden text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] lg:block">
+            Navigation
+          </h4>
+          <nav
+            id="az-nav"
+            class="mt-3 hidden justify-items-center grid-cols-6 gap-1.5 sm:grid-cols-8 lg:mt-0 lg:!grid lg:grid-cols-4"
+            aria-label="Buchstaben-Navigation"
+          >
+            {letters.map((letter) => (
+              <a
+                href={`#letter-${letter}`}
+                class="flex h-9 w-9 items-center justify-center rounded-full bg-primary-500/15 text-sm font-semibold text-primary-700 transition-colors hover:bg-primary-500 hover:text-white dark:text-primary-400 dark:hover:bg-primary-500 dark:hover:text-white"
+              >
+                {letter}
+              </a>
+            ))}
+          </nav>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="min-w-0 flex-1">
+      <div class="glass-card rounded-2xl p-6 md:p-8">
+        <h1 class="mb-6 text-3xl font-bold tracking-tight md:text-4xl">Tiny House Glossar</h1>
+        <p class="mb-6 text-[var(--text-secondary)]">
+          {allTerms.length} Begriffe rund um Tiny Houses — von Autarkie bis Zulassung.
+        </p>
+
+        <!-- Search -->
+        <div class="relative mb-8">
+          <svg class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="search"
+            id="glossary-search"
+            placeholder="Begriff suchen..."
+            class="w-full rounded-xl border border-[var(--border)] bg-[var(--bg)] py-2.5 pl-10 pr-4 text-sm text-[var(--text)] placeholder-[var(--text-secondary)] outline-none transition-colors focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+          />
+        </div>
+
+        <!-- Terms grouped by letter -->
+        {letters.map((letter) => (
+          <section id={`letter-${letter}`} class="glossary-section mb-8" data-letter={letter}>
+            <h2 class="mb-4 border-b border-[var(--border)]/30 pb-2 text-2xl font-bold text-primary-500">
+              {letter}
+            </h2>
+            <dl class="space-y-4">
+              {glossaryByLetter.get(letter)!.map((entry) => (
+                <div id={slugifyTerm(entry.term)} class="glossary-entry scroll-mt-24" data-term={entry.term.toLowerCase()}>
+                  <dt class="text-lg font-semibold">{entry.term}</dt>
+                  <dd class="mt-1 text-[var(--text-secondary)] leading-relaxed">{entry.definition}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        ))}
+
+        <p id="glossary-no-results" class="hidden py-8 text-center text-[var(--text-secondary)]">
+          Kein Begriff gefunden.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Back to top button (mobile) -->
+  <button
+    id="back-to-top"
+    class="fixed bottom-6 right-6 z-40 hidden h-11 w-11 items-center justify-center rounded-full bg-primary-500 text-white shadow-lg transition-all hover:bg-primary-600 active:scale-95 lg:hidden"
+    aria-label="Nach oben scrollen"
+  >
+    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+    </svg>
+  </button>
+</BaseLayout>
+
+<script>
+  const input = document.getElementById('glossary-search') as HTMLInputElement
+  const sections = document.querySelectorAll<HTMLElement>('.glossary-section')
+  const entries = document.querySelectorAll<HTMLElement>('.glossary-entry')
+  const noResults = document.getElementById('glossary-no-results')
+
+  input?.addEventListener('input', () => {
+    const q = input.value.toLowerCase().trim()
+    let anyVisible = false
+
+    entries.forEach((entry) => {
+      const term = entry.dataset.term || ''
+      const visible = !q || term.includes(q)
+      entry.style.display = visible ? '' : 'none'
+      if (visible) anyVisible = true
+    })
+
+    // Hide empty sections
+    sections.forEach((section) => {
+      const visibleEntries = section.querySelectorAll<HTMLElement>('.glossary-entry')
+      const hasVisible = Array.from(visibleEntries).some((e) => e.style.display !== 'none')
+      section.style.display = hasVisible ? '' : 'none'
+    })
+
+    if (noResults) noResults.style.display = anyVisible ? 'none' : ''
+  })
+
+  // A-Z toggle on mobile
+  const azToggle = document.getElementById('az-toggle')
+  const azNav = document.getElementById('az-nav')
+  const azChevron = document.getElementById('az-chevron')
+  azToggle?.addEventListener('click', () => {
+    const open = azNav?.classList.toggle('grid') ?? false
+    azNav?.classList.toggle('hidden', !open)
+    azChevron?.classList.toggle('rotate-180', open)
+    azToggle.setAttribute('aria-expanded', String(open))
+  })
+
+  // Keyboard navigation: A-Z → scroll to section, ArrowUp → scroll to top
+  document.addEventListener('keydown', (e) => {
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+
+    const key = e.key.toUpperCase()
+    if (/^[A-Z]$/.test(key)) {
+      const section = document.getElementById(`letter-${key}`)
+      if (section) section.scrollIntoView({ behavior: 'smooth' })
+    }
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  })
+
+  // Back to top button
+  const btt = document.getElementById('back-to-top')
+  if (btt) {
+    window.addEventListener('scroll', () => {
+      const show = window.scrollY > 400
+      btt.classList.toggle('hidden', !show)
+      btt.classList.toggle('flex', show)
+    }, { passive: true })
+    btt.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    })
+  }
+</script>

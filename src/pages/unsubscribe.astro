@@ -1,0 +1,11 @@
+---
+export const prerender = false
+import { unsubscribeByToken } from '../lib/newsletter'
+
+const token = Astro.url.searchParams.get('token')
+if (!token) {
+  return Astro.redirect('/')
+}
+await unsubscribeByToken(token)
+return Astro.redirect('/newsletter/abgemeldet')
+---

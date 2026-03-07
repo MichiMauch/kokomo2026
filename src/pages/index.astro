@@ -3,10 +3,17 @@ export const prerender = true
 import { getCollection } from 'astro:content'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import PostCard from '../components/PostCard.astro'
+import Pin from '../components/Pin.astro'
 import { sortPostsByDate } from '../lib/utils'
 import { siteConfig } from '../lib/site-config'
+import { getGlossaryTerms, slugifyTerm } from '../lib/glossary'
 
 const allPosts = await getCollection('posts', ({ data }) => !data.draft)
+
+const allTerms = getGlossaryTerms()
+const now = new Date()
+const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000)
+const todayTerm = allTerms[dayOfYear % allTerms.length]
 const sortedPosts = sortPostsByDate(allPosts)
 ---
 
@@ -78,16 +85,38 @@ const sortedPosts = sortPostsByDate(allPosts)
   <section class="mb-16">
     <div class="fotowand grid gap-10 px-2 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3 lg:gap-10">
       {sortedPosts.map((post, i) => (
-        <div data-post-index={i} class={i >= 9 ? 'hidden' : ''}>
-          <PostCard
-            title={post.data.title}
-            slug={post.slug}
-            date={post.data.date}
-            summary={post.data.summary}
-            tags={post.data.tags}
-            images={post.data.images}
-          />
-        </div>
+        <>
+          {i === 3 && (
+            <div class="col-span-full flex justify-center py-2">
+              <a href={`/glossar/#${slugifyTerm(todayTerm.term)}`}
+                 class="polaroid begriff-des-tages group block w-full max-w-sm sm:max-w-md p-4 pb-5"
+                 style="--rotation: -2.5deg;">
+                <Pin color="red" />
+                <div class="mb-1 text-xs font-semibold uppercase tracking-wider text-[#0092d1]">
+                  Begriff des Tages
+                </div>
+                <div class="text-lg font-bold">{todayTerm.term}</div>
+                <div class="mt-1 text-sm leading-relaxed text-[var(--text-secondary)] line-clamp-2">
+                  {todayTerm.definition}
+                </div>
+                <div class="mt-2 mb-2 text-xs font-medium text-[#0092d1] transition-colors group-hover:text-primary-600">
+                  Im Glossar ansehen →
+                </div>
+              </a>
+            </div>
+          )}
+          <div data-post-index={i} class={i >= 9 ? 'hidden' : ''}>
+            <PostCard
+              title={post.data.title}
+              slug={post.slug}
+              date={post.data.date}
+              summary={post.data.summary}
+              tags={post.data.tags}
+              images={post.data.images}
+              pinColor={(['blue', 'green', 'beige'] as const)[i % 3]}
+            />
+          </div>
+        </>
       ))}
     </div>
   </section>

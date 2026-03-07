@@ -7,7 +7,7 @@ import { createClient, type Client } from '@libsql/client'
 
 let client: Client | null = null
 
-function getClient(): Client {
+export function getClient(): Client {
   if (client) return client
 
   const url = import.meta.env.TURSO_DB_URL
@@ -145,4 +145,21 @@ export async function createApprovedReply(data: {
   })
 
   return Number(result.lastInsertRowid)
+}
+
+// ─── Settings ───────────────────────────────────────────────────────────
+
+export async function getSetting(key: string): Promise<string | null> {
+  const db = getClient()
+  const result = await db.execute({ sql: 'SELECT value FROM settings WHERE key = ?', args: [key] })
+  if (result.rows.length === 0) return null
+  return result.rows[0].value as string
+}
+
+export async function setSetting(key: string, value: string): Promise<void> {
+  const db = getClient()
+  await db.execute({
+    sql: `INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES (?, ?, datetime('now'))`,
+    args: [key, value],
+  })
 }

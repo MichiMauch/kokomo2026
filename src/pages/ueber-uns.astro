@@ -2,6 +2,7 @@
 export const prerender = true
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { siteConfig } from '../lib/site-config'
+import Pin from '../components/Pin.astro'
 ---
 
 <BaseLayout title="Über uns" description="Sibylle & Michi — die Menschen hinter KOKOMO House">
@@ -28,7 +29,7 @@ import { siteConfig } from '../lib/site-config'
     <aside class="hidden w-56 shrink-0 lg:block">
       <div class="sticky top-24">
         <div class="polaroid" style="--rotation: -1.5deg">
-          <div class="tape"></div>
+          <Pin color="blue" />
           <img
             src="https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/TinyHouse_170722_21.webp"
             alt="Sibylle & Michi"

@@ -13,7 +13,7 @@ summary: >-
   Entdecke die Welt der Tiny Houses, von All-in-One-Lösungen, Autarkie und
   DIY-Projekten bis hin zu Wohnraumgestaltung, Solaranlagen und
   Zulassungsregeln. Entfalte dein Potenzial für Nachhaltigkeit und Minimalismus.
-draft: false
+draft: true
 images: >-
   https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/andreas-fickl-o1xcUi-Yt_w-unsplash.webp
 ---
@@ -26,10 +26,13 @@ images: >-
 - **Baugenehmigung:** Vor dem Bau eines Tiny Houses ist in den meisten Fällen eine Baugenehmigung erforderlich. Diese stellt sicher, dass das Gebäude alle gesetzlichen Anforderungen erfüllt.
 - **Bauvorschriften:** Diese legen fest, welche Art von Gebäuden in einer bestimmten Zone erlaubt sind. In vielen Fällen müssen Tiny Houses bestimmte Bauvorschriften erfüllen, um als Wohnraum anerkannt zu werden.
 - **Beuteltoiletten:** Bei diesen Toiletten werden die Abfälle in speziellen Beuteln gesammelt, die anschliessend entsorgt werden können. Sie sind eine einfache und tragbare Option, erfordern jedoch regelmässigen Austausch der Beutel.
+- **Biophilie:** Die menschliche Sehnsucht nach einer Verbindung zur Natur. Tiny Houses mit großen Glasfronten und Naturmaterialien holen die Außenwelt nach innen und fördern so die psychische Gesundheit.
+- **Circular Living:** Ein Lebensstil, der auf Kreisläufen basiert. Das reicht vom Kompostieren bis hin zum Bau des Hauses aus recycelbaren Materialien (Cradle-to-Cradle), um keinen ökologischen Fußabdruck zu hinterlassen.
 - **Co-Housing:** Bezeichnet eine Wohnform, bei der mehrere Menschen oder Familien in einer Gemeinschaft zusammenleben. In der Tiny-House-Szene gibt es oft spezielle Co-Housing-Projekte, in denen mehrere Tiny Houses um einen gemeinsamen Bereich gruppiert sind.
 - **Containerhaus:** Ein Tiny House, das aus einem oder mehreren umgebauten Frachtcontainern besteht. Diese Häuser sind oft günstig und können sehr robust sein, aber sie haben auch spezielle Anforderungen in Bezug auf Isolierung und Gestaltung.
 - **Coworking:** In einigen Tiny House Gemeinschaften gibt es Coworking-Spaces, die eine professionelle Arbeitsumgebung bieten. Dies ist besonders attraktiv für Menschen, die remote arbeiten und Wert auf Gemeinschaft legen.
 - **Dachgarten:** Ein kleiner Garten, der auf dem Dach eines Tiny Houses angelegt ist, oft zur Nahrungsmittelproduktion oder einfach zur Ästhetik.
+- **Digital Detoxing:** Der bewusste Verzicht auf digitale Medien. Viele Tiny-House-Besitzer nutzen den reduzierten Raum, um die Bildschirmzeit zu senken und sich wieder mehr der analogen Welt und der Natur zu widmen.
 - **Digitaler Nomade:** Einige Tiny-House-Bewohner arbeiten remote und nutzen die Mobilität ihres Hauses, um als digitale Nomaden zu leben. Sie können von überall aus arbeiten, solange es eine Internetverbindung gibt.
 - **DIY (Do It Yourself):** Viele Tiny Houses werden im Eigenbau hergestellt. Die DIY-Kultur ist in der Bewegung stark vertreten, und es gibt zahlreiche Ressourcen und Anleitungen für den Selbstbau.
 - **Downsizing:** Downsizing bezeichnet den Prozess der Reduzierung des persönlichen Besitzes und des Wohnraums. Beim Umzug in ein Tiny House ist dieser Schritt oft notwendig, um sich auf das Wesentliche zu konzentrieren. Dabei geht es nicht nur um die räumliche Dimension, sondern auch um ein einfacheres, fokussierteres Leben. Downsizing kann eine tiefgreifende Erfahrung sein, die viele Menschen als Befreiung empfinden.
@@ -38,6 +41,7 @@ images: >-
 - **Einspeisevergütung:** Ein finanzieller Anreiz für die Erzeugung von Solarstrom, bei dem Überschussstrom zu einem festgelegten Preis ins öffentliche Netz eingespeist wird.
 - **Elektrisches System:** Die elektrische Infrastruktur eines Tiny Houses, die oft speziell konzipiert ist, um Energie zu sparen und Sicherheitsstandards zu erfüllen.
 - **Energieeffizienz:** Viele Tiny Houses sind so konzipiert, dass sie möglichst wenig Energie verbrauchen. Dies wird durch effiziente Dämmung, Solarpaneele und andere Technologien erreicht.
+- **Entschleunigung:** Ein Lebensstil, der sich gegen die Hektik des Alltags richtet. Im Tiny House wird dies durch weniger Hausarbeit, geringere Fixkosten und die Nähe zur Natur gefördert, was Raum für mehr Zeit und Ruhe schafft.
 - **EPS (expandiertes Polystyrol):** Ein leichtes, synthetisches Material, das vor allem für seine Wärmedämmung bekannt ist. Es ist wasserabweisend, aber weniger umweltfreundlich als natürliche Optionen.
 - **Fenstergestaltung:** Wegen der begrenzten Wandfläche in Tiny Houses ist die Positionierung und Grösse der Fenster entscheidend für natürliches Licht und Belüftung.
 - **Fernreisen:** Einige Tiny House Bewohner nutzen ihr mobiles Zuhause für ausgedehnte Reisen und leben quasi als moderne Nomaden.
@@ -63,6 +67,8 @@ images: >-
 - **Holzofen:** Ein kleiner Ofen, der mit Holz befeuert wird und in einigen Tiny Houses als Hauptwärmequelle dient.
 - **Holzwolle:** Aus Holzfasern hergestellt, ist dieses Material sowohl wärme- als auch schalldämmend. Es ist umweltfreundlich und oft in Plattenform erhältlich.
 - **Hybrid-Tiny-House:** Ein Tiny House, das sowohl stationär als auch mobil sein kann, oft mit abnehmbaren Rädern oder einer konvertierbaren Plattform.
+- **Hygge:** Ein dänischer Begriff für Herzlichkeit und Gemütlichkeit. Im Tiny House beschreibt es die Kunst, auf kleinem Raum eine Atmosphäre von Geborgenheit, Licht und Wärme zu schaffen.
+- **Intentionale Gemeinschaft:** Das bewusste Zusammenleben mit Gleichgesinnten (z.B. in Tiny House Dörfern), um Ressourcen zu teilen, soziale Isolation zu vermeiden und sich gegenseitig zu unterstützen.
 - **Isolation:** Die Art der verwendeten Isolationsmaterialien kann in einem Tiny House entscheidend sein, um Energieeffizienz und Komfort zu gewährleisten.
 - **Kaminofen:** Ein moderner Holzofen mit einem stilvollen Design. Oft mit einer grösseren Glasscheibe und höherer Effizienz. Kann auch als Einbaugerät in einer Wand installiert werden.
 - **Kilowattstunde (kWh):** Eine Masseinheit für Energie, die oft zur Messung des Energieertrags von Solaranlagen verwendet wird.
@@ -72,6 +78,7 @@ images: >-
 - **Kompakte Elektrogeräte:** Speziell entwickelte, kleinere Versionen von Haushaltsgeräten wie Öfen, Kühlschränken oder Waschmaschinen, die in Tiny Houses verwendet werden.
 - **Komposttoiletten:** Diese Toiletten trennen Feststoffe von Flüssigkeiten. Die Feststoffe werden in einem Behälter mit Kompostierungsmaterialien wie Sägemehl oder Kokosfasern gemischt. Dies fördert den Kompostierungsprozess, der die Abfälle in nützlichen Dünger umwandelt.
 - **Krüppelwalmdach:** Ein Krüppelwalmdach ist eine Variation des Walmdachs, bei dem die vier Hauptseiten durch kleinere Dreiecksflächen ergänzt werden, die als "Krüppel" bezeichnet werden. Diese Form kann ästhetisch ansprechend sein und zusätzlichen Raum bieten.
+- **Lagom:** Ein schwedisches Lebenskonzept, das „genau das richtige Maß" bedeutet. Weder zu viel noch zu wenig. Im Tiny House steht Lagom für die perfekte Balance zwischen Komfort und Verzicht.
 - **Lagerraum:** Da der Platz in einem Tiny House begrenzt ist, wird der verfügbare Lagerraum oft sehr kreativ genutzt, zum Beispiel durch Einbau von Stauraum in Treppen oder Möbeln.
 - **Landkauf:** Einige Tiny-House-Besitzer entscheiden sich dafür, ein Stück Land zu kaufen, auf dem sie ihr Tiny House abstellen können. Dies bietet mehr Unabhängigkeit, aber auch mehr Verantwortung.
 - **Leistungsfaktor:** Ein Mass für die Effizienz einer Solaranlage, oft in Watt pro Quadratmeter angegeben.
@@ -91,6 +98,7 @@ images: >-
 - **Off-Grid:** Ein Tiny House, das nicht an öffentliche Versorgungsnetze wie Strom und Wasser angeschlossen ist und sich selbst versorgt.
 - **Off-Grid-System:** Ein unabhängiges Solarsystem, das nicht an das öffentliche Stromnetz angeschlossen ist.
 - **Outdoor-Ofen:** Speziell für den Einsatz im Freien konzipiert, oft tragbar. Ideal für Leute, die das Outdoor-Leben eines Tiny House geniessen möchten.
+- **Ownership vs. Stewardship:** Der philosophische Wechsel vom „Besitzen" zum „Verwalten". Man sieht sich nicht als Eigentümer eines Stücks Land, sondern als dessen Hüter, der es für kommende Generationen bewahrt.
 - **Passive Solarheizung:** Ein Ansatz zur Ausrichtung und Konstruktion eines Tiny Houses, der darauf abzielt, Sonnenenergie optimal für die Beheizung des Innenraums zu nutzen.
 - **Pelletsofen:** Verwendet Holzpellets als Brennstoff und ist oft automatisiert, was das Heizen einfacher macht. Allerdings benötigt er Strom und ist weniger romantisch als traditionelle Holzöfen.
 - **Photovoltaik:** Dieser Begriff beschreibt die direkte Umwandlung von Sonnenlicht in elektrische Energie mithilfe von Solarzellen. Photovoltaikanlagen sind auf vielen Tiny Houses zu finden, um unabhängig vom Stromnetz zu sein.
@@ -112,6 +120,7 @@ images: >-
 - **Sichtbare Balken:** Ein Gestaltungselement in einigen Tiny Houses, bei dem die Tragstruktur des Hauses sichtbar bleibt, oft als ästhetisches Highlight.
 - **SIPS:** Steht für Structural Insulated Panels. Es handelt sich um vorgefertigte Wandelemente, die sowohl isolierend als auch strukturell stabil sind. Sie sind besonders in der Tiny-House-Bewegung beliebt, da sie leicht und einfach zu montieren sind.
 - **Skoolie:** Ein Skoolie ist ein umgebauter Schulbus, der als Wohnraum dient. Diese spezielle Art von Tiny House hat den Vorteil der Mobilität und bietet oft erstaunlich viel Platz. Allerdings gibt es auch Herausforderungen in Bezug auf die Strassentauglichkeit und Zulassung.
+- **Slow Living:** Eine Bewegung, die dazu aufruft, das Tempo im Alltag zu drosseln. Das Tiny House ist das physische Fundament für diesen Lebensstil, da es weniger Pflege, weniger Arbeit und weniger Konsumdruck bedeutet.
 - **Solardach:** Ein Dach, das mit Solarzellen ausgestattet ist, um Energie für das Tiny House zu erzeugen.
 - **Solarfenster:** Transparente Materialien, die Sonnenlicht durchlassen, aber auch die Wärmeenergie der Sonne für die Heizung nutzen können.
 - **Solarkollektor:** Ein Bauelement in einer solarthermischen Anlage, das die Sonnenenergie absorbiert und in Wärme umwandelt.
@@ -126,6 +135,7 @@ images: >-
 - **Steinwolle:** Hergestellt aus vulkanischem Gestein, bietet es eine hervorragende thermische und akustische Dämmung. Es ist feuerbeständig und wasserabweisend.
 - **Stelzenhaus:** Ein Tiny House, das auf Stelzen gebaut ist, um Hochwasser oder anderen natürlichen Bedingungen standzuhalten.
 - **Steuervorteile:** In einigen Ländern oder Regionen gibt es steuerliche Vorteile für den Besitz eines Tiny Houses, da sie oft als sekundäre oder temporäre Wohnsitze gelten.
+- **Suffizienz:** Die Strategie der Genügsamkeit. Es ist die Frage: „Wie viel ist genug?" Suffizienz im Tiny House bedeutet, den Ressourcenverbrauch durch Verhaltensänderung statt nur durch Technik zu senken.
 - **Tiny House auf Rädern:** Ein Tiny House, das auf einem Anhänger gebaut ist und somit mobil ist.
 - **Tiny-House-Blog:** Eine Online-Plattform, auf der Tiny-House-Enthusiasten ihre Erfahrungen, Tipps und Designs teilen.
 - **Tiny-House-Buch:** Veröffentlichungen, die sich speziell mit dem Thema Tiny Houses befassen, sei es als Bauanleitung, Erfahrungsbericht oder philosophische Betrachtung.
@@ -142,6 +152,7 @@ images: >-
 - **Verbrennungstoiletten:** Diese Art von Toilette verbrennt die Abfallstoffe bei sehr hohen Temperaturen, wodurch Asche entsteht. Diese Toiletten benötigen Strom, sind aber effektiv in der Geruchsbeseitigung und erzeugen nur eine geringe Menge an Rückständen.
 - **Vermietung:** Manche Besitzer vermieten ihr Tiny House zeitweise, um zusätzliche Einnahmen zu generieren. Dies kann besonders attraktiv sein, wenn das Tiny House an einem touristisch interessanten Ort steht.
 - **Vollfinanzierung:** Manche Menschen finanzieren den Kauf oder Bau eines Tiny Houses durch Kredite oder Crowdfunding. Die geringeren Kosten im Vergleich zu herkömmlichen Häusern machen eine Vollfinanzierung oft realistischer.
+- **Wabi-Sabi:** Eine japanische Ästhetik, die Schönheit im Unvollkommenen, Alten und Einfachen findet. Passt perfekt zu Tiny Houses aus Naturmaterialien, die mit der Zeit eine eigene Patina entwickeln.
 - **Wagenlizenz:** Einige Tiny Houses auf Rädern benötigen eine spezielle Lizenz oder Registrierung, um auf öffentlichen Strassen bewegt werden zu dürfen.
 - **Walmdach:** Ein Walmdach hat vier schräge Seiten, die alle zur Wand hin abfallen. Im Gegensatz zum Satteldach gibt es keine vertikalen Giebelseiten. Diese Dachform ist stabil und bietet guten Schutz gegen Wind. In einem Tiny House kann es aber komplexer und teurer in der Herstellung sein.
 - **Wassergeführter Holzofen:** Dieser spezielle Ofen ist an ein Warmwassersystem angeschlossen und kann somit nicht nur den Raum, sondern auch Wasser für Heizkörper oder sanitäre Anlagen erhitzen. Das macht ihn besonders vielseitig und effizient, allerdings ist die Installation komplexer und oft teurer. Ein wassergeführter Holzofen ist eine gute Option für diejenigen, die ein ganzheitliches Heizsystem in ihrem Tiny House integrieren möchten.
