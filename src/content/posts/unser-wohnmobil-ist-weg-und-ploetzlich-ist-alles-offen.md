@@ -5,7 +5,7 @@ summary: 'Wir haben unser 20-jähriges Wohnmobil verkauft: Rost, Bremsen, Stossd
 tags: ['Tiny House Alltag', 'minimalismus', 'schweiz', 'nachhaltigkeit', 'autarkie']
 authors: ['default']
 draft: false
-images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/unser-wohnmobil-ist-weg-und-ploetzlich-ist-alles-offen-titelbild.webp'
+images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/unser-wohnmobil-ist-weg-und-ploetzlich-ist-alles-offen-titelbild.webp?v=1773076842973'
 ---
 
 Es gibt diese Entscheidungen, die sich anfühlen wie ein Pflaster abziehen.
