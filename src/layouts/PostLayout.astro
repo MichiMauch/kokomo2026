@@ -114,7 +114,7 @@ const faqLd = faqItems.length >= 2 ? {
 const glossaryData = getGlossaryTerms().map((t) => ({
   t: t.term,
   s: slugifyTerm(t.term),
-  d: truncate(t.definition, 200),
+  d: t.definition,
 }))
 ---
 
