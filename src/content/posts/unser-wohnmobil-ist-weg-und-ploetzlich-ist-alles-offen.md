@@ -24,7 +24,7 @@ Und wir haben gemerkt: Uns reicht wenig.
 
 «So haben wir das erlebt: Je kleiner der Raum, desto klarer wird, was wirklich zählt.»
 
-![](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/unser-wohnmobil-ist-weg-und-ploetzlich-ist-alles-offen-1773078572997.webp)
+![](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/unser-wohnmobil-ist-weg-und-ploetzlich-ist-alles-offen-1773081714271.webp)
 
 ## Die Realität nach 20 Jahren: Rost frisst Romantik
 Irgendwann kippt so eine Liebesgeschichte. Nicht mit einem grossen Knall, eher mit einem schleichenden «Hmm… das wird jetzt aber teuer».
