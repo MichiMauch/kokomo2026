@@ -14,7 +14,6 @@ authors:
   - default
 draft: false
 images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/gaeste-im-tiny-house-geht-das-ueberhaupt-titelbild.webp?v=1773077082269'
-  https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/gaeste-im-tiny-house-geht-das-ueberhaupt-titelbild.webp
 ---
 
 «Und wenn Besuch kommt – wo schlafen die dann?» Diese Frage gehört zu den absoluten Klassikern, die wir hören, sobald jemand erfährt, dass wir auf 36 Quadratmetern leben. Meistens schwingt ein ungläubiges Lächeln mit. Verständlich. Also reden wir mal darüber.

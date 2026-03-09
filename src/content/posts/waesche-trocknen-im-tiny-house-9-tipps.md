@@ -14,7 +14,6 @@ summary: >-
   zum Innenbereich, von der Sortierung bis zur Trocknung.
 draft: false
 images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/waesche-trocknen-im-tiny-house-9-tipps-titelbild.webp?v=1773077685193'
-  https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/DALL·E-2023-10-23-22.39.46-Fotorealistische-Darstellung-zum-Thema-Waeschetrocknen-im-Winter_-Ein-winterlicher-Garten-oder-Balkon-mit-Waesche-die-auf-einer-Leine-im-Frost-aufgeh.webp
 youtube: aycJcrpM82M
 ---
 

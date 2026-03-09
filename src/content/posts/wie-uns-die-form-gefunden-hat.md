@@ -12,7 +12,6 @@ summary: >-
   und effizient. Dieses Bild begegnete uns ständig...
 draft: false
 images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/wie-uns-die-form-gefunden-hat-titelbild.webp?v=1773077276017'
-  https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/featured-wie-uns-die-form-gefunden-hat.webp
 ---
 
 Wenn man an Tiny Houses denkt, hat man schnell ein bestimmtes Bild im Kopf: eine rechteckige Box auf Rädern, gerade Linien, klare Kanten, alles kompakt und effizient. Dieses Bild begegnete uns ständig, als wir anfingen, uns mit dem Thema zu beschäftigen. Doch manchmal ist es gerade das, was man nicht sucht, das am besten zu einem passt.

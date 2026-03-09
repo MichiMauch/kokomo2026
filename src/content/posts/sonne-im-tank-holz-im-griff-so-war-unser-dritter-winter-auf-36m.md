@@ -14,7 +14,6 @@ summary: >-
   Warum wir trotz 113 kWh Fremdstrom glücklich mit unserer Winterbilanz sind.
 draft: false
 images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/sonne-im-tank-holz-im-griff-so-war-unser-dritter-winter-auf-36m-titelbild.webp?v=1773077139277'
-  https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/sonne-im-tank-holz-im-griff-so-war-unser-dritter-winter-auf-36m-titelbild.webp
 ---
 
 Hast du es auch gespürt? Die ersten kräftigen Sonnenstrahlen, die nicht nur die Nase kitzeln, sondern auch endlich wieder richtig Power für unser Haus bringen. Der dritte Winter in unserem [KOKOMO House](https://www.kokomo.house) in Muhen ist offiziell Geschichte, und wir ziehen zufrieden – und wie immer ehrlich – Bilanz.

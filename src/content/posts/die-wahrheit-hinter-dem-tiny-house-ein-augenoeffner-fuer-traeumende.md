@@ -15,7 +15,6 @@ summary: >-
   die Schwierigkeit, idyllische Standorte zu finden."
 draft: false
 images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/die-wahrheit-hinter-dem-tiny-house-ein-augenoeffner-fuer-traeumende-titelbild.webp?v=1773077618660'
-  https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/DALL·E-2023-11-27-21.30.53-A-visually-engaging-image-portraying-the-contrast-between-the-dream-and-reality-of-Tiny-House-living.-On-one-side-a-whimsical-and-charming-Tiny-House.webp
 ---
 
 Du wohnst bereits in deinem Traum-Tiny House oder steckst mitten in den

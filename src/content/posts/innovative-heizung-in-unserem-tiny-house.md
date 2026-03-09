@@ -15,7 +15,6 @@ summary: >-
   Wasser.
 draft: false
 images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/innovative-heizung-in-unserem-tiny-house-titelbild.webp?v=1773077553209'
-  https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/DALL·E-2023-12-21-19.10.56-A-wide-panoramic-view-of-a-cozy-tiny-house-in-a-winter-landscape-illuminated-with-warm-light-from-windows-surrounded-by-snow-and-trees.-The-roof-has.webp
 ---
 
 In unserem gemütlichen Tiny House ist [eine der am häufigsten gestellten Fragen](https://www.kokomo.house/tiny-house/100-tage-im-tiny-house-6-fragen-die-immer-wieder-gestellt-werden/), besonders im Winter, die nach unserem

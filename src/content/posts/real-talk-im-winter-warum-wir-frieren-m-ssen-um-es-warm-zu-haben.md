@@ -17,7 +17,6 @@ summary: >-
   erleben wir den ehrlichen Winteralltag auf unseren 36 Quadratmetern.
 draft: false
 images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/real-talk-im-winter-warum-wir-frieren-m-ssen-um-es-warm-zu-haben-titelbild.webp?v=1773077178269'
-  https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/real-talk-im-winter-warum-wir-frieren-m-ssen-um-es-warm-zu-haben-titelbild.webp
 ---
 
 Brrr, habt ihr es gemerkt? In ein paar Tagen ist offiziell Winter. Während wir im Sommer unser Leben quasi nach draussen verlagert haben und die Tür eigentlich immer offen stand, hat sich unser Radius nun deutlich auf unsere 36 Quadratmeter reduziert. Das bringt natürlich Veränderungen mit sich – wunderschöne, aber auch ein paar kalte Momente.
