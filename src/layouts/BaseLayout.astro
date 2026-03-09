@@ -209,6 +209,25 @@ const breadcrumbLd = !article && pathSegments.length > 0 ? {
           });
         });
       })();
+
+      window.addEventListener('pageshow', function (e) {
+        if (e.persisted) {
+          var c = document.getElementById('page-curtain');
+          if (c) {
+            c.classList.remove('wipe-in', 'wipe-out');
+            c.style.transform = 'translateX(-100%)';
+          }
+          sessionStorage.removeItem('navigating');
+        }
+      });
+
+      window.addEventListener('pagehide', function () {
+        var c = document.getElementById('page-curtain');
+        if (c) {
+          c.classList.remove('wipe-in', 'wipe-out');
+          c.style.transform = 'translateX(-100%)';
+        }
+      });
     </script>
   </body>
 </html>
