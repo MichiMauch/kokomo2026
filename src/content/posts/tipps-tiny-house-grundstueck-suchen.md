@@ -15,7 +15,7 @@ summary: >-
   Nutzung von Online-Karten, sowie persönliches Erkunden von Gegenden
   erleichtert.
 draft: false
-images: >-
+images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/tipps-tiny-house-grundstueck-suchen-titelbild.webp?v=1773077518244'
   https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/DALL·E-2023-12-24-14.17.44-A-charming-tiny-house-in-a-picturesque-rural-landscape-with-a-stylized-map-in-the-background-showing-marked-locations.-The-scene-includes-green-spaces.webp
 ---
 
