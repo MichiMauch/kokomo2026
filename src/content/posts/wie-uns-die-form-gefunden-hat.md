@@ -11,7 +11,7 @@ summary: >-
   eine rechteckige Box auf Rädern, gerade Linien, klare Kanten, alles kompakt
   und effizient. Dieses Bild begegnete uns ständig...
 draft: false
-images: >-
+images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/wie-uns-die-form-gefunden-hat-titelbild.webp?v=1773077276017'
   https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/featured-wie-uns-die-form-gefunden-hat.webp
 ---
 
