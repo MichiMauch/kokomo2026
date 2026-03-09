@@ -475,6 +475,38 @@ document.addEventListener('DOMContentLoaded', () => {
       );
     }
   });
+
+  // 5) Track glossary tooltip hovers (500ms debounce, once per term per pageview)
+  const hoveredTerms = new Set<string>();
+  let hoverTimer: ReturnType<typeof setTimeout> | null = null;
+  let hoverTarget: Element | null = null;
+
+  prose.addEventListener('mouseenter', (e) => {
+    const link = (e.target as HTMLElement).closest('a.glossary-term');
+    if (!link) return;
+    const term = link.textContent?.trim().toLowerCase();
+    if (!term || hoveredTerms.has(term)) return;
+
+    hoverTarget = link;
+    hoverTimer = setTimeout(() => {
+      hoveredTerms.add(term);
+      navigator.sendBeacon(
+        '/api/glossary/track',
+        new Blob([JSON.stringify({ term, type: 'hover' })], { type: 'application/json' }),
+      );
+      hoverTimer = null;
+    }, 500);
+  }, true);
+
+  prose.addEventListener('mouseleave', (e) => {
+    const link = (e.target as HTMLElement).closest('a.glossary-term');
+    if (!link || link !== hoverTarget) return;
+    if (hoverTimer) {
+      clearTimeout(hoverTimer);
+      hoverTimer = null;
+    }
+    hoverTarget = null;
+  }, true);
 });
 
 function injectGlossaryTooltips(prose: Element) {

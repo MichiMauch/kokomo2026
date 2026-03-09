@@ -13,8 +13,8 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(JSON.stringify({ error: 'Term darf nicht leer sein.' }), { status: 400, headers })
     }
 
-    if (type !== 'click' && type !== 'search') {
-      return new Response(JSON.stringify({ error: 'Type muss "click" oder "search" sein.' }), { status: 400, headers })
+    if (type !== 'click' && type !== 'search' && type !== 'hover') {
+      return new Response(JSON.stringify({ error: 'Type muss "click", "search" oder "hover" sein.' }), { status: 400, headers })
     }
 
     await trackGlossaryTerm(term.trim(), type)

@@ -4,12 +4,13 @@ interface GlossaryStat {
   term: string
   clicks: number
   searches: number
+  hovers: number
   boost: number
   score: number
   updated_at: string
 }
 
-type SortKey = 'score' | 'clicks' | 'searches' | 'boost' | 'term'
+type SortKey = 'score' | 'clicks' | 'searches' | 'hovers' | 'boost' | 'term'
 
 export default function AdminGlossar() {
   const [stats, setStats] = useState<GlossaryStat[]>([])
@@ -55,7 +56,7 @@ export default function AdminGlossar() {
       setStats((prev) =>
         prev.map((s) =>
           s.term === term
-            ? { ...s, boost, score: s.clicks + s.searches + boost }
+            ? { ...s, boost, score: s.clicks + s.searches + s.hovers + boost }
             : s,
         ),
       )
@@ -141,6 +142,9 @@ export default function AdminGlossar() {
                 <th className="cursor-pointer px-4 py-3 text-right font-semibold hover:text-primary-500" onClick={() => handleSort('searches')}>
                   Suchen{sortArrow('searches')}
                 </th>
+                <th className="cursor-pointer px-4 py-3 text-right font-semibold hover:text-primary-500" onClick={() => handleSort('hovers')}>
+                  Hovers{sortArrow('hovers')}
+                </th>
                 <th className="cursor-pointer px-4 py-3 text-right font-semibold hover:text-primary-500" onClick={() => handleSort('boost')}>
                   Boost{sortArrow('boost')}
                 </th>
@@ -156,6 +160,7 @@ export default function AdminGlossar() {
                   <td className="px-4 py-3 font-medium capitalize">{stat.term}</td>
                   <td className="px-4 py-3 text-right tabular-nums">{stat.clicks}</td>
                   <td className="px-4 py-3 text-right tabular-nums">{stat.searches}</td>
+                  <td className="px-4 py-3 text-right tabular-nums">{stat.hovers}</td>
                   <td className="px-4 py-3 text-right tabular-nums">
                     {editingTerm === stat.term ? (
                       <input

@@ -170,14 +170,15 @@ export interface GlossaryStat {
   term: string
   clicks: number
   searches: number
+  hovers: number
   boost: number
   score: number
   updated_at: string
 }
 
-export async function trackGlossaryTerm(term: string, type: 'click' | 'search'): Promise<void> {
+export async function trackGlossaryTerm(term: string, type: 'click' | 'search' | 'hover'): Promise<void> {
   const db = getClient()
-  const col = type === 'click' ? 'clicks' : 'searches'
+  const col = type === 'click' ? 'clicks' : type === 'search' ? 'searches' : 'hovers'
   await db.execute({
     sql: `INSERT INTO glossary_stats (term, ${col}, updated_at)
           VALUES (?, 1, datetime('now'))
@@ -189,9 +190,9 @@ export async function trackGlossaryTerm(term: string, type: 'click' | 'search'):
 export async function getTopGlossaryTerms(limit = 10): Promise<GlossaryStat[]> {
   const db = getClient()
   const result = await db.execute({
-    sql: `SELECT term, clicks, searches, boost, (clicks + searches + boost) AS score, updated_at
+    sql: `SELECT term, clicks, searches, hovers, boost, (clicks + searches + hovers + boost) AS score, updated_at
           FROM glossary_stats
-          WHERE (clicks + searches + boost) > 0
+          WHERE (clicks + searches + hovers + boost) > 0
           ORDER BY score DESC
           LIMIT ?`,
     args: [limit],
@@ -200,6 +201,7 @@ export async function getTopGlossaryTerms(limit = 10): Promise<GlossaryStat[]> {
     term: row.term as string,
     clicks: row.clicks as number,
     searches: row.searches as number,
+    hovers: row.hovers as number,
     boost: row.boost as number,
     score: row.score as number,
     updated_at: row.updated_at as string,
@@ -209,7 +211,7 @@ export async function getTopGlossaryTerms(limit = 10): Promise<GlossaryStat[]> {
 export async function getGlossaryStats(): Promise<GlossaryStat[]> {
   const db = getClient()
   const result = await db.execute(
-    `SELECT term, clicks, searches, boost, (clicks + searches + boost) AS score, updated_at
+    `SELECT term, clicks, searches, hovers, boost, (clicks + searches + hovers + boost) AS score, updated_at
      FROM glossary_stats
      ORDER BY score DESC`,
   )
@@ -217,6 +219,7 @@ export async function getGlossaryStats(): Promise<GlossaryStat[]> {
     term: row.term as string,
     clicks: row.clicks as number,
     searches: row.searches as number,
+    hovers: row.hovers as number,
     boost: row.boost as number,
     score: row.score as number,
     updated_at: row.updated_at as string,
