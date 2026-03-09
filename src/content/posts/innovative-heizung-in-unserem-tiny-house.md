@@ -14,7 +14,7 @@ summary: >-
   Brauchwasser. Im Sommer erzeugt Überschussstrom unserer Solaranlage heisses
   Wasser.
 draft: false
-images: >-
+images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/innovative-heizung-in-unserem-tiny-house-titelbild.webp?v=1773077553209'
   https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/DALL·E-2023-12-21-19.10.56-A-wide-panoramic-view-of-a-cozy-tiny-house-in-a-winter-landscape-illuminated-with-warm-light-from-windows-surrounded-by-snow-and-trees.-The-roof-has.webp
 ---
 
