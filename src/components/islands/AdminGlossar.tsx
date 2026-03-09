@@ -129,7 +129,7 @@ export default function AdminGlossar() {
           Noch keine Glossar-Statistiken vorhanden. Statistiken erscheinen, sobald Nutzer Glossar-Begriffe suchen oder anklicken.
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
+        <div className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--bg)]">
           <table className="w-full text-sm">
             <thead className="bg-[var(--bg)] text-left text-xs uppercase tracking-wider text-[var(--text-secondary)]">
               <tr>
