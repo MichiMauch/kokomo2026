@@ -13,7 +13,7 @@ tags:
 authors:
   - default
 draft: false
-images: >-
+images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/gaeste-im-tiny-house-geht-das-ueberhaupt-titelbild.webp?v=1773077082269'
   https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/gaeste-im-tiny-house-geht-das-ueberhaupt-titelbild.webp
 ---
 
