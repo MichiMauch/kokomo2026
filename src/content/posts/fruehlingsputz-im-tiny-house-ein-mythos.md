@@ -5,7 +5,7 @@ summary: 'Im Tiny House braucht es keinen grossen Frühlingsputz. Mit wenig Besi
 tags: ['tiny house', 'minimalismus', 'Frühlingsputz', 'nachhaltigkeit', 'Tiny House Alltag']
 authors: ['default']
 draft: false
-images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/fruehlingsputz-im-tiny-house-ein-mythos-titelbild.webp'
+images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/fruehlingsputz-im-tiny-house-ein-mythos-titelbild.webp?v=1773077035803'
 ---
 
 ### Der Mythos vom Frühlingsputz  
