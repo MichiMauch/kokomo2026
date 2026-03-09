@@ -13,7 +13,7 @@ summary: >-
   60 Tage am Netz, ein stromfressender Radiator und ganz viel Februar-Nebel:
   Warum wir trotz 113 kWh Fremdstrom glücklich mit unserer Winterbilanz sind.
 draft: false
-images: >-
+images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/sonne-im-tank-holz-im-griff-so-war-unser-dritter-winter-auf-36m-titelbild.webp?v=1773077139277'
   https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/sonne-im-tank-holz-im-griff-so-war-unser-dritter-winter-auf-36m-titelbild.webp
 ---
 
