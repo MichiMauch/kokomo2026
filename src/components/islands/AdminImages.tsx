@@ -478,7 +478,7 @@ function PostCard({
                 </label>
                 <div className="flex items-center gap-2">
                   <label className="cursor-pointer rounded-full border border-slate-300 px-3 py-1 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800">
-                    {uploadingImage ? 'Wird hochgeladen…' : 'Bild einfügen'}
+                    {uploadingImage ? 'Bild wird optimiert…' : 'Bild einfügen'}
                     <input
                       ref={inlineFileRef}
                       type="file"

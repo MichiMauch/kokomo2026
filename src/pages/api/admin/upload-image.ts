@@ -1,7 +1,9 @@
 import type { APIRoute } from 'astro'
 import { isAuthenticated } from '../../../lib/admin-auth'
 import { uploadBufferToR2 } from '../../../lib/r2'
-import sharp from 'sharp'
+import { enhancePhoto } from '../../../lib/image-enhance'
+import { getFileContent } from '../../../lib/github'
+import { parse as parseYaml } from 'yaml'
 
 export const prerender = false
 
@@ -9,6 +11,7 @@ const headers = { 'Content-Type': 'application/json' }
 
 /**
  * POST — Upload an inline image for a blog post body
+ * Enhances the image with Gemini AI (Kodak Portra 400 style) before uploading
  * Body: { slug, image_base64 }
  * Returns: { url }
  */
@@ -27,20 +30,39 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(JSON.stringify({ error: 'Kein Bild hochgeladen' }), { status: 400, headers })
     }
 
-    // Strip data URL prefix if present
-    const base64Data = image_base64.replace(/^data:image\/\w+;base64,/, '')
-    const imageBuffer = Buffer.from(base64Data, 'base64')
+    // Load image style config
+    let imageStyle: any = {
+      base_style: '',
+      header: { width: 1200, height: 675, style_suffix: '' },
+      inline: { width: 800, height: 600, style_suffix: '' },
+      enhancement_prompt: '',
+      lighting_moods: [],
+      color_palettes: [],
+      negative_prompt: '',
+    }
+    try {
+      const raw = await getFileContent('content-config/image-style.yaml')
+      imageStyle = parseYaml(raw)
+    } catch { /* use defaults */ }
 
-    // Resize and convert to WebP
-    const optimized = await sharp(imageBuffer)
-      .resize(1200, undefined, { fit: 'inside', withoutEnlargement: true })
-      .webp({ quality: 85 })
-      .toBuffer()
+    // Check Gemini API key
+    const geminiKey = import.meta.env.GOOGLE_GEMINI_API_KEY
+    if (!geminiKey) {
+      return new Response(JSON.stringify({ error: 'Gemini API Key nicht konfiguriert' }), { status: 500, headers })
+    }
+
+    console.log(`[admin/upload-image] Enhancing inline image for ${slug}…`)
+    const optimized = await enhancePhoto({
+      photo_base64: image_base64,
+      imageStyle,
+      geminiKey,
+      variant: 'inline',
+    })
 
     const filename = `${slug}-${Date.now()}.webp`
     const url = await uploadBufferToR2(optimized, filename)
 
-    console.log(`[admin/upload-image] Uploaded inline image: ${url}`)
+    console.log(`[admin/upload-image] Uploaded enhanced inline image: ${url}`)
 
     return new Response(JSON.stringify({ url }), { status: 200, headers })
   } catch (err: any) {

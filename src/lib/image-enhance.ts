@@ -6,9 +6,16 @@
 import { GoogleGenAI, Modality } from '@google/genai'
 import sharp from 'sharp'
 
+interface ImageStyleVariant {
+  width?: number
+  height?: number
+  style_suffix?: string
+}
+
 interface ImageStyle {
   base_style?: string
-  header?: { width?: number; height?: number; style_suffix?: string }
+  header?: ImageStyleVariant
+  inline?: ImageStyleVariant
   enhancement_prompt?: string
   lighting_moods?: string[]
   color_palettes?: string[]
@@ -24,9 +31,10 @@ export async function enhancePhoto(opts: {
   image_prompt?: string
   imageStyle: ImageStyle
   geminiKey: string
+  variant?: 'header' | 'inline'
 }): Promise<Buffer> {
-  const { photo_base64, image_prompt, imageStyle, geminiKey } = opts
-  const cfg = imageStyle.header || { width: 1200, height: 675 }
+  const { photo_base64, image_prompt, imageStyle, geminiKey, variant = 'header' } = opts
+  const cfg = imageStyle[variant] || imageStyle.header || { width: 1200, height: 675 }
 
   // Extract raw base64 from data URL if needed
   const rawBase64 = photo_base64.includes(',')
@@ -82,9 +90,11 @@ export async function enhancePhoto(opts: {
   }
 
   // Optimize output to target dimensions as WebP
+  // header: crop to exact dimensions (cover), inline: fit within bounds (inside)
   const imageBuffer = Buffer.from(imagePart.inlineData.data, 'base64')
+  const fit = variant === 'inline' ? 'inside' as const : 'cover' as const
   const optimized = await sharp(imageBuffer)
-    .resize(cfg.width || 1200, cfg.height || 675, { fit: 'cover' })
+    .resize(cfg.width || 1200, cfg.height || 675, { fit, withoutEnlargement: true })
     .webp({ quality: 85 })
     .toBuffer()
 
