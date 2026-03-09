@@ -46,7 +46,7 @@ Der Tag, an dem wir es verkauft haben, war komisch. Praktisch gesehen war es log
 
 Als der Käufer vom Hof fuhr, haben wir uns kurz angeschaut.
 
-Ein paar Sekunden lang war da nur Stille.
+Ein paar Sekunden lang war da nur Stille...
 
 Dann kam der erste Schock: Was machen wir jetzt ohne unsere Campingausflüge?
 
