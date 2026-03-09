@@ -16,7 +16,7 @@ summary: >-
   Zwischen wohliger Ofenwärme und dem notwendigen Übel des Stosslüftens – so
   erleben wir den ehrlichen Winteralltag auf unseren 36 Quadratmetern.
 draft: false
-images: >-
+images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/real-talk-im-winter-warum-wir-frieren-m-ssen-um-es-warm-zu-haben-titelbild.webp?v=1773077178269'
   https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/real-talk-im-winter-warum-wir-frieren-m-ssen-um-es-warm-zu-haben-titelbild.webp
 ---
 
