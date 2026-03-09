@@ -14,7 +14,7 @@ summary: >-
   Jahresverbrauch von 15m3 erreicht. Mit Massnahmen wie Trockentrenntoilette und
   Sparduschkopf leisten wir einen Beitrag zur Umweltschonung.
 draft: false
-images: >-
+images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/unser-wasserverbrauch-im-tiny-house-titelbild.webp?v=1773077460297'
   https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/DALL%C2%B7E-2024-01-03-20.42.09-An-illustrative-and-evocative-teaser-image-for-a-blog-post-about-water-consumption-in-a-tiny-house.-The-image-should-depict-a-tiny-house-surrounded-by.webp
 ---
 
