@@ -462,6 +462,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 3) Glossary Tooltips: link first occurrence of each term
   injectGlossaryTooltips(prose);
+
+  // 4) Track glossary tooltip clicks via sendBeacon
+  prose.addEventListener('click', (e) => {
+    const link = (e.target as HTMLElement).closest('a.glossary-term');
+    if (!link) return;
+    const term = link.textContent?.trim().toLowerCase();
+    if (term) {
+      navigator.sendBeacon(
+        '/api/glossary/track',
+        new Blob([JSON.stringify({ term, type: 'click' })], { type: 'application/json' }),
+      );
+    }
+  });
 });
 
 function injectGlossaryTooltips(prose: Element) {

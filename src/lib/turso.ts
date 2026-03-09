@@ -163,3 +163,72 @@ export async function setSetting(key: string, value: string): Promise<void> {
     args: [key, value],
   })
 }
+
+// ─── Glossary Stats ─────────────────────────────────────────────────────
+
+export interface GlossaryStat {
+  term: string
+  clicks: number
+  searches: number
+  boost: number
+  score: number
+  updated_at: string
+}
+
+export async function trackGlossaryTerm(term: string, type: 'click' | 'search'): Promise<void> {
+  const db = getClient()
+  const col = type === 'click' ? 'clicks' : 'searches'
+  await db.execute({
+    sql: `INSERT INTO glossary_stats (term, ${col}, updated_at)
+          VALUES (?, 1, datetime('now'))
+          ON CONFLICT(term) DO UPDATE SET ${col} = ${col} + 1, updated_at = datetime('now')`,
+    args: [term],
+  })
+}
+
+export async function getTopGlossaryTerms(limit = 10): Promise<GlossaryStat[]> {
+  const db = getClient()
+  const result = await db.execute({
+    sql: `SELECT term, clicks, searches, boost, (clicks + searches + boost) AS score, updated_at
+          FROM glossary_stats
+          WHERE (clicks + searches + boost) > 0
+          ORDER BY score DESC
+          LIMIT ?`,
+    args: [limit],
+  })
+  return result.rows.map((row) => ({
+    term: row.term as string,
+    clicks: row.clicks as number,
+    searches: row.searches as number,
+    boost: row.boost as number,
+    score: row.score as number,
+    updated_at: row.updated_at as string,
+  }))
+}
+
+export async function getGlossaryStats(): Promise<GlossaryStat[]> {
+  const db = getClient()
+  const result = await db.execute(
+    `SELECT term, clicks, searches, boost, (clicks + searches + boost) AS score, updated_at
+     FROM glossary_stats
+     ORDER BY score DESC`,
+  )
+  return result.rows.map((row) => ({
+    term: row.term as string,
+    clicks: row.clicks as number,
+    searches: row.searches as number,
+    boost: row.boost as number,
+    score: row.score as number,
+    updated_at: row.updated_at as string,
+  }))
+}
+
+export async function setGlossaryBoost(term: string, boost: number): Promise<void> {
+  const db = getClient()
+  await db.execute({
+    sql: `INSERT INTO glossary_stats (term, boost, updated_at)
+          VALUES (?, ?, datetime('now'))
+          ON CONFLICT(term) DO UPDATE SET boost = ?, updated_at = datetime('now')`,
+    args: [term, boost, boost],
+  })
+}

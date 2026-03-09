@@ -3,6 +3,7 @@ export const prerender = true
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { siteConfig } from '../lib/site-config'
 import { getGlossaryByLetter, getGlossaryTerms, slugifyTerm } from '../lib/glossary'
+type Term = ReturnType<typeof getGlossaryTerms>[number]
 
 const glossaryByLetter = getGlossaryByLetter()
 const allTerms = getGlossaryTerms()
@@ -32,6 +33,9 @@ const definedTermSetLd = {
   description="Umfassendes Glossar mit Tiny-House-Begriffen von A bis Z: Autarkie, Komposttoilette, Off-Grid und mehr."
 >
   <script type="application/ld+json" set:html={JSON.stringify(definedTermSetLd)} />
+  <script type="application/json" id="glossary-term-slugs" set:html={JSON.stringify(
+    Object.fromEntries(allTerms.map((t: Term) => [t.term.toLowerCase(), slugifyTerm(t.term)]))
+  )} />
 
   <div class="my-8 flex flex-col gap-8 lg:flex-row">
     <!-- Sidebar: A-Z Navigation -->
@@ -70,6 +74,22 @@ const definedTermSetLd = {
               </a>
             ))}
           </nav>
+        </div>
+
+        <!-- Häufig gesucht -->
+        <div id="popular-terms" class="glass-card mt-3 hidden rounded-2xl p-4">
+          <h4 class="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+            Häufig gesucht
+          </h4>
+          <div id="popular-terms-loading" class="space-y-2">
+            <div class="h-4 w-3/4 animate-pulse rounded bg-[var(--border)]/40"></div>
+            <div class="h-4 w-2/3 animate-pulse rounded bg-[var(--border)]/40"></div>
+            <div class="h-4 w-4/5 animate-pulse rounded bg-[var(--border)]/40"></div>
+          </div>
+          <ol id="popular-terms-list" class="hidden space-y-1 text-sm"></ol>
+          <p id="popular-terms-empty" class="hidden text-xs text-[var(--text-secondary)] italic">
+            Noch keine Daten vorhanden.
+          </p>
         </div>
       </div>
     </aside>
@@ -137,6 +157,14 @@ const definedTermSetLd = {
   const entries = document.querySelectorAll<HTMLElement>('.glossary-entry')
   const noResults = document.getElementById('glossary-no-results')
 
+  // Term→slug map for tracking
+  const slugMapEl = document.getElementById('glossary-term-slugs')
+  const termSlugs: Record<string, string> = slugMapEl ? JSON.parse(slugMapEl.textContent || '{}') : {}
+  const allTermNames = Object.keys(termSlugs)
+
+  // --- Search filtering + tracking ---
+  let searchTrackTimer: ReturnType<typeof setTimeout> | null = null
+
   input?.addEventListener('input', () => {
     const q = input.value.toLowerCase().trim()
     let anyVisible = false
@@ -156,7 +184,86 @@ const definedTermSetLd = {
     })
 
     if (noResults) noResults.style.display = anyVisible ? 'none' : ''
+
+    // Debounced search tracking (500ms, min 3 chars, matching term must exist)
+    if (searchTrackTimer) clearTimeout(searchTrackTimer)
+    if (q.length >= 3) {
+      searchTrackTimer = setTimeout(() => {
+        const matchedTerm = allTermNames.find((t) => t.includes(q))
+        if (matchedTerm) {
+          fetch('/api/glossary/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ term: matchedTerm, type: 'search' }),
+          }).catch(() => {})
+        }
+      }, 500)
+    }
   })
+
+  // --- Click tracking for glossary entries ---
+  document.addEventListener('click', (e) => {
+    const target = (e.target as HTMLElement).closest('.glossary-entry')
+    if (!target) return
+    const term = target.getAttribute('data-term')
+    if (term) {
+      fetch('/api/glossary/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ term, type: 'click' }),
+      }).catch(() => {})
+    }
+  })
+
+  // --- Track clicks from hash navigation (anchor links in sidebar) ---
+  if (window.location.hash) {
+    const id = window.location.hash.slice(1)
+    const entry = document.getElementById(id)
+    if (entry?.classList.contains('glossary-entry')) {
+      const term = entry.getAttribute('data-term')
+      if (term) {
+        fetch('/api/glossary/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ term, type: 'click' }),
+        }).catch(() => {})
+      }
+    }
+  }
+
+  // --- Load popular terms ---
+  const popularContainer = document.getElementById('popular-terms')
+  const popularLoading = document.getElementById('popular-terms-loading')
+  const popularList = document.getElementById('popular-terms-list')
+  const popularEmpty = document.getElementById('popular-terms-empty')
+
+  if (popularContainer) {
+    popularContainer.classList.remove('hidden')
+    fetch('/api/glossary/top')
+      .then((r) => r.json())
+      .then((terms: { term: string; score: number }[]) => {
+        popularLoading?.classList.add('hidden')
+        if (!terms.length) {
+          popularEmpty?.classList.remove('hidden')
+          return
+        }
+        popularList?.classList.remove('hidden')
+        for (const { term } of terms) {
+          const li = document.createElement('li')
+          const slug = termSlugs[term] || term.toLowerCase().replace(/\s+/g, '-')
+          const a = document.createElement('a')
+          a.href = `#${slug}`
+          a.className = 'text-[var(--text-secondary)] transition-colors hover:text-primary-500'
+          a.textContent = term.charAt(0).toUpperCase() + term.slice(1)
+          li.appendChild(a)
+          popularList?.appendChild(li)
+        }
+      })
+      .catch(() => {
+        popularLoading?.classList.add('hidden')
+        popularEmpty?.classList.remove('hidden')
+      })
+  }
 
   // A-Z toggle on mobile
   const azToggle = document.getElementById('az-toggle')

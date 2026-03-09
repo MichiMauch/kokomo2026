@@ -1,13 +1,19 @@
 ---
 export const prerender = false
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import AdminComments from '../../components/islands/AdminComments'
+import AdminGlossar from '../../components/islands/AdminGlossar'
 ---
 
-<BaseLayout title="Kommentar-Verwaltung" noIndex>
+<BaseLayout title="Glossar-Statistiken" noIndex>
   <div class="py-12">
     <div class="mb-8 flex items-center gap-4">
-      <h1 class="text-2xl font-bold text-[var(--text)]">Kommentar-Verwaltung</h1>
+      <h1 class="text-2xl font-bold text-[var(--text)]">Glossar-Statistiken</h1>
+      <a
+        href="/admin/comments"
+        class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
+      >
+        Kommentare
+      </a>
       <a
         href="/admin/content"
         class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
@@ -20,13 +26,7 @@ import AdminComments from '../../components/islands/AdminComments'
       >
         Newsletter
       </a>
-      <a
-        href="/admin/glossar"
-        class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
-      >
-        Glossar
-      </a>
     </div>
-    <AdminComments client:load />
+    <AdminGlossar client:load />
   </div>
 </BaseLayout>
