@@ -52,7 +52,9 @@ export async function getFileContent(path: string): Promise<string> {
 
   const data: { content: string; encoding: string } = await res.json()
   if (data.encoding === 'base64') {
-    return atob(data.content.replace(/\n/g, ''))
+    const binary = atob(data.content.replace(/\n/g, ''))
+    const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0))
+    return new TextDecoder().decode(bytes)
   }
   return data.content
 }
@@ -88,6 +90,47 @@ export async function createFile(
   if (!res.ok) {
     const err = await res.text()
     throw new Error(`GitHub create file failed: ${res.status} — ${err}`)
+  }
+
+  const data: { content: { html_url: string } } = await res.json()
+  return { htmlUrl: data.content.html_url }
+}
+
+/**
+ * Get file SHA (needed for updating existing files)
+ */
+export async function getFileSha(path: string): Promise<string> {
+  const { branch } = getConfig()
+  const res = await apiRequest(`contents/${path}?ref=${branch}`)
+  if (!res.ok) throw new Error(`GitHub API error: ${res.status} for ${path}`)
+  const data: { sha: string } = await res.json()
+  return data.sha
+}
+
+/**
+ * Update an existing file via PUT (requires SHA)
+ */
+export async function updateFile(
+  path: string,
+  content: string,
+  commitMessage: string
+): Promise<{ htmlUrl: string }> {
+  const sha = await getFileSha(path)
+  const encoded = btoa(unescape(encodeURIComponent(content)))
+
+  const res = await apiRequest(`contents/${path}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      message: commitMessage,
+      content: encoded,
+      sha,
+      branch: getConfig().branch,
+    }),
+  })
+
+  if (!res.ok) {
+    const err = await res.text()
+    throw new Error(`GitHub update file failed: ${res.status} — ${err}`)
   }
 
   const data: { content: { html_url: string } } = await res.json()

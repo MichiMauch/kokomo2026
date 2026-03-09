@@ -61,3 +61,22 @@ color_palettes:
   - "golden wheat and sky blue"
   - "forest green and warm copper"
   - "lavender and soft morning gold"
+
+# Photo enhancement: Kodak Portra 400 film emulation for consistent KOKOMO look
+# Used when a user uploads their own photo to be refined
+enhancement_prompt: >-
+  Apply a Kodak Portra 400 film emulation to this photo.
+  Keep the exact subject, people, scene, and composition completely unchanged.
+  Do NOT add, remove, or replace any elements, people, or objects.
+  Apply ONLY these color and tone adjustments:
+  Lifted black levels (shadows never fully black, slightly milky),
+  warm skin tones with natural peachy undertones,
+  slightly desaturated greens shifting toward olive/sage,
+  warm golden cast in highlights,
+  soft rolloff in highlights (no harsh clipping),
+  reduced overall saturation by about 15%,
+  subtle warm color shift in midtones,
+  fine organic film grain (not digital noise),
+  slightly lower contrast than digital with compressed dynamic range.
+  The result must look like an analog photograph shot on Portra 400 film,
+  not a digital filter. Output a photorealistic photograph, not an illustration.

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, type FormEvent } from 'react'
+import { compressImage } from '../../lib/compress-image'
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -17,6 +18,7 @@ interface PostDraft {
   tags: string[]
   body: string
   image_prompt: string
+  photo_base64?: string
 }
 
 interface PublishResult {
@@ -233,16 +235,63 @@ function PostEditor({
         />
       </div>
 
+      {/* Photo Upload */}
+      <div>
+        <label className="mb-1 block text-xs font-medium text-[var(--text-secondary)]">
+          Eigenes Foto hochladen (optional)
+        </label>
+        <div className="flex items-center gap-3">
+          <label className="cursor-pointer rounded-full border border-slate-300 px-4 py-2 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800">
+            Foto wählen
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              disabled={publishing}
+              onChange={async (e) => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                try {
+                  const dataUrl = await compressImage(file)
+                  onChange({ ...draft, photo_base64: dataUrl })
+                } catch (err: any) {
+                  alert(err.message || 'Foto konnte nicht geladen werden')
+                }
+                e.target.value = ''
+              }}
+            />
+          </label>
+          {draft.photo_base64 && (
+            <>
+              <img
+                src={draft.photo_base64}
+                alt="Vorschau"
+                className="h-16 w-24 rounded-lg object-cover shadow-sm"
+              />
+              <button
+                type="button"
+                onClick={() => onChange({ ...draft, photo_base64: undefined })}
+                className="text-xs text-red-500 hover:underline"
+              >
+                Entfernen
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
       {/* Image Prompt */}
       <div>
         <label className="mb-1 block text-xs font-medium text-[var(--text-secondary)]">
-          Bild-Prompt (leer lassen = kein Bild)
+          {draft.photo_base64 ? 'Verbesserungsanweisungen (optional)' : 'Bild-Prompt (leer lassen = kein Bild)'}
         </label>
         <textarea
           value={draft.image_prompt}
           onChange={(e) => onChange({ ...draft, image_prompt: e.target.value })}
           rows={2}
           disabled={publishing}
+          placeholder={draft.photo_base64 ? 'z.B. "Mehr Wärme, Bokeh verstärken"' : 'Szene beschreiben…'}
           className="w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-2.5 text-sm text-slate-900 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-400/30 disabled:opacity-50 dark:border-slate-600/50 dark:bg-slate-800/50 dark:text-white dark:focus:border-primary-500 dark:focus:ring-primary-500/30"
         />
       </div>
@@ -482,6 +531,7 @@ export default function AdminContent() {
           tags: draft.tags,
           body: draft.body,
           image_prompt: draft.image_prompt || undefined,
+          photo_base64: draft.photo_base64 || undefined,
         }),
       })
       if (res.status === 401) {
@@ -504,7 +554,7 @@ export default function AdminContent() {
   function handleReset() {
     setPhase('idle')
     setSuggestions([])
-    setDraft({ title: '', summary: '', tags: [], body: '', image_prompt: '' })
+    setDraft({ title: '', summary: '', tags: [], body: '', image_prompt: '', photo_base64: undefined })
     setPublishResult(null)
     setCustomTopic('')
     setPostType('erzaehlung')
@@ -686,7 +736,11 @@ export default function AdminContent() {
       {phase === 'publishing' && (
         <div className="py-12 text-center">
           <div className="mb-3 text-sm text-[var(--text-secondary)]">
-            {draft.image_prompt ? 'Bild wird generiert & Post wird publiziert…' : 'Post wird publiziert…'}
+            {draft.photo_base64
+              ? 'Foto wird veredelt & Post wird publiziert…'
+              : draft.image_prompt
+                ? 'Bild wird generiert & Post wird publiziert…'
+                : 'Post wird publiziert…'}
           </div>
           <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-emerald-200 border-t-emerald-500" />
           <p className="mt-4 text-xs text-[var(--text-secondary)]">

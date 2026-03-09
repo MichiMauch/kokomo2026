@@ -6,6 +6,7 @@ import { GoogleGenAI, Modality } from '@google/genai'
 import { parse as parseYaml } from 'yaml'
 import sharp from 'sharp'
 import { fixUmlauts, hasUmlautIssues } from '../../../lib/fix-umlauts'
+import { enhancePhoto } from '../../../lib/image-enhance'
 
 export const prerender = false
 
@@ -60,6 +61,7 @@ interface PublishRequest {
   tags: string[]
   body: string
   image_prompt?: string
+  photo_base64?: string
   skip_image?: boolean
 }
 
@@ -96,7 +98,7 @@ export const POST: APIRoute = async ({ request }) => {
     let imageUrl: string | undefined
     let imageError: string | undefined
 
-    if (body.image_prompt && !body.skip_image) {
+    if ((body.photo_base64 || body.image_prompt) && !body.skip_image) {
       try {
         const geminiKey = import.meta.env.GOOGLE_GEMINI_API_KEY
         console.log('[admin/publish] Gemini key available:', !!geminiKey, 'length:', geminiKey?.length ?? 0)
@@ -110,54 +112,69 @@ export const POST: APIRoute = async ({ request }) => {
 
           const cfg = imageStyle.header || { width: 1200, height: 675, style_suffix: '' }
 
-          // Random dynamic elements (wie in pipeline/generate-images.ts)
-          const mood = imageStyle.lighting_moods?.length
-            ? imageStyle.lighting_moods[Math.floor(Math.random() * imageStyle.lighting_moods.length)]
-            : ''
-          const palette = imageStyle.color_palettes?.length
-            ? imageStyle.color_palettes[Math.floor(Math.random() * imageStyle.color_palettes.length)]
-            : ''
-
-          const fullPrompt = [
-            imageStyle.base_style,
-            cfg.style_suffix,
-            mood ? `Lighting: ${mood}` : '',
-            palette ? `Color palette: ${palette}` : '',
-            body.image_prompt,
-            `Aspect ratio: ${cfg.width}x${cfg.height}`,
-            imageStyle.negative_prompt ? `Avoid: ${imageStyle.negative_prompt}` : 'No text overlays, no watermarks, no logos',
-          ]
-            .filter(Boolean)
-            .join('. ')
-
-          console.log('[admin/publish] Prompt:', fullPrompt.slice(0, 200) + '...')
-
-          const ai = new GoogleGenAI({ apiKey: geminiKey })
-          const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash-image',
-            contents: fullPrompt,
-            config: {
-              responseModalities: [Modality.TEXT, Modality.IMAGE],
-            },
-          })
-
-          const parts = response.candidates?.[0]?.content?.parts || []
-          const imagePart = parts.find((p: any) => p.inlineData?.mimeType?.startsWith('image/'))
-
-          if (!imagePart) {
-            console.warn('[admin/publish] Gemini returned no image part. Parts:', parts.map((p: any) => p.text ? 'text' : p.inlineData?.mimeType ?? 'unknown'))
-          }
-
-          if (imagePart?.inlineData?.data) {
-            const imageBuffer = Buffer.from(imagePart.inlineData.data, 'base64')
-            const optimized = await sharp(imageBuffer)
-              .resize(cfg.width || 1200, cfg.height || 675, { fit: 'cover' })
-              .webp({ quality: 85 })
-              .toBuffer()
-
+          if (body.photo_base64) {
+            // ── Photo Enhancement Mode ──
+            console.log('[admin/publish] Enhancing uploaded photo…')
+            const optimized = await enhancePhoto({
+              photo_base64: body.photo_base64,
+              image_prompt: body.image_prompt,
+              imageStyle,
+              geminiKey,
+            })
             const filename = `${slug}-titelbild.webp`
-            imageUrl = await uploadBufferToR2(optimized, filename)
-            console.log('[admin/publish] Image uploaded:', imageUrl)
+            const rawUrl = await uploadBufferToR2(optimized, filename)
+            imageUrl = `${rawUrl}?v=${Date.now()}`
+            console.log('[admin/publish] Enhanced photo uploaded:', imageUrl)
+          } else if (body.image_prompt) {
+            // ── Text-to-Image Mode (existing logic) ──
+            const mood = imageStyle.lighting_moods?.length
+              ? imageStyle.lighting_moods[Math.floor(Math.random() * imageStyle.lighting_moods.length)]
+              : ''
+            const palette = imageStyle.color_palettes?.length
+              ? imageStyle.color_palettes[Math.floor(Math.random() * imageStyle.color_palettes.length)]
+              : ''
+
+            const fullPrompt = [
+              imageStyle.base_style,
+              cfg.style_suffix,
+              mood ? `Lighting: ${mood}` : '',
+              palette ? `Color palette: ${palette}` : '',
+              body.image_prompt,
+              `Aspect ratio: ${cfg.width}x${cfg.height}`,
+              imageStyle.negative_prompt ? `Avoid: ${imageStyle.negative_prompt}` : 'No text overlays, no watermarks, no logos',
+            ]
+              .filter(Boolean)
+              .join('. ')
+
+            console.log('[admin/publish] Prompt:', fullPrompt.slice(0, 200) + '...')
+
+            const ai = new GoogleGenAI({ apiKey: geminiKey })
+            const response = await ai.models.generateContent({
+              model: 'gemini-2.5-flash-image',
+              contents: fullPrompt,
+              config: {
+                responseModalities: [Modality.TEXT, Modality.IMAGE],
+              },
+            })
+
+            const parts = response.candidates?.[0]?.content?.parts || []
+            const imagePart = parts.find((p: any) => p.inlineData?.mimeType?.startsWith('image/'))
+
+            if (!imagePart) {
+              console.warn('[admin/publish] Gemini returned no image part. Parts:', parts.map((p: any) => p.text ? 'text' : p.inlineData?.mimeType ?? 'unknown'))
+            }
+
+            if (imagePart?.inlineData?.data) {
+              const imageBuffer = Buffer.from(imagePart.inlineData.data, 'base64')
+              const optimized = await sharp(imageBuffer)
+                .resize(cfg.width || 1200, cfg.height || 675, { fit: 'cover' })
+                .webp({ quality: 85 })
+                .toBuffer()
+
+              const filename = `${slug}-titelbild.webp`
+              imageUrl = await uploadBufferToR2(optimized, filename)
+              console.log('[admin/publish] Image uploaded:', imageUrl)
+            }
           }
         }
       } catch (err: any) {
