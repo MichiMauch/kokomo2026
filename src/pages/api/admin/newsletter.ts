@@ -170,8 +170,8 @@ export const POST: APIRoute = async ({ request }) => {
       )
     }
 
-    const BATCH_SIZE = 10
-    const BATCH_DELAY_MS = 100
+    const SEND_DELAY_MS = 1500 // 1.5s between emails to avoid Resend rate limits
+    const MAX_RETRIES = 2
     let successCount = 0
     const sentRecipients: { email: string; resendEmailId: string | null }[] = []
 
@@ -209,10 +209,11 @@ export const POST: APIRoute = async ({ request }) => {
         }
       }
 
-      for (let i = 0; i < subscribers.length; i += BATCH_SIZE) {
-        const batch = subscribers.slice(i, i + BATCH_SIZE)
-        const results = await Promise.allSettled(
-          batch.map(async (sub) => {
+      for (let i = 0; i < subscribers.length; i++) {
+        const sub = subscribers[i]
+        let sent = false
+        for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+          try {
             const result = await sendMultiBlockNewsletterEmail({
               email: sub.email,
               unsubscribeToken: sub.token,
@@ -220,18 +221,22 @@ export const POST: APIRoute = async ({ request }) => {
               blocks: typedBlocks,
               postsMap,
             })
-            return { email: sub.email, resendEmailId: result.resendEmailId }
-          }),
-        )
-        for (const r of results) {
-          if (r.status === 'fulfilled') {
             successCount++
-            sentRecipients.push(r.value)
+            sentRecipients.push({ email: sub.email, resendEmailId: result.resendEmailId })
+            sent = true
+            break
+          } catch (err: any) {
+            const isRateLimit = err?.statusCode === 429 || err?.message?.includes('rate')
+            if (isRateLimit && attempt < MAX_RETRIES) {
+              await new Promise((resolve) => setTimeout(resolve, 3000 * (attempt + 1)))
+            } else {
+              console.error(`[newsletter] Failed to send to ${sub.email}:`, err?.message)
+              break
+            }
           }
         }
-
-        if (i + BATCH_SIZE < subscribers.length) {
-          await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS))
+        if (i < subscribers.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, SEND_DELAY_MS))
         }
       }
 
@@ -273,10 +278,10 @@ export const POST: APIRoute = async ({ request }) => {
       })
     }
 
-    for (let i = 0; i < subscribers.length; i += BATCH_SIZE) {
-      const batch = subscribers.slice(i, i + BATCH_SIZE)
-      const results = await Promise.allSettled(
-        batch.map(async (sub) => {
+    for (let i = 0; i < subscribers.length; i++) {
+      const sub = subscribers[i]
+      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        try {
           const result = await sendNewsletterEmail({
             email: sub.email,
             unsubscribeToken: sub.token,
@@ -286,18 +291,21 @@ export const POST: APIRoute = async ({ request }) => {
             postSummary: post.data.summary ?? '',
             postDate: post.data.date.toISOString().split('T')[0],
           })
-          return { email: sub.email, resendEmailId: result.resendEmailId }
-        }),
-      )
-      for (const r of results) {
-        if (r.status === 'fulfilled') {
           successCount++
-          sentRecipients.push(r.value)
+          sentRecipients.push({ email: sub.email, resendEmailId: result.resendEmailId })
+          break
+        } catch (err: any) {
+          const isRateLimit = err?.statusCode === 429 || err?.message?.includes('rate')
+          if (isRateLimit && attempt < MAX_RETRIES) {
+            await new Promise((resolve) => setTimeout(resolve, 3000 * (attempt + 1)))
+          } else {
+            console.error(`[newsletter] Failed to send to ${sub.email}:`, err?.message)
+            break
+          }
         }
       }
-
-      if (i + BATCH_SIZE < subscribers.length) {
-        await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS))
+      if (i < subscribers.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, SEND_DELAY_MS))
       }
     }
 
