@@ -1,17 +1,11 @@
 ---
-title: Wasserverbrauch in einem Jahr - Die Zahlen
+title: 'Wasserverbrauch in einem Jahr - Die Zahlen'
 date: '2025-02-26'
-tags:
-  - wasser
-  - verbrauch
-  - ressourcen sparen
-authors:
-  - default
-summary: >-
-  Jeden Januar hält bei uns eine besondere Rechnung Einzug: die Wasser- und
-  Abwasserabrechnung.
+summary: 'Jeden Januar hält bei uns eine besondere Rechnung Einzug: die Wasser- und Abwasserabrechnung.'
+tags: ['wasser', 'verbrauch', 'ressourcen sparen']
+authors: ['default']
 draft: false
-images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/wasseruhr.webp'
+images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/wasserverbrauch-im-2024---immer-wieder-spannend-titelbild.webp?v=1773162724932'
 ---
 
 Jeden Januar hält bei uns eine besondere Rechnung Einzug: die Wasser- und Abwasserabrechnung. Das ist für uns noch ungewohnt, denn in früheren Mietwohnungen war Wasser einfach in den Nebenkosten enthalten – ohne dass wir eine detaillierte Übersicht über unseren tatsächlichen Verbrauch hatten. Jetzt ist das anders: Wir sehen genau, wie viel Wasser wir benötigen, und unser Ergebnis überrascht uns selbst.
