@@ -390,6 +390,26 @@ export async function getRecipientsForSend(sendId: number): Promise<NewsletterRe
   }))
 }
 
+export async function getFailedRecipientsForSend(sendId: number): Promise<{ email: string; token: string }[]> {
+  const db = getClient()
+  const result = await db.execute({
+    sql: `SELECT s.email, s.token
+          FROM newsletter_recipients nr
+          JOIN subscribers s ON s.email = nr.email AND s.status = 'confirmed'
+          WHERE nr.send_id = ? AND nr.resend_email_id IS NULL`,
+    args: [sendId],
+  })
+  return result.rows.map((row) => ({ email: row.email as string, token: row.token as string }))
+}
+
+export async function updateRecipientResendId(sendId: number, email: string, resendEmailId: string): Promise<void> {
+  const db = getClient()
+  await db.execute({
+    sql: 'UPDATE newsletter_recipients SET resend_email_id = ?, status = ? WHERE send_id = ? AND email = ?',
+    args: [resendEmailId, 'sent', sendId, email],
+  })
+}
+
 export async function getLinkClicksForSend(sendId: number): Promise<LinkClickStats[]> {
   const db = getClient()
 

@@ -8,6 +8,8 @@ import {
   recordNewsletterSend,
   recordNewsletterRecipientsBatch,
   getRecipientsForSend,
+  getFailedRecipientsForSend,
+  updateRecipientResendId,
   getLinkClicksForSend,
   getOverallNewsletterStats,
   deleteSubscriber,
@@ -145,6 +147,76 @@ export const POST: APIRoute = async ({ request }) => {
       }
 
       return new Response(JSON.stringify({ ok: true, sent: 1, testEmail }), { status: 200, headers })
+    }
+
+    // ─── Retry failed recipients for a send ───
+    if (action === 'retry-failed') {
+      const { sendId, blocks: retryBlocks, subject: retrySubject } = body
+      if (!sendId || !retryBlocks || !retrySubject) {
+        return new Response(JSON.stringify({ error: 'sendId, subject und blocks sind erforderlich.' }), { status: 400, headers })
+      }
+
+      const failedRecipients = await getFailedRecipientsForSend(sendId)
+      if (failedRecipients.length === 0) {
+        return new Response(JSON.stringify({ ok: true, sent: 0, message: 'Keine fehlgeschlagenen Empfänger gefunden.' }), { status: 200, headers })
+      }
+
+      const typedBlocks = retryBlocks as NewsletterBlock[]
+      const slugs = new Set<string>()
+      for (const block of typedBlocks) {
+        if (block.type === 'hero' || block.type === 'article') slugs.add(block.slug)
+        if (block.type === 'two-column') { slugs.add(block.slugLeft); slugs.add(block.slugRight) }
+      }
+
+      const allPosts = await getCollection('posts')
+      const postsMap: Record<string, PostRef> = {}
+      for (const slug of slugs) {
+        const post = allPosts.find((p) => p.id === slug || p.id.replace(/\.md$/, '') === slug)
+        if (post) {
+          postsMap[slug] = {
+            slug: post.id, title: post.data.title, summary: post.data.summary ?? '',
+            image: getFirstImage(post.data.images), date: post.data.date.toISOString().split('T')[0],
+          }
+        }
+      }
+
+      const SEND_DELAY_MS = 1500
+      const MAX_RETRIES = 2
+      let retrySent = 0
+
+      for (let i = 0; i < failedRecipients.length; i++) {
+        const sub = failedRecipients[i]
+        for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+          try {
+            const result = await sendMultiBlockNewsletterEmail({
+              email: sub.email,
+              unsubscribeToken: sub.token,
+              subject: retrySubject,
+              blocks: typedBlocks,
+              postsMap,
+            })
+            await updateRecipientResendId(sendId, sub.email, result.resendEmailId ?? '')
+            retrySent++
+            break
+          } catch (err: any) {
+            const isRateLimit = err?.statusCode === 429 || err?.message?.includes('rate')
+            if (isRateLimit && attempt < MAX_RETRIES) {
+              await new Promise((resolve) => setTimeout(resolve, 3000 * (attempt + 1)))
+            } else {
+              console.error(`[newsletter retry] Failed to send to ${sub.email}:`, err?.message)
+              break
+            }
+          }
+        }
+        if (i < failedRecipients.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, SEND_DELAY_MS))
+        }
+      }
+
+      return new Response(
+        JSON.stringify({ ok: true, sent: retrySent, total: failedRecipients.length }),
+        { status: 200, headers },
+      )
     }
 
     if (action === 'delete') {

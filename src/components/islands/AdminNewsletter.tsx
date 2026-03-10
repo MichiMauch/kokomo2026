@@ -35,6 +35,7 @@ interface NewsletterSend {
 interface NewsletterRecipientRow {
   id: number
   email: string
+  resend_email_id: string | null
   status: 'sent' | 'delivered' | 'opened' | 'clicked' | 'bounced' | 'complained'
   delivered_at: string | null
   opened_at: string | null
@@ -831,6 +832,7 @@ export default function AdminNewsletter() {
   const [sendRecipients, setSendRecipients] = useState<NewsletterRecipientRow[]>([])
   const [sendLinkClicks, setSendLinkClicks] = useState<LinkClickRow[]>([])
   const [loadingDetail, setLoadingDetail] = useState(false)
+  const [retrying, setRetrying] = useState(false)
 
   // Settings state
   const [generatorPrompt, setGeneratorPrompt] = useState('')
@@ -876,6 +878,40 @@ export default function AdminNewsletter() {
       console.error('Failed to load send detail:', err)
     }
     setLoadingDetail(false)
+  }
+
+  async function handleRetryFailed(send: NewsletterSend) {
+    const failedCount = sendRecipients.filter((r) => !r.resend_email_id).length
+    if (failedCount === 0) {
+      setToast({ type: 'info', message: 'Keine fehlgeschlagenen Empfänger.' })
+      return
+    }
+    if (!confirm(`${failedCount} fehlgeschlagene Empfänger nochmal senden?`)) return
+
+    setRetrying(true)
+    try {
+      const res = await fetch('/api/admin/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'retry-failed',
+          sendId: send.id,
+          subject: send.subject,
+          blocks,
+        }),
+      })
+      const json = await res.json()
+      if (json.error) {
+        setToast({ type: 'error', message: json.error })
+      } else {
+        setToast({ type: 'success', message: `${json.sent} von ${json.total} erfolgreich nachgesendet.` })
+        await loadSendDetail(send)
+        await loadData()
+      }
+    } catch (err) {
+      setToast({ type: 'error', message: 'Nachversand fehlgeschlagen.' })
+    }
+    setRetrying(false)
   }
 
   useEffect(() => {
@@ -1526,9 +1562,22 @@ export default function AdminNewsletter() {
               </button>
 
               <div className="glass-card rounded-2xl p-5">
-                <h3 className="text-lg font-semibold text-[var(--text)]">{selectedSend.subject}</h3>
-                <div className="mt-1 text-sm text-[var(--text-secondary)]">
-                  {formatDate(selectedSend.sent_at)} · {selectedSend.recipient_count} Empfänger
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-[var(--text)]">{selectedSend.subject}</h3>
+                    <div className="mt-1 text-sm text-[var(--text-secondary)]">
+                      {formatDate(selectedSend.sent_at)} · {selectedSend.recipient_count} Empfänger
+                    </div>
+                  </div>
+                  {!loadingDetail && sendRecipients.filter((r) => !r.resend_email_id).length > 0 && (
+                    <button
+                      onClick={() => handleRetryFailed(selectedSend)}
+                      disabled={retrying || blocks.length === 0}
+                      className="shrink-0 rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-50 transition-colors"
+                    >
+                      {retrying ? 'Wird gesendet…' : `${sendRecipients.filter((r) => !r.resend_email_id).length} fehlgeschlagene nochmal senden`}
+                    </button>
+                  )}
                 </div>
               </div>
 
