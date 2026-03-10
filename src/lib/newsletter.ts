@@ -174,15 +174,24 @@ export async function recordNewsletterSend(data: {
   post_title: string
   subject: string
   recipient_count: number
+  blocks_json?: string
 }): Promise<number> {
   const db = getClient()
 
   const result = await db.execute({
-    sql: `INSERT INTO newsletter_sends (post_slug, post_title, subject, recipient_count) VALUES (?, ?, ?, ?)`,
-    args: [data.post_slug, data.post_title, data.subject, data.recipient_count],
+    sql: `INSERT INTO newsletter_sends (post_slug, post_title, subject, recipient_count, blocks_json) VALUES (?, ?, ?, ?, ?)`,
+    args: [data.post_slug, data.post_title, data.subject, data.recipient_count, data.blocks_json ?? null],
   })
 
   return Number(result.lastInsertRowid)
+}
+
+export async function getSendForRetry(sendId: number): Promise<{ subject: string; blocks_json: string } | null> {
+  const db = getClient()
+  const result = await db.execute({ sql: 'SELECT subject, blocks_json FROM newsletter_sends WHERE id = ?', args: [sendId] })
+  const row = result.rows[0]
+  if (!row || !row.blocks_json) return null
+  return { subject: row.subject as string, blocks_json: row.blocks_json as string }
 }
 
 export async function getNewsletterSends(): Promise<NewsletterSend[]> {

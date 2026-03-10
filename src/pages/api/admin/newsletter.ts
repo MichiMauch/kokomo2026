@@ -10,6 +10,7 @@ import {
   getRecipientsForSend,
   getFailedRecipientsForSend,
   updateRecipientResendId,
+  getSendForRetry,
   getLinkClicksForSend,
   getOverallNewsletterStats,
   deleteSubscriber,
@@ -151,9 +152,14 @@ export const POST: APIRoute = async ({ request }) => {
 
     // ─── Retry failed recipients for a send ───
     if (action === 'retry-failed') {
-      const { sendId, blocks: retryBlocks, subject: retrySubject } = body
-      if (!sendId || !retryBlocks || !retrySubject) {
-        return new Response(JSON.stringify({ error: 'sendId, subject und blocks sind erforderlich.' }), { status: 400, headers })
+      const { sendId } = body
+      if (!sendId) {
+        return new Response(JSON.stringify({ error: 'sendId ist erforderlich.' }), { status: 400, headers })
+      }
+
+      const sendData = await getSendForRetry(sendId)
+      if (!sendData) {
+        return new Response(JSON.stringify({ error: 'Keine Blocks für diesen Versand gespeichert.' }), { status: 400, headers })
       }
 
       const failedRecipients = await getFailedRecipientsForSend(sendId)
@@ -161,7 +167,8 @@ export const POST: APIRoute = async ({ request }) => {
         return new Response(JSON.stringify({ ok: true, sent: 0, message: 'Keine fehlgeschlagenen Empfänger gefunden.' }), { status: 200, headers })
       }
 
-      const typedBlocks = retryBlocks as NewsletterBlock[]
+      const retrySubject = sendData.subject
+      const typedBlocks = JSON.parse(sendData.blocks_json) as NewsletterBlock[]
       const slugs = new Set<string>()
       for (const block of typedBlocks) {
         if (block.type === 'hero' || block.type === 'article') slugs.add(block.slug)
@@ -320,6 +327,7 @@ export const POST: APIRoute = async ({ request }) => {
         post_title: firstPost?.title ?? subject,
         subject,
         recipient_count: successCount,
+        blocks_json: JSON.stringify(typedBlocks),
       })
 
       // Record recipients with resend email IDs
@@ -386,6 +394,7 @@ export const POST: APIRoute = async ({ request }) => {
       post_title: post.data.title,
       subject,
       recipient_count: successCount,
+      blocks_json: JSON.stringify([{ type: 'hero', slug: post.id }]),
     })
 
     // Record recipients with resend email IDs

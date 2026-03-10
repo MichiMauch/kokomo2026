@@ -896,8 +896,6 @@ export default function AdminNewsletter() {
         body: JSON.stringify({
           action: 'retry-failed',
           sendId: send.id,
-          subject: send.subject,
-          blocks,
         }),
       })
       const json = await res.json()
@@ -1572,7 +1570,7 @@ export default function AdminNewsletter() {
                   {!loadingDetail && sendRecipients.filter((r) => !r.resend_email_id).length > 0 && (
                     <button
                       onClick={() => handleRetryFailed(selectedSend)}
-                      disabled={retrying || blocks.length === 0}
+                      disabled={retrying}
                       className="shrink-0 rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-50 transition-colors"
                     >
                       {retrying ? 'Wird gesendet…' : `${sendRecipients.filter((r) => !r.resend_email_id).length} fehlgeschlagene nochmal senden`}
