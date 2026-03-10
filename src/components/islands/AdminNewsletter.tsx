@@ -833,6 +833,7 @@ export default function AdminNewsletter() {
   const [sendLinkClicks, setSendLinkClicks] = useState<LinkClickRow[]>([])
   const [loadingDetail, setLoadingDetail] = useState(false)
   const [retrying, setRetrying] = useState(false)
+  const [retryConfirm, setRetryConfirm] = useState(false)
 
   // Settings state
   const [generatorPrompt, setGeneratorPrompt] = useState('')
@@ -886,8 +887,12 @@ export default function AdminNewsletter() {
       setToast({ type: 'info', message: 'Keine fehlgeschlagenen Empfänger.' })
       return
     }
-    if (!confirm(`${failedCount} fehlgeschlagene Empfänger nochmal senden?`)) return
 
+    if (!retryConfirm) {
+      setRetryConfirm(true)
+      return
+    }
+    setRetryConfirm(false)
     setRetrying(true)
     try {
       const res = await fetch('/api/admin/newsletter', {
@@ -1568,13 +1573,27 @@ export default function AdminNewsletter() {
                     </div>
                   </div>
                   {!loadingDetail && sendRecipients.filter((r) => !r.resend_email_id).length > 0 && (
-                    <button
-                      onClick={() => handleRetryFailed(selectedSend)}
-                      disabled={retrying}
-                      className="shrink-0 rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-50 transition-colors"
-                    >
-                      {retrying ? 'Wird gesendet…' : `${sendRecipients.filter((r) => !r.resend_email_id).length} fehlgeschlagene nochmal senden`}
-                    </button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {retryConfirm && !retrying && (
+                        <button
+                          onClick={() => setRetryConfirm(false)}
+                          className="rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] transition-colors"
+                        >
+                          Abbrechen
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleRetryFailed(selectedSend)}
+                        disabled={retrying}
+                        className={`rounded-full px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 transition-colors ${retryConfirm ? 'bg-red-500 hover:bg-red-600' : 'bg-amber-500 hover:bg-amber-600'}`}
+                      >
+                        {retrying
+                          ? 'Wird gesendet…'
+                          : retryConfirm
+                            ? `Jetzt ${sendRecipients.filter((r) => !r.resend_email_id).length} Emails senden?`
+                            : `${sendRecipients.filter((r) => !r.resend_email_id).length} fehlgeschlagene nochmal senden`}
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>

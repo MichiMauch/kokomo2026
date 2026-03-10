@@ -404,7 +404,7 @@ export async function getFailedRecipientsForSend(sendId: number): Promise<{ emai
   const result = await db.execute({
     sql: `SELECT s.email, s.token
           FROM newsletter_recipients nr
-          JOIN subscribers s ON s.email = nr.email AND s.status = 'confirmed'
+          JOIN newsletter_subscribers s ON s.email = nr.email AND s.status = 'confirmed'
           WHERE nr.send_id = ? AND nr.resend_email_id IS NULL`,
     args: [sendId],
   })
