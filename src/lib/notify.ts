@@ -214,11 +214,11 @@ export async function sendNewsletterEmail(data: {
   postImage: string | null
   postSummary: string
   postDate: string
-}) {
+}): Promise<{ resendEmailId: string | null }> {
   const postUrl = `${siteConfig.siteUrl}/tiny-house/${data.postSlug}/`
   const unsubscribeUrl = `${siteConfig.siteUrl}/unsubscribe?token=${data.unsubscribeToken}`
 
-  await resend.emails.send({
+  const result = await resend.emails.send({
     from: fromEmail(),
     to: data.email,
     subject: data.postTitle,
@@ -236,6 +236,8 @@ export async function sendNewsletterEmail(data: {
       'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
     },
   })
+
+  return { resendEmailId: result.data?.id ?? null }
 }
 
 // ─── Newsletter: Multi-Block Newsletter ────────────────────────────────
@@ -246,17 +248,24 @@ export async function sendMultiBlockNewsletterEmail(data: {
   subject: string
   blocks: NewsletterBlock[]
   postsMap: Record<string, PostRef>
-}) {
+}): Promise<{ resendEmailId: string | null }> {
   const unsubscribeUrl = `${siteConfig.siteUrl}/unsubscribe?token=${data.unsubscribeToken}`
 
-  await resend.emails.send({
-    from: fromEmail(),
-    to: data.email,
-    subject: data.subject,
-    html: buildMultiBlockNewsletterHtml(data.blocks, data.postsMap, siteConfig.siteUrl, unsubscribeUrl),
-    headers: {
-      'List-Unsubscribe': `<${unsubscribeUrl}>`,
-      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
-    },
-  })
+  try {
+    const result = await resend.emails.send({
+      from: fromEmail(),
+      to: data.email,
+      subject: data.subject,
+      html: buildMultiBlockNewsletterHtml(data.blocks, data.postsMap, siteConfig.siteUrl, unsubscribeUrl),
+      headers: {
+        'List-Unsubscribe': `<${unsubscribeUrl}>`,
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+      },
+    })
+
+    return { resendEmailId: result.data?.id ?? null }
+  } catch (err) {
+    console.error(`[notify] Failed to send multi-block newsletter to ${data.email}:`, err)
+    throw err
+  }
 }

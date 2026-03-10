@@ -1,6 +1,6 @@
 /**
  * Client-side image compression using Canvas API
- * Used by AdminContent and AdminImages islands
+ * Used by AdminContent and AdminPostDetail islands
  */
 
 export async function compressImage(

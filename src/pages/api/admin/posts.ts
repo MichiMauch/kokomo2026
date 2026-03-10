@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro'
 import { isAuthenticated } from '../../../lib/admin-auth'
-import { getFileContent, updateFile } from '../../../lib/github'
+import { getFileContent, updateFile, deleteFile } from '../../../lib/github'
 import { parse as parseYaml } from 'yaml'
 
 export const prerender = false
@@ -114,6 +114,30 @@ export const PUT: APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({ success: true, slug }), { status: 200, headers })
   } catch (err: any) {
     console.error('[admin/posts PUT]', err)
+    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers })
+  }
+}
+
+/**
+ * DELETE — Delete a post by slug
+ */
+export const DELETE: APIRoute = async ({ request }) => {
+  if (!(await isAuthenticated(request))) {
+    return new Response(JSON.stringify({ error: 'Nicht autorisiert.' }), { status: 401, headers })
+  }
+
+  try {
+    const { slug } = await request.json()
+    if (!slug) {
+      return new Response(JSON.stringify({ error: 'Slug fehlt' }), { status: 400, headers })
+    }
+
+    const filePath = `src/content/posts/${slug}.md`
+    await deleteFile(filePath, `🗑️ Post gelöscht: ${slug}`)
+
+    return new Response(JSON.stringify({ success: true, slug }), { status: 200, headers })
+  } catch (err: any) {
+    console.error('[admin/posts DELETE]', err)
     return new Response(JSON.stringify({ error: err.message }), { status: 500, headers })
   }
 }

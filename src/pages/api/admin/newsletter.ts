@@ -4,7 +4,12 @@ import {
   getAllSubscribers,
   getConfirmedSubscribers,
   getNewsletterSends,
+  getNewsletterSendsWithStats,
   recordNewsletterSend,
+  recordNewsletterRecipientsBatch,
+  getRecipientsForSend,
+  getLinkClicksForSend,
+  getOverallNewsletterStats,
   deleteSubscriber,
 } from '../../../lib/newsletter'
 import { sendNewsletterEmail, sendMultiBlockNewsletterEmail } from '../../../lib/notify'
@@ -29,8 +34,29 @@ export const GET: APIRoute = async ({ request }) => {
   try {
     const url = new URL(request.url)
     const includePosts = url.searchParams.get('posts') === '1'
+    const includeStats = url.searchParams.get('stats') === '1'
+    const sendDetailId = url.searchParams.get('sendDetail')
 
-    const [subscribers, sends] = await Promise.all([getAllSubscribers(), getNewsletterSends()])
+    // If requesting detail for a specific send
+    if (sendDetailId) {
+      const id = parseInt(sendDetailId, 10)
+      if (isNaN(id)) {
+        return new Response(JSON.stringify({ error: 'Ungültige sendDetail ID.' }), { status: 400, headers })
+      }
+      const [recipients, linkClicks] = await Promise.all([
+        getRecipientsForSend(id),
+        getLinkClicksForSend(id),
+      ])
+      return new Response(
+        JSON.stringify({ sendDetail: { recipients, linkClicks } }),
+        { status: 200, headers },
+      )
+    }
+
+    const [subscribers, sends] = await Promise.all([
+      getAllSubscribers(),
+      includeStats ? getNewsletterSendsWithStats() : getNewsletterSends(),
+    ])
 
     let posts: any[] = []
     if (includePosts) {
@@ -47,7 +73,12 @@ export const GET: APIRoute = async ({ request }) => {
         }))
     }
 
-    return new Response(JSON.stringify({ subscribers, sends, posts }), { status: 200, headers })
+    const response: any = { subscribers, sends, posts }
+    if (includeStats) {
+      response.overallStats = await getOverallNewsletterStats()
+    }
+
+    return new Response(JSON.stringify(response), { status: 200, headers })
   } catch (err: any) {
     console.error('[admin/newsletter GET]', err)
     return new Response(
@@ -94,6 +125,7 @@ export const POST: APIRoute = async ({ request }) => {
     const BATCH_SIZE = 10
     const BATCH_DELAY_MS = 100
     let successCount = 0
+    const sentRecipients: { email: string; resendEmailId: string | null }[] = []
 
     // ─── Multi-Block path ───
     if (blocks && Array.isArray(blocks) && blocks.length > 0) {
@@ -113,7 +145,7 @@ export const POST: APIRoute = async ({ request }) => {
       const allPosts = await getCollection('posts')
       const postsMap: Record<string, PostRef> = {}
       for (const slug of slugs) {
-        const post = allPosts.find((p) => p.id === slug)
+        const post = allPosts.find((p) => p.id === slug || p.id.replace(/\.md$/, '') === slug)
         if (!post) {
           return new Response(
             JSON.stringify({ error: `Blogpost "${slug}" nicht gefunden.` }),
@@ -132,17 +164,23 @@ export const POST: APIRoute = async ({ request }) => {
       for (let i = 0; i < subscribers.length; i += BATCH_SIZE) {
         const batch = subscribers.slice(i, i + BATCH_SIZE)
         const results = await Promise.allSettled(
-          batch.map((sub) =>
-            sendMultiBlockNewsletterEmail({
+          batch.map(async (sub) => {
+            const result = await sendMultiBlockNewsletterEmail({
               email: sub.email,
               unsubscribeToken: sub.token,
               subject,
               blocks: typedBlocks,
               postsMap,
-            }),
-          ),
+            })
+            return { email: sub.email, resendEmailId: result.resendEmailId }
+          }),
         )
-        successCount += results.filter((r) => r.status === 'fulfilled').length
+        for (const r of results) {
+          if (r.status === 'fulfilled') {
+            successCount++
+            sentRecipients.push(r.value)
+          }
+        }
 
         if (i + BATCH_SIZE < subscribers.length) {
           await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS))
@@ -152,12 +190,17 @@ export const POST: APIRoute = async ({ request }) => {
       // Use first post slug for record, or 'multi-block'
       const firstSlug = slugs.size > 0 ? [...slugs][0] : 'multi-block'
       const firstPost = postsMap[firstSlug]
-      await recordNewsletterSend({
+      const sendId = await recordNewsletterSend({
         post_slug: firstSlug,
         post_title: firstPost?.title ?? subject,
         subject,
         recipient_count: successCount,
       })
+
+      // Record recipients with resend email IDs
+      await recordNewsletterRecipientsBatch(
+        sentRecipients.map((r) => ({ send_id: sendId, email: r.email, resend_email_id: r.resendEmailId })),
+      )
 
       return new Response(
         JSON.stringify({ ok: true, sent: successCount, total: subscribers.length }),
@@ -174,7 +217,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     const allPosts = await getCollection('posts')
-    const post = allPosts.find((p) => p.id === postSlug)
+    const post = allPosts.find((p) => p.id === postSlug || p.id.replace(/\.md$/, '') === postSlug)
     if (!post) {
       return new Response(JSON.stringify({ error: 'Blogpost nicht gefunden.' }), {
         status: 404,
@@ -185,8 +228,8 @@ export const POST: APIRoute = async ({ request }) => {
     for (let i = 0; i < subscribers.length; i += BATCH_SIZE) {
       const batch = subscribers.slice(i, i + BATCH_SIZE)
       const results = await Promise.allSettled(
-        batch.map((sub) =>
-          sendNewsletterEmail({
+        batch.map(async (sub) => {
+          const result = await sendNewsletterEmail({
             email: sub.email,
             unsubscribeToken: sub.token,
             postTitle: post.data.title,
@@ -194,22 +237,33 @@ export const POST: APIRoute = async ({ request }) => {
             postImage: getFirstImage(post.data.images),
             postSummary: post.data.summary ?? '',
             postDate: post.data.date.toISOString().split('T')[0],
-          }),
-        ),
+          })
+          return { email: sub.email, resendEmailId: result.resendEmailId }
+        }),
       )
-      successCount += results.filter((r) => r.status === 'fulfilled').length
+      for (const r of results) {
+        if (r.status === 'fulfilled') {
+          successCount++
+          sentRecipients.push(r.value)
+        }
+      }
 
       if (i + BATCH_SIZE < subscribers.length) {
         await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS))
       }
     }
 
-    await recordNewsletterSend({
+    const sendId = await recordNewsletterSend({
       post_slug: post.id,
       post_title: post.data.title,
       subject,
       recipient_count: successCount,
     })
+
+    // Record recipients with resend email IDs
+    await recordNewsletterRecipientsBatch(
+      sentRecipients.map((r) => ({ send_id: sendId, email: r.email, resend_email_id: r.resendEmailId })),
+    )
 
     return new Response(
       JSON.stringify({ ok: true, sent: successCount, total: subscribers.length }),

@@ -108,6 +108,21 @@ export async function getFileSha(path: string): Promise<string> {
 }
 
 /**
+ * Delete a file via GitHub Contents API DELETE
+ */
+export async function deleteFile(path: string, commitMessage: string): Promise<void> {
+  const sha = await getFileSha(path)
+  const res = await apiRequest(`contents/${path}`, {
+    method: 'DELETE',
+    body: JSON.stringify({ message: commitMessage, sha, branch: getConfig().branch }),
+  })
+  if (!res.ok) {
+    const err = await res.text()
+    throw new Error(`GitHub delete file failed: ${res.status} — ${err}`)
+  }
+}
+
+/**
  * Update an existing file via PUT (requires SHA)
  */
 export async function updateFile(

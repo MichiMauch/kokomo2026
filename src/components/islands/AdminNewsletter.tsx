@@ -25,6 +25,40 @@ interface NewsletterSend {
   subject: string
   sent_at: string
   recipient_count: number
+  delivered_count?: number
+  opened_count?: number
+  clicked_count?: number
+  bounced_count?: number
+  complained_count?: number
+}
+
+interface NewsletterRecipientRow {
+  id: number
+  email: string
+  status: 'sent' | 'delivered' | 'opened' | 'clicked' | 'bounced' | 'complained'
+  delivered_at: string | null
+  opened_at: string | null
+  open_count: number
+  clicked_at: string | null
+  click_count: number
+  bounced_at: string | null
+  bounce_type: string | null
+  complained_at: string | null
+}
+
+interface LinkClickRow {
+  url: string
+  click_count: number
+  unique_clickers: number
+}
+
+interface OverallStatsData {
+  total_sends: number
+  total_recipients: number
+  avg_open_rate: number
+  avg_click_rate: number
+  avg_bounce_rate: number
+  total_complaints: number
 }
 
 interface Post {
@@ -759,16 +793,24 @@ export default function AdminNewsletter() {
   const [subject, setSubject] = useState('')
   const [generatingSubject, setGeneratingSubject] = useState(false)
   const [sending, setSending] = useState(false)
-  const [sendResult, setSendResult] = useState<{ ok: boolean; message: string } | null>(null)
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
   const [showPreview, setShowPreview] = useState(false)
+  const [confirmSend, setConfirmSend] = useState(false)
+  const [confirmAction, setConfirmAction] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null)
   const [customTemplates, setCustomTemplates] = useState<NewsletterTemplate[]>([])
+
+  // Reporting state
+  const [overallStats, setOverallStats] = useState<OverallStatsData | null>(null)
+  const [selectedSend, setSelectedSend] = useState<NewsletterSend | null>(null)
+  const [sendRecipients, setSendRecipients] = useState<NewsletterRecipientRow[]>([])
+  const [sendLinkClicks, setSendLinkClicks] = useState<LinkClickRow[]>([])
+  const [loadingDetail, setLoadingDetail] = useState(false)
 
   // Settings state
   const [generatorPrompt, setGeneratorPrompt] = useState('')
   const [reviewerPrompt, setReviewerPrompt] = useState('')
   const [promptsLoaded, setPromptsLoaded] = useState(false)
   const [savingPrompt, setSavingPrompt] = useState(false)
-  const [promptSaved, setPromptSaved] = useState(false)
 
   const confirmedCount = subscribers.filter((s) => s.status === 'confirmed').length
   const canSend = subject.trim() !== '' && blocksAreValid(blocks) && confirmedCount > 0
@@ -779,7 +821,7 @@ export default function AdminNewsletter() {
 
   async function loadData() {
     try {
-      const res = await fetch('/api/admin/newsletter?posts=1')
+      const res = await fetch('/api/admin/newsletter?posts=1&stats=1')
       if (res.status === 401) {
         setPhase('login')
         return
@@ -788,15 +830,37 @@ export default function AdminNewsletter() {
       setSubscribers(data.subscribers || [])
       setSends(data.sends || [])
       setPosts(data.posts || [])
+      setOverallStats(data.overallStats || null)
       setPhase('loaded')
     } catch {
       setPhase('login')
     }
   }
 
+  async function loadSendDetail(send: NewsletterSend) {
+    setSelectedSend(send)
+    setLoadingDetail(true)
+    try {
+      const res = await fetch(`/api/admin/newsletter?sendDetail=${send.id}`)
+      const json = await res.json()
+      setSendRecipients(json.sendDetail?.recipients ?? [])
+      setSendLinkClicks(json.sendDetail?.linkClicks ?? [])
+    } catch (err) {
+      console.error('Failed to load send detail:', err)
+    }
+    setLoadingDetail(false)
+  }
+
   useEffect(() => {
     loadData()
   }, [])
+
+  // Toast auto-dismiss
+  useEffect(() => {
+    if (!toast) return
+    const timer = setTimeout(() => setToast(null), 8000)
+    return () => clearTimeout(timer)
+  }, [toast])
 
   async function loadPrompts() {
     try {
@@ -818,7 +882,6 @@ export default function AdminNewsletter() {
 
   async function savePrompts() {
     setSavingPrompt(true)
-    setPromptSaved(false)
     try {
       const [genRes, revRes] = await Promise.all([
         fetch('/api/admin/settings', {
@@ -832,8 +895,14 @@ export default function AdminNewsletter() {
           body: JSON.stringify({ key: 'subject_prompt_reviewer', value: reviewerPrompt }),
         }),
       ])
-      if (genRes.ok && revRes.ok) setPromptSaved(true)
-    } catch { /* ignore */ }
+      if (genRes.ok && revRes.ok) {
+        setToast({ type: 'success', message: 'Prompts gespeichert.' })
+      } else {
+        setToast({ type: 'error', message: 'Fehler beim Speichern der Prompts.' })
+      }
+    } catch {
+      setToast({ type: 'error', message: 'Verbindung fehlgeschlagen.' })
+    }
     setSavingPrompt(false)
   }
 
@@ -841,7 +910,6 @@ export default function AdminNewsletter() {
     setGeneratorPrompt('')
     setReviewerPrompt('')
     setSavingPrompt(true)
-    setPromptSaved(false)
     try {
       const [genRes, revRes] = await Promise.all([
         fetch('/api/admin/settings', {
@@ -855,8 +923,14 @@ export default function AdminNewsletter() {
           body: JSON.stringify({ key: 'subject_prompt_reviewer', value: '' }),
         }),
       ])
-      if (genRes.ok && revRes.ok) setPromptSaved(true)
-    } catch { /* ignore */ }
+      if (genRes.ok && revRes.ok) {
+        setToast({ type: 'success', message: 'Prompts zurückgesetzt.' })
+      } else {
+        setToast({ type: 'error', message: 'Fehler beim Zurücksetzen.' })
+      }
+    } catch {
+      setToast({ type: 'error', message: 'Verbindung fehlgeschlagen.' })
+    }
     setSavingPrompt(false)
   }
 
@@ -864,7 +938,6 @@ export default function AdminNewsletter() {
     setSelectedTemplate(template)
     setBlocks(blocksFromTemplate(template))
     setSubject('')
-    setSendResult(null)
     setComposeMode('fill-slots')
   }
 
@@ -872,7 +945,6 @@ export default function AdminNewsletter() {
     setSelectedTemplate(null)
     setBlocks([])
     setSubject('')
-    setSendResult(null)
     setComposeMode('pick-template')
   }
 
@@ -939,22 +1011,27 @@ export default function AdminNewsletter() {
   }
 
   function handleDeleteCustomTemplate(id: string) {
-    if (!window.confirm('Template wirklich löschen?')) return
-    const updated = customTemplates.filter((t) => t.id !== id)
-    setCustomTemplates(updated)
-    saveCustomTemplates(updated)
+    setConfirmAction({
+      title: 'Template löschen',
+      message: 'Template wirklich löschen?',
+      onConfirm: () => {
+        setConfirmAction(null)
+        const updated = customTemplates.filter((t) => t.id !== id)
+        setCustomTemplates(updated)
+        saveCustomTemplates(updated)
+        setToast({ type: 'success', message: 'Template gelöscht.' })
+      },
+    })
   }
 
-  async function handleSend() {
+  function handleSendClick() {
     if (!canSend) return
+    setConfirmSend(true)
+  }
 
-    const confirmed = window.confirm(
-      `Newsletter "${subject}" an ${confirmedCount} Abonnent${confirmedCount !== 1 ? 'en' : ''} senden?`,
-    )
-    if (!confirmed) return
-
+  async function handleSendConfirmed() {
+    setConfirmSend(false)
     setSending(true)
-    setSendResult(null)
 
     try {
       const res = await fetch('/api/admin/newsletter', {
@@ -963,37 +1040,48 @@ export default function AdminNewsletter() {
         body: JSON.stringify({ action: 'send', subject, blocks }),
       })
       const data = await res.json()
+      console.log('[Newsletter] Send response:', { ok: res.ok, data })
       if (res.ok) {
-        setSendResult({ ok: true, message: `Erfolgreich an ${data.sent}/${data.total} versendet.` })
+        const msg = `Erfolgreich an ${data.sent}/${data.total} versendet.`
+        console.log('[Newsletter] Setting toast:', msg)
+        setToast({ type: 'success', message: msg })
         goBackToPicker()
         loadData()
       } else {
-        setSendResult({ ok: false, message: data.error || 'Fehler beim Versenden.' })
+        setToast({ type: 'error', message: data.error || 'Fehler beim Versenden.' })
       }
-    } catch {
-      setSendResult({ ok: false, message: 'Verbindung fehlgeschlagen.' })
+    } catch (err) {
+      console.error('[Newsletter] Send error:', err)
+      setToast({ type: 'error', message: 'Verbindung fehlgeschlagen.' })
     } finally {
       setSending(false)
     }
   }
 
-  async function handleDeleteSubscriber(id: number) {
-    if (!window.confirm('Abonnent wirklich löschen?')) return
-    try {
-      const res = await fetch('/api/admin/newsletter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'delete', subscriberId: id }),
-      })
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        setSendResult({ ok: false, message: data.error || 'Löschen fehlgeschlagen.' })
-        return
-      }
-      loadData()
-    } catch {
-      setSendResult({ ok: false, message: 'Verbindung fehlgeschlagen.' })
-    }
+  function handleDeleteSubscriber(id: number) {
+    setConfirmAction({
+      title: 'Abonnent löschen',
+      message: 'Abonnent wirklich löschen?',
+      onConfirm: async () => {
+        setConfirmAction(null)
+        try {
+          const res = await fetch('/api/admin/newsletter', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'delete', subscriberId: id }),
+          })
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}))
+            setToast({ type: 'error', message: data.error || 'Löschen fehlgeschlagen.' })
+            return
+          }
+          setToast({ type: 'success', message: 'Abonnent gelöscht.' })
+          loadData()
+        } catch {
+          setToast({ type: 'error', message: 'Verbindung fehlgeschlagen.' })
+        }
+      },
+    })
   }
 
   if (phase === 'checking') {
@@ -1190,7 +1278,7 @@ export default function AdminNewsletter() {
                   Vorschau
                 </button>
                 <button
-                  onClick={handleSend}
+                  onClick={handleSendClick}
                   disabled={sending || !canSend}
                   className="flex-1 rounded-full bg-primary-500 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-600 hover:shadow-md disabled:opacity-50"
                 >
@@ -1203,17 +1291,6 @@ export default function AdminNewsletter() {
             )
           })()}
 
-          {sendResult && (
-            <div
-              className={`rounded-xl border px-4 py-3 text-sm ${
-                sendResult.ok
-                  ? 'border-emerald-200/50 bg-emerald-50/60 text-emerald-700 dark:border-emerald-800/50 dark:bg-emerald-900/20 dark:text-emerald-300'
-                  : 'border-red-200/50 bg-red-50/60 text-red-700 dark:border-red-800/50 dark:bg-red-900/20 dark:text-red-300'
-              }`}
-            >
-              {sendResult.message}
-            </div>
-          )}
         </div>
       )}
 
@@ -1276,40 +1353,247 @@ export default function AdminNewsletter() {
         </div>
       )}
 
-      {/* ─── History Tab ─────────────────────────────────────────── */}
+      {/* ─── History / Reporting Tab ─────────────────────────────── */}
       {tab === 'history' && (
-        <div className="glass-card overflow-hidden rounded-2xl">
-          {sends.length === 0 ? (
-            <div className="px-6 py-12 text-center text-[var(--text-secondary)]">
-              Noch keine Newsletter versendet.
+        <div className="space-y-6">
+          {/* KPI Dashboard */}
+          {overallStats && overallStats.total_sends > 0 && (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <div className="glass-card rounded-2xl p-5 text-center">
+                <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                  {overallStats.avg_open_rate}%
+                </div>
+                <div className="mt-1 text-xs text-[var(--text-secondary)]">Ø Öffnungsrate</div>
+              </div>
+              <div className="glass-card rounded-2xl p-5 text-center">
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  {overallStats.avg_click_rate}%
+                </div>
+                <div className="mt-1 text-xs text-[var(--text-secondary)]">Ø Klickrate</div>
+              </div>
+              <div className="glass-card rounded-2xl p-5 text-center">
+                <div className={`text-2xl font-bold ${overallStats.avg_bounce_rate > 2 ? 'text-red-600 dark:text-red-400' : 'text-[var(--text)]'}`}>
+                  {overallStats.avg_bounce_rate}%
+                </div>
+                <div className="mt-1 text-xs text-[var(--text-secondary)]">Ø Bounce-Rate</div>
+              </div>
+              <div className="glass-card rounded-2xl p-5 text-center">
+                <div className={`text-2xl font-bold ${overallStats.total_complaints > 0 ? 'text-red-600 dark:text-red-400' : 'text-[var(--text)]'}`}>
+                  {overallStats.total_complaints}
+                </div>
+                <div className="mt-1 text-xs text-[var(--text-secondary)]">Beschwerden</div>
+              </div>
+            </div>
+          )}
+
+          {/* Detail View */}
+          {selectedSend ? (
+            <div className="space-y-6">
+              <button
+                onClick={() => { setSelectedSend(null); setSendRecipients([]); setSendLinkClicks([]) }}
+                className="flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors"
+              >
+                <span>←</span> Zurück zur Übersicht
+              </button>
+
+              <div className="glass-card rounded-2xl p-5">
+                <h3 className="text-lg font-semibold text-[var(--text)]">{selectedSend.subject}</h3>
+                <div className="mt-1 text-sm text-[var(--text-secondary)]">
+                  {formatDate(selectedSend.sent_at)} · {selectedSend.recipient_count} Empfänger
+                </div>
+              </div>
+
+              {loadingDetail ? (
+                <div className="glass-card rounded-2xl p-6 text-center text-[var(--text-secondary)]">Laden…</div>
+              ) : (
+                <>
+                  {/* Summary Cards */}
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                    <div className="glass-card rounded-2xl p-4 text-center">
+                      <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{selectedSend.delivered_count ?? 0}</div>
+                      <div className="mt-1 text-xs text-[var(--text-secondary)]">Zugestellt</div>
+                    </div>
+                    <div className="glass-card rounded-2xl p-4 text-center">
+                      <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{selectedSend.opened_count ?? 0}</div>
+                      <div className="mt-1 text-xs text-[var(--text-secondary)]">Geöffnet</div>
+                    </div>
+                    <div className="glass-card rounded-2xl p-4 text-center">
+                      <div className="text-xl font-bold text-green-600 dark:text-green-400">{selectedSend.clicked_count ?? 0}</div>
+                      <div className="mt-1 text-xs text-[var(--text-secondary)]">Geklickt</div>
+                    </div>
+                    <div className="glass-card rounded-2xl p-4 text-center">
+                      <div className={`text-xl font-bold ${(selectedSend.bounced_count ?? 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-[var(--text)]'}`}>
+                        {selectedSend.bounced_count ?? 0}
+                      </div>
+                      <div className="mt-1 text-xs text-[var(--text-secondary)]">Bounced</div>
+                    </div>
+                  </div>
+
+                  {/* Link Performance */}
+                  {sendLinkClicks.length > 0 && (
+                    <div className="glass-card overflow-hidden rounded-2xl">
+                      <div className="border-b border-slate-200 px-5 py-3 dark:border-slate-700">
+                        <h4 className="font-medium text-[var(--text)]">Link-Performance</h4>
+                      </div>
+                      <table className="w-full text-left text-sm">
+                        <thead>
+                          <tr className="border-b border-slate-200 dark:border-slate-700">
+                            <th className="px-5 py-3 font-medium text-[var(--text-secondary)]">URL</th>
+                            <th className="px-5 py-3 font-medium text-[var(--text-secondary)] text-right">Klicks</th>
+                            <th className="px-5 py-3 font-medium text-[var(--text-secondary)] text-right">Eindeutig</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {sendLinkClicks.map((lc, i) => (
+                            <tr key={i} className="border-b border-slate-100 last:border-0 dark:border-slate-800">
+                              <td className="px-5 py-3 text-[var(--text)]">
+                                <span className="block max-w-xs truncate" title={lc.url}>
+                                  {lc.url.length > 60 ? lc.url.substring(0, 57) + '…' : lc.url}
+                                </span>
+                              </td>
+                              <td className="px-5 py-3 text-right text-[var(--text)]">{lc.click_count}</td>
+                              <td className="px-5 py-3 text-right text-[var(--text)]">{lc.unique_clickers}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {/* Recipients Table */}
+                  {sendRecipients.length > 0 && (
+                    <div className="glass-card overflow-hidden rounded-2xl">
+                      <div className="border-b border-slate-200 px-5 py-3 dark:border-slate-700">
+                        <h4 className="font-medium text-[var(--text)]">Empfänger ({sendRecipients.length})</h4>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left text-sm">
+                          <thead>
+                            <tr className="border-b border-slate-200 dark:border-slate-700">
+                              <th className="px-5 py-3 font-medium text-[var(--text-secondary)]">E-Mail</th>
+                              <th className="px-5 py-3 font-medium text-[var(--text-secondary)]">Status</th>
+                              <th className="px-5 py-3 font-medium text-[var(--text-secondary)]">Zugestellt</th>
+                              <th className="px-5 py-3 font-medium text-[var(--text-secondary)]">Geöffnet</th>
+                              <th className="px-5 py-3 font-medium text-[var(--text-secondary)] text-right">Klicks</th>
+                              <th className="px-5 py-3 font-medium text-[var(--text-secondary)]">Bounce</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {sendRecipients.map((r) => {
+                              const recipientBadge: Record<string, { label: string; cls: string }> = {
+                                sent: { label: 'Gesendet', cls: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' },
+                                delivered: { label: 'Zugestellt', cls: 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300' },
+                                opened: { label: 'Geöffnet', cls: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300' },
+                                clicked: { label: 'Geklickt', cls: 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300' },
+                                bounced: { label: 'Bounced', cls: 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300' },
+                                complained: { label: 'Beschwerde', cls: 'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300' },
+                              }
+                              const badge = recipientBadge[r.status] || recipientBadge.sent
+                              return (
+                                <tr key={r.id} className="border-b border-slate-100 last:border-0 dark:border-slate-800">
+                                  <td className="px-5 py-3 text-[var(--text)]">{r.email}</td>
+                                  <td className="px-5 py-3">
+                                    <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${badge.cls}`}>
+                                      {badge.label}
+                                    </span>
+                                  </td>
+                                  <td className="px-5 py-3 text-[var(--text-secondary)]">
+                                    {r.delivered_at ? formatDate(r.delivered_at) : '—'}
+                                  </td>
+                                  <td className="px-5 py-3 text-[var(--text-secondary)]">
+                                    {r.opened_at ? `${formatDate(r.opened_at)}${r.open_count > 1 ? ` (${r.open_count}×)` : ''}` : '—'}
+                                  </td>
+                                  <td className="px-5 py-3 text-right text-[var(--text)]">
+                                    {r.click_count > 0 ? r.click_count : '—'}
+                                  </td>
+                                  <td className="px-5 py-3 text-[var(--text-secondary)]">
+                                    {r.bounce_type || '—'}
+                                  </td>
+                                </tr>
+                              )
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           ) : (
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-700">
-                  <th className="px-5 py-3 font-medium text-[var(--text-secondary)]">Betreff</th>
-                  <th className="px-5 py-3 font-medium text-[var(--text-secondary)]">Empfänger</th>
-                  <th className="px-5 py-3 font-medium text-[var(--text-secondary)]">Datum</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sends.map((s) => (
-                  <tr
-                    key={s.id}
-                    className="border-b border-slate-100 last:border-0 dark:border-slate-800"
-                  >
-                    <td className="px-5 py-3 text-[var(--text)]">
-                      <div className="font-medium">{s.subject}</div>
-                      <div className="text-xs text-[var(--text-secondary)]">{s.post_title}</div>
-                    </td>
-                    <td className="px-5 py-3 text-[var(--text)]">{s.recipient_count}</td>
-                    <td className="px-5 py-3 text-[var(--text-secondary)]">
-                      {formatDate(s.sent_at)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            /* Send List */
+            <div className="glass-card overflow-hidden rounded-2xl">
+              {sends.length === 0 ? (
+                <div className="px-6 py-12 text-center text-[var(--text-secondary)]">
+                  Noch keine Newsletter versendet.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-200 dark:border-slate-700">
+                        <th className="px-5 py-3 font-medium text-[var(--text-secondary)]">Betreff</th>
+                        <th className="px-5 py-3 font-medium text-[var(--text-secondary)]">Empfänger</th>
+                        <th className="px-5 py-3 font-medium text-[var(--text-secondary)]">Zugestellt</th>
+                        <th className="px-5 py-3 font-medium text-[var(--text-secondary)]">Geöffnet</th>
+                        <th className="px-5 py-3 font-medium text-[var(--text-secondary)]">Geklickt</th>
+                        <th className="px-5 py-3 font-medium text-[var(--text-secondary)]">Bounced</th>
+                        <th className="px-5 py-3 font-medium text-[var(--text-secondary)]">Datum</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sends.map((s) => {
+                        const hasTracking = (s.delivered_count ?? 0) > 0 || (s.opened_count ?? 0) > 0 || (s.bounced_count ?? 0) > 0
+                        const openRate = hasTracking && s.recipient_count > 0
+                          ? Math.round(((s.opened_count ?? 0) / s.recipient_count) * 100)
+                          : null
+                        const clickRate = hasTracking && s.recipient_count > 0
+                          ? Math.round(((s.clicked_count ?? 0) / s.recipient_count) * 100)
+                          : null
+                        const openRateColor = openRate === null ? '' : openRate > 40 ? 'text-emerald-600 dark:text-emerald-400' : openRate >= 20 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'
+
+                        return (
+                          <tr
+                            key={s.id}
+                            onClick={() => loadSendDetail(s)}
+                            className="cursor-pointer border-b border-slate-100 last:border-0 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+                          >
+                            <td className="px-5 py-3 text-[var(--text)]">
+                              <div className="font-medium">{s.subject}</div>
+                              <div className="text-xs text-[var(--text-secondary)]">{s.post_title}</div>
+                            </td>
+                            <td className="px-5 py-3 text-[var(--text)]">{s.recipient_count}</td>
+                            <td className="px-5 py-3 text-[var(--text)]">
+                              {hasTracking ? (s.delivered_count ?? 0) : '—'}
+                            </td>
+                            <td className="px-5 py-3">
+                              {hasTracking ? (
+                                <span className={openRateColor}>
+                                  {s.opened_count ?? 0} ({openRate}%)
+                                </span>
+                              ) : '—'}
+                            </td>
+                            <td className="px-5 py-3 text-[var(--text)]">
+                              {hasTracking ? (
+                                <span>
+                                  {s.clicked_count ?? 0}{clickRate !== null ? ` (${clickRate}%)` : ''}
+                                </span>
+                              ) : '—'}
+                            </td>
+                            <td className="px-5 py-3 text-[var(--text)]">
+                              {hasTracking ? (s.bounced_count ?? 0) : '—'}
+                            </td>
+                            <td className="px-5 py-3 text-[var(--text-secondary)]">
+                              {formatDate(s.sent_at)}
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           )}
         </div>
       )}
@@ -1332,7 +1616,7 @@ export default function AdminNewsletter() {
                 </p>
                 <textarea
                   value={generatorPrompt}
-                  onChange={(e) => { setGeneratorPrompt(e.target.value); setPromptSaved(false) }}
+                  onChange={(e) => setGeneratorPrompt(e.target.value)}
                   placeholder={`Du bist ein Newsletter-Betreff-Generator für "KOKOMO" — einen Tiny House Blog aus der Schweiz.\nDie Bewohner sind Sibylle und Michi, die seit September 2022 in ihrem Tiny House leben.\n\nDeine Aufgabe: Generiere genau 10 Newsletter-Betreffzeilen basierend auf den Inhalten.\nMarkiere die besten 3 als Top-Vorschläge.\n\nRegeln:\n- Maximal 60 Zeichen pro Betreffzeile\n- Persoenlich und authentisch, kein Clickbait\n- Macht neugierig und animiert zum Oeffnen\n- Verwende "ss" statt "ß"\n- Deutsch (Schweizer Stil)`}
                   rows={10}
                   className="w-full rounded-xl border border-slate-300 bg-white/80 px-4 py-3 text-sm text-[var(--text)] placeholder:text-slate-400 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-200 dark:border-slate-600 dark:bg-slate-800/80 dark:placeholder:text-slate-500 dark:focus:border-primary-500 dark:focus:ring-primary-800"
@@ -1352,7 +1636,7 @@ export default function AdminNewsletter() {
                 </p>
                 <textarea
                   value={reviewerPrompt}
-                  onChange={(e) => { setReviewerPrompt(e.target.value); setPromptSaved(false) }}
+                  onChange={(e) => setReviewerPrompt(e.target.value)}
                   placeholder={`Du bist ein erfahrener Newsletter-Redakteur für "KOKOMO" — einen Tiny House Blog aus der Schweiz.\n\nDu erhältst 10 Betreffzeilen-Vorschläge, davon 3 als Top-Vorschläge markiert.\nWähle die beste Betreffzeile aus oder formuliere eine noch bessere basierend auf den Vorschlägen.\n\nKriterien:\n- Maximal 60 Zeichen\n- Hohe Oeffnungsrate\n- Authentisch, nicht reisserisch\n- Verwende "ss" statt "ß"`}
                   rows={10}
                   className="w-full rounded-xl border border-slate-300 bg-white/80 px-4 py-3 text-sm text-[var(--text)] placeholder:text-slate-400 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-200 dark:border-slate-600 dark:bg-slate-800/80 dark:placeholder:text-slate-500 dark:focus:border-primary-500 dark:focus:ring-primary-800"
@@ -1373,18 +1657,91 @@ export default function AdminNewsletter() {
                   {savingPrompt ? 'Speichern…' : 'Beide Prompts speichern'}
                 </button>
                 <button
-                  onClick={() => { setGeneratorPrompt(''); setReviewerPrompt(''); setPromptSaved(false) }}
+                  onClick={resetPrompts}
                   disabled={savingPrompt}
                   className="rounded-full border border-slate-300 px-5 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 disabled:opacity-50 dark:border-slate-600 dark:hover:bg-slate-800"
                 >
                   Zurücksetzen
                 </button>
-                {promptSaved && (
-                  <span className="text-sm text-emerald-600 dark:text-emerald-400">Gespeichert!</span>
-                )}
               </div>
             </>
           )}
+        </div>
+      )}
+
+      {/* ─── Toast ─────────────────────────────────────────────── */}
+      {toast && (
+        <div className="fixed inset-x-0 top-6 z-[9999] flex justify-center pointer-events-none">
+          <div
+            className={`pointer-events-auto flex items-center gap-3 rounded-2xl border px-5 py-3 shadow-xl backdrop-blur-md ${
+              toast.type === 'success'
+                ? 'border-emerald-200/60 bg-emerald-50/90 text-emerald-800 dark:border-emerald-700/60 dark:bg-emerald-900/80 dark:text-emerald-200'
+                : 'border-red-200/60 bg-red-50/90 text-red-800 dark:border-red-700/60 dark:bg-red-900/80 dark:text-red-200'
+            }`}
+          >
+            <span className="text-sm font-medium">{toast.message}</span>
+            <button
+              onClick={() => setToast(null)}
+              className="ml-1 rounded-full p-0.5 opacity-60 transition-opacity hover:opacity-100"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Confirm Send Modal ───────────────────────────────── */}
+      {confirmSend && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl border border-white/20 bg-white/90 p-6 shadow-2xl backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-900/90">
+            <h3 className="mb-2 text-lg font-semibold text-[var(--text)]">Newsletter versenden</h3>
+            <p className="mb-1 text-sm text-[var(--text-secondary)]">
+              Bist du sicher, dass du den Newsletter versenden möchtest?
+            </p>
+            <p className="mb-6 text-sm font-medium text-[var(--text)]">
+              &laquo;{subject}&raquo; an {confirmedCount} Abonnent{confirmedCount !== 1 ? 'en' : ''}
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setConfirmSend(false)}
+                className="rounded-full border border-slate-300 px-5 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={handleSendConfirmed}
+                className="rounded-full bg-primary-500 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600"
+              >
+                Jetzt senden
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Generic Confirm Modal ────────────────────────────── */}
+      {confirmAction && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl border border-white/20 bg-white/90 p-6 shadow-2xl backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-900/90">
+            <h3 className="mb-3 text-lg font-semibold text-[var(--text)]">{confirmAction.title}</h3>
+            <p className="mb-6 text-sm text-[var(--text-secondary)]">{confirmAction.message}</p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setConfirmAction(null)}
+                className="rounded-full border border-slate-300 px-5 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={confirmAction.onConfirm}
+                className="rounded-full bg-red-500 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-red-600"
+              >
+                Löschen
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

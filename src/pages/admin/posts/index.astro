@@ -1,7 +1,7 @@
 ---
 export const prerender = false
-import BaseLayout from '../../layouts/BaseLayout.astro'
-import AdminImages from '../../components/islands/AdminImages'
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import AdminPostsList from '../../../components/islands/AdminPostsList'
 ---
 
 <BaseLayout title="Posts" noIndex>
@@ -33,6 +33,6 @@ import AdminImages from '../../components/islands/AdminImages'
         Glossar
       </a>
     </div>
-    <AdminImages client:load />
+    <AdminPostsList client:load />
   </div>
 </BaseLayout>

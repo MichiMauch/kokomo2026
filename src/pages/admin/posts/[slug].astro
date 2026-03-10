@@ -1,13 +1,27 @@
 ---
 export const prerender = false
-import BaseLayout from '../../layouts/BaseLayout.astro'
-import AdminContent from '../../components/islands/AdminContent'
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import AdminPostDetail from '../../../components/islands/AdminPostDetail'
+
+const { slug } = Astro.params
 ---
 
-<BaseLayout title="Blog-Content" noIndex>
+<BaseLayout title="Post bearbeiten" noIndex>
   <div class="py-12">
     <div class="mb-8 flex items-center gap-4">
-      <h1 class="text-2xl font-bold text-[var(--text)]">Blog-Content</h1>
+      <h1 class="text-2xl font-bold text-[var(--text)]">Post bearbeiten</h1>
+      <a
+        href="/admin/posts"
+        class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
+      >
+        Posts
+      </a>
+      <a
+        href="/admin/content"
+        class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
+      >
+        Blog-Content
+      </a>
       <a
         href="/admin/comments"
         class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
@@ -26,13 +40,7 @@ import AdminContent from '../../components/islands/AdminContent'
       >
         Glossar
       </a>
-      <a
-        href="/admin/posts"
-        class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
-      >
-        Posts
-      </a>
     </div>
-    <AdminContent client:load />
+    <AdminPostDetail client:load slug={slug!} />
   </div>
 </BaseLayout>
