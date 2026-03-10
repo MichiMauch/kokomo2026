@@ -894,25 +894,31 @@ export default function AdminNewsletter() {
     }
     setRetryConfirm(false)
     setRetrying(true)
+    let totalSent = 0
     try {
-      const res = await fetch('/api/admin/newsletter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'retry-failed',
-          sendId: send.id,
-        }),
-      })
-      const json = await res.json()
-      if (json.error) {
-        setToast({ type: 'error', message: json.error })
-      } else {
-        setToast({ type: 'success', message: `${json.sent} von ${json.total} erfolgreich nachgesendet.` })
-        await loadSendDetail(send)
-        await loadData()
+      let remaining = failedCount
+      while (remaining > 0) {
+        const res = await fetch('/api/admin/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'retry-failed', sendId: send.id }),
+        })
+        const json = await res.json()
+        if (json.error) {
+          setToast({ type: 'error', message: json.error })
+          break
+        }
+        totalSent += json.sent
+        remaining = json.remaining ?? 0
+        setToast({ type: 'info', message: `${totalSent} gesendet, ${remaining} verbleibend…` })
       }
+      if (totalSent > 0) {
+        setToast({ type: 'success', message: `${totalSent} erfolgreich nachgesendet.` })
+      }
+      await loadSendDetail(send)
+      await loadData()
     } catch (err) {
-      setToast({ type: 'error', message: 'Nachversand fehlgeschlagen.' })
+      setToast({ type: 'error', message: `Nachversand abgebrochen nach ${totalSent} Emails.` })
     }
     setRetrying(false)
   }
@@ -1152,22 +1158,43 @@ export default function AdminNewsletter() {
     setSending(true)
 
     try {
+      // First request: creates send record + sends first chunk
       const res = await fetch('/api/admin/newsletter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'send', subject, blocks }),
       })
       const data = await res.json()
-      console.log('[Newsletter] Send response:', { ok: res.ok, data })
-      if (res.ok) {
-        const msg = `Erfolgreich an ${data.sent}/${data.total} versendet.`
-        console.log('[Newsletter] Setting toast:', msg)
-        setToast({ type: 'success', message: msg })
-        goBackToPicker()
-        loadData()
-      } else {
+      if (!res.ok) {
         setToast({ type: 'error', message: data.error || 'Fehler beim Versenden.' })
+        setSending(false)
+        return
       }
+
+      let totalSent = data.sent
+      let remaining = data.remaining ?? 0
+      const sendId = data.sendId
+
+      // Continue sending remaining in chunks via retry-failed
+      while (remaining > 0 && sendId) {
+        setToast({ type: 'info', message: `${totalSent} gesendet, ${remaining} verbleibend…` })
+        const retryRes = await fetch('/api/admin/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'retry-failed', sendId }),
+        })
+        const retryData = await retryRes.json()
+        if (retryData.error) {
+          setToast({ type: 'error', message: retryData.error })
+          break
+        }
+        totalSent += retryData.sent
+        remaining = retryData.remaining ?? 0
+      }
+
+      setToast({ type: 'success', message: `Erfolgreich an ${totalSent} Empfänger versendet.` })
+      goBackToPicker()
+      loadData()
     } catch (err) {
       console.error('[Newsletter] Send error:', err)
       setToast({ type: 'error', message: 'Verbindung fehlgeschlagen.' })

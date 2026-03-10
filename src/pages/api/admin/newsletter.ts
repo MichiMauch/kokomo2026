@@ -187,12 +187,14 @@ export const POST: APIRoute = async ({ request }) => {
         }
       }
 
-      const SEND_DELAY_MS = 1500
+      const CHUNK_SIZE = 15
+      const SEND_DELAY_MS = 800
       const MAX_RETRIES = 2
       let retrySent = 0
+      const chunk = failedRecipients.slice(0, CHUNK_SIZE)
 
-      for (let i = 0; i < failedRecipients.length; i++) {
-        const sub = failedRecipients[i]
+      for (let i = 0; i < chunk.length; i++) {
+        const sub = chunk[i]
         for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
           try {
             const result = await sendMultiBlockNewsletterEmail({
@@ -215,13 +217,14 @@ export const POST: APIRoute = async ({ request }) => {
             }
           }
         }
-        if (i < failedRecipients.length - 1) {
+        if (i < chunk.length - 1) {
           await new Promise((resolve) => setTimeout(resolve, SEND_DELAY_MS))
         }
       }
 
+      const remaining = failedRecipients.length - retrySent
       return new Response(
-        JSON.stringify({ ok: true, sent: retrySent, total: failedRecipients.length }),
+        JSON.stringify({ ok: true, sent: retrySent, total: failedRecipients.length, remaining }),
         { status: 200, headers },
       )
     }
@@ -249,7 +252,7 @@ export const POST: APIRoute = async ({ request }) => {
       )
     }
 
-    const SEND_DELAY_MS = 1500 // 1.5s between emails to avoid Resend rate limits
+    // Sending is chunked: first 15 per request, client loops via retry-failed
     const MAX_RETRIES = 2
     let successCount = 0
     const sentRecipients: { email: string; resendEmailId: string | null }[] = []
@@ -288,9 +291,29 @@ export const POST: APIRoute = async ({ request }) => {
         }
       }
 
-      for (let i = 0; i < subscribers.length; i++) {
-        const sub = subscribers[i]
-        let sent = false
+      // Create send record first with all recipients
+      const firstSlug = slugs.size > 0 ? [...slugs][0] : 'multi-block'
+      const firstPost = postsMap[firstSlug]
+      const sendId = await recordNewsletterSend({
+        post_slug: firstSlug,
+        post_title: firstPost?.title ?? subject,
+        subject,
+        recipient_count: subscribers.length,
+        blocks_json: JSON.stringify(typedBlocks),
+      })
+
+      // Record all recipients with null resend_email_id
+      await recordNewsletterRecipientsBatch(
+        subscribers.map((s) => ({ send_id: sendId, email: s.email, resend_email_id: null })),
+      )
+
+      // Send first chunk
+      const CHUNK_SIZE = 15
+      const SEND_DELAY_MS_CHUNK = 800
+      const chunk = subscribers.slice(0, CHUNK_SIZE)
+
+      for (let i = 0; i < chunk.length; i++) {
+        const sub = chunk[i]
         for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
           try {
             const result = await sendMultiBlockNewsletterEmail({
@@ -301,8 +324,7 @@ export const POST: APIRoute = async ({ request }) => {
               postsMap,
             })
             successCount++
-            sentRecipients.push({ email: sub.email, resendEmailId: result.resendEmailId })
-            sent = true
+            await updateRecipientResendId(sendId, sub.email, result.resendEmailId ?? '')
             break
           } catch (err: any) {
             const isRateLimit = err?.statusCode === 429 || err?.message?.includes('rate')
@@ -314,29 +336,14 @@ export const POST: APIRoute = async ({ request }) => {
             }
           }
         }
-        if (i < subscribers.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, SEND_DELAY_MS))
+        if (i < chunk.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, SEND_DELAY_MS_CHUNK))
         }
       }
 
-      // Use first post slug for record, or 'multi-block'
-      const firstSlug = slugs.size > 0 ? [...slugs][0] : 'multi-block'
-      const firstPost = postsMap[firstSlug]
-      const sendId = await recordNewsletterSend({
-        post_slug: firstSlug,
-        post_title: firstPost?.title ?? subject,
-        subject,
-        recipient_count: successCount,
-        blocks_json: JSON.stringify(typedBlocks),
-      })
-
-      // Record recipients with resend email IDs
-      await recordNewsletterRecipientsBatch(
-        sentRecipients.map((r) => ({ send_id: sendId, email: r.email, resend_email_id: r.resendEmailId })),
-      )
-
+      const remaining = subscribers.length - successCount
       return new Response(
-        JSON.stringify({ ok: true, sent: successCount, total: subscribers.length }),
+        JSON.stringify({ ok: true, sent: successCount, total: subscribers.length, remaining, sendId }),
         { status: 200, headers },
       )
     }
@@ -358,8 +365,24 @@ export const POST: APIRoute = async ({ request }) => {
       })
     }
 
-    for (let i = 0; i < subscribers.length; i++) {
-      const sub = subscribers[i]
+    // Create send record + all recipients first
+    const sendId = await recordNewsletterSend({
+      post_slug: post.id,
+      post_title: post.data.title,
+      subject,
+      recipient_count: subscribers.length,
+      blocks_json: JSON.stringify([{ type: 'hero', slug: post.id }]),
+    })
+    await recordNewsletterRecipientsBatch(
+      subscribers.map((s) => ({ send_id: sendId, email: s.email, resend_email_id: null })),
+    )
+
+    const CHUNK_SIZE = 15
+    const SEND_DELAY_MS_CHUNK = 800
+    const chunk = subscribers.slice(0, CHUNK_SIZE)
+
+    for (let i = 0; i < chunk.length; i++) {
+      const sub = chunk[i]
       for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
         try {
           const result = await sendNewsletterEmail({
@@ -372,7 +395,7 @@ export const POST: APIRoute = async ({ request }) => {
             postDate: post.data.date.toISOString().split('T')[0],
           })
           successCount++
-          sentRecipients.push({ email: sub.email, resendEmailId: result.resendEmailId })
+          await updateRecipientResendId(sendId, sub.email, result.resendEmailId ?? '')
           break
         } catch (err: any) {
           const isRateLimit = err?.statusCode === 429 || err?.message?.includes('rate')
@@ -384,26 +407,14 @@ export const POST: APIRoute = async ({ request }) => {
           }
         }
       }
-      if (i < subscribers.length - 1) {
-        await new Promise((resolve) => setTimeout(resolve, SEND_DELAY_MS))
+      if (i < chunk.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, SEND_DELAY_MS_CHUNK))
       }
     }
 
-    const sendId = await recordNewsletterSend({
-      post_slug: post.id,
-      post_title: post.data.title,
-      subject,
-      recipient_count: successCount,
-      blocks_json: JSON.stringify([{ type: 'hero', slug: post.id }]),
-    })
-
-    // Record recipients with resend email IDs
-    await recordNewsletterRecipientsBatch(
-      sentRecipients.map((r) => ({ send_id: sendId, email: r.email, resend_email_id: r.resendEmailId })),
-    )
-
+    const remaining = subscribers.length - successCount
     return new Response(
-      JSON.stringify({ ok: true, sent: successCount, total: subscribers.length }),
+      JSON.stringify({ ok: true, sent: successCount, total: subscribers.length, remaining, sendId }),
       { status: 200, headers },
     )
   } catch (err: any) {
