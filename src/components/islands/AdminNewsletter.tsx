@@ -165,6 +165,15 @@ function buildPostsMap(blocks: NewsletterBlock[], posts: Post[]): Record<string,
 }
 
 const STORAGE_KEY = 'newsletter-templates'
+const DRAFTS_KEY = 'newsletter-drafts'
+
+interface NewsletterDraft {
+  id: string
+  subject: string
+  blocks: NewsletterBlock[]
+  templateId: string | null
+  savedAt: string
+}
 
 function loadCustomTemplates(): NewsletterTemplate[] {
   try {
@@ -176,6 +185,18 @@ function loadCustomTemplates(): NewsletterTemplate[] {
 
 function saveCustomTemplates(templates: NewsletterTemplate[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(templates))
+}
+
+function loadDrafts(): NewsletterDraft[] {
+  try {
+    return JSON.parse(localStorage.getItem(DRAFTS_KEY) || '[]')
+  } catch {
+    return []
+  }
+}
+
+function saveDrafts(drafts: NewsletterDraft[]) {
+  localStorage.setItem(DRAFTS_KEY, JSON.stringify(drafts))
 }
 
 // ─── Helpers: used slugs ──────────────────────────────────────────────
@@ -798,6 +819,11 @@ export default function AdminNewsletter() {
   const [confirmSend, setConfirmSend] = useState(false)
   const [confirmAction, setConfirmAction] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null)
   const [customTemplates, setCustomTemplates] = useState<NewsletterTemplate[]>([])
+  const [drafts, setDrafts] = useState<NewsletterDraft[]>([])
+
+  // Test send state
+  const [showTestSend, setShowTestSend] = useState(false)
+  const [testEmail, setTestEmail] = useState('')
 
   // Reporting state
   const [overallStats, setOverallStats] = useState<OverallStatsData | null>(null)
@@ -817,6 +843,7 @@ export default function AdminNewsletter() {
 
   useEffect(() => {
     setCustomTemplates(loadCustomTemplates())
+    setDrafts(loadDrafts())
   }, [])
 
   async function loadData() {
@@ -1024,9 +1051,61 @@ export default function AdminNewsletter() {
     })
   }
 
+  function handleSaveDraft() {
+    const draft: NewsletterDraft = {
+      id: crypto.randomUUID(),
+      subject,
+      blocks,
+      templateId: selectedTemplate?.id ?? null,
+      savedAt: new Date().toISOString(),
+    }
+    const updated = [draft, ...drafts]
+    setDrafts(updated)
+    saveDrafts(updated)
+    setToast({ type: 'success', message: 'Entwurf gespeichert.' })
+  }
+
+  function handleLoadDraft(draft: NewsletterDraft) {
+    const template = [...BUILT_IN_TEMPLATES, ...customTemplates].find((t) => t.id === draft.templateId) ?? BUILT_IN_TEMPLATES[0]
+    setSelectedTemplate(template)
+    setBlocks(draft.blocks)
+    setSubject(draft.subject)
+    setComposeMode('fill-slots')
+  }
+
+  function handleDeleteDraft(id: string) {
+    const updated = drafts.filter((d) => d.id !== id)
+    setDrafts(updated)
+    saveDrafts(updated)
+    setToast({ type: 'success', message: 'Entwurf gelöscht.' })
+  }
+
   function handleSendClick() {
     if (!canSend) return
     setConfirmSend(true)
+  }
+
+  async function handleTestSendConfirmed() {
+    if (!testEmail.trim()) return
+    setShowTestSend(false)
+    setSending(true)
+    try {
+      const res = await fetch('/api/admin/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'test-send', subject, blocks, testEmail: testEmail.trim() }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setToast({ type: 'success', message: `Test-Newsletter an ${testEmail.trim()} gesendet.` })
+      } else {
+        setToast({ type: 'error', message: data.error || 'Testversand fehlgeschlagen.' })
+      }
+    } catch {
+      setToast({ type: 'error', message: 'Verbindung fehlgeschlagen.' })
+    } finally {
+      setSending(false)
+    }
   }
 
   async function handleSendConfirmed() {
@@ -1172,6 +1251,42 @@ export default function AdminNewsletter() {
                 </div>
               )}
 
+              {drafts.length > 0 && (
+                <div>
+                  <div className="mb-3 flex items-center gap-3">
+                    <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+                    <span className="text-xs font-medium text-[var(--text-secondary)]">Gespeicherte Entwürfe</span>
+                    <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+                  </div>
+                  <div className="space-y-2">
+                    {drafts.map((d) => (
+                      <div
+                        key={d.id}
+                        className="flex items-center justify-between rounded-xl border border-slate-200 bg-white/60 px-4 py-3 transition-colors hover:border-primary-300 dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-primary-600"
+                      >
+                        <button
+                          onClick={() => handleLoadDraft(d)}
+                          className="flex-1 text-left"
+                        >
+                          <div className="text-sm font-medium text-[var(--text)]">
+                            {d.subject || 'Ohne Betreff'}
+                          </div>
+                          <div className="text-xs text-[var(--text-secondary)]">
+                            {d.blocks.length} Block{d.blocks.length !== 1 ? 'e' : ''} · {formatDate(d.savedAt)}
+                          </div>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteDraft(d.id)}
+                          className="ml-3 text-xs text-red-500 hover:text-red-700"
+                        >
+                          Löschen
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <button
                 onClick={() => setComposeMode('build-template')}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 px-4 py-4 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:border-primary-400 hover:bg-primary-50/50 hover:text-primary-600 dark:border-slate-600 dark:hover:border-primary-500 dark:hover:bg-primary-900/20 dark:hover:text-primary-400"
@@ -1271,11 +1386,25 @@ export default function AdminNewsletter() {
 
               <div className="flex flex-wrap gap-3">
                 <button
+                  onClick={handleSaveDraft}
+                  disabled={blocks.length === 0}
+                  className="rounded-full border border-slate-300 px-5 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 disabled:opacity-50 dark:border-slate-600 dark:hover:bg-slate-800"
+                >
+                  Entwurf speichern
+                </button>
+                <button
                   onClick={() => setShowPreview(true)}
                   disabled={!blocksAreValid(blocks)}
                   className="rounded-full border border-slate-300 px-5 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 disabled:opacity-50 dark:border-slate-600 dark:hover:bg-slate-800"
                 >
                   Vorschau
+                </button>
+                <button
+                  onClick={() => setShowTestSend(true)}
+                  disabled={sending || !subject.trim() || !blocksAreValid(blocks)}
+                  className="rounded-full border border-amber-400 bg-amber-50 px-5 py-2.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-100 disabled:opacity-50 dark:border-amber-600 dark:bg-amber-900/20 dark:text-amber-300 dark:hover:bg-amber-900/40"
+                >
+                  Test senden
                 </button>
                 <button
                   onClick={handleSendClick}
@@ -1715,6 +1844,42 @@ export default function AdminNewsletter() {
                 className="rounded-full bg-primary-500 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600"
               >
                 Jetzt senden
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Test Send Modal ──────────────────────────────────── */}
+      {showTestSend && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl border border-white/20 bg-white/90 p-6 shadow-2xl backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-900/90">
+            <h3 className="mb-2 text-lg font-semibold text-[var(--text)]">Test-Newsletter senden</h3>
+            <p className="mb-4 text-sm text-[var(--text-secondary)]">
+              &laquo;[TEST] {subject}&raquo; wird an diese Adresse gesendet:
+            </p>
+            <input
+              type="email"
+              value={testEmail}
+              onChange={(e) => setTestEmail(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && testEmail.trim()) handleTestSendConfirmed() }}
+              placeholder="test@example.com"
+              autoFocus
+              className={inputCls + ' mb-6'}
+            />
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowTestSend(false)}
+                className="rounded-full border border-slate-300 px-5 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={handleTestSendConfirmed}
+                disabled={!testEmail.trim()}
+                className="rounded-full bg-amber-500 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-600 disabled:opacity-50"
+              >
+                Test senden
               </button>
             </div>
           </div>

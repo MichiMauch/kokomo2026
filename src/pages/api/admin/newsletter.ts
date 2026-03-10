@@ -97,7 +97,55 @@ export const POST: APIRoute = async ({ request }) => {
 
   try {
     const body = await request.json()
-    const { action, postSlug, subject, subscriberId, blocks } = body
+    const { action, postSlug, subject, subscriberId, blocks, testEmail } = body
+
+    // ─── Test send ───
+    if (action === 'test-send') {
+      if (!subject || !blocks || !Array.isArray(blocks) || blocks.length === 0) {
+        return new Response(JSON.stringify({ error: 'subject und blocks sind erforderlich.' }), { status: 400, headers })
+      }
+      if (!testEmail || typeof testEmail !== 'string') {
+        return new Response(JSON.stringify({ error: 'testEmail ist erforderlich.' }), { status: 400, headers })
+      }
+
+      const typedBlocks = blocks as NewsletterBlock[]
+      const slugs = new Set<string>()
+      for (const block of typedBlocks) {
+        if (block.type === 'hero' || block.type === 'article') slugs.add(block.slug)
+        if (block.type === 'two-column') { slugs.add(block.slugLeft); slugs.add(block.slugRight) }
+      }
+
+      const allPosts = await getCollection('posts')
+      const postsMap: Record<string, PostRef> = {}
+      for (const slug of slugs) {
+        const post = allPosts.find((p) => p.id === slug || p.id.replace(/\.md$/, '') === slug)
+        if (!post) {
+          return new Response(JSON.stringify({ error: `Blogpost "${slug}" nicht gefunden.` }), { status: 404, headers })
+        }
+        postsMap[slug] = {
+          slug: post.id, title: post.data.title, summary: post.data.summary ?? '',
+          image: getFirstImage(post.data.images), date: post.data.date.toISOString().split('T')[0],
+        }
+      }
+
+      try {
+        await sendMultiBlockNewsletterEmail({
+          email: testEmail,
+          unsubscribeToken: 'test',
+          subject: `[TEST] ${subject}`,
+          blocks: typedBlocks,
+          postsMap,
+        })
+      } catch (err: any) {
+        console.error('[admin/newsletter test-send]', err)
+        return new Response(
+          JSON.stringify({ error: `Testversand fehlgeschlagen: ${err?.message || 'Unbekannter Fehler'}` }),
+          { status: 500, headers },
+        )
+      }
+
+      return new Response(JSON.stringify({ ok: true, sent: 1, testEmail }), { status: 200, headers })
+    }
 
     if (action === 'delete') {
       if (!subscriberId || typeof subscriberId !== 'number' || !Number.isInteger(subscriberId)) {

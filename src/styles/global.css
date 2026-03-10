@@ -1,6 +1,11 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 
+/* ===== Global interactive elements ===== */
+button, [role="button"], input[type="submit"], input[type="button"], select, summary {
+  cursor: pointer;
+}
+
 /* ===== KOKOMO Brand Theme ===== */
 @theme {
   /* Primary Green */

@@ -70,17 +70,21 @@ export function buildNewsletterHtml(data: {
 
 // ─── Multi-Block Newsletter ──────────────────────────────────────────
 
+function cleanSlug(slug: string): string {
+  return slug.replace(/\.md$/, '')
+}
+
 function renderHeroBlock(post: PostRef, siteUrl: string): string {
-  const postUrl = `${siteUrl}/tiny-house/${post.slug}/`
+  const postUrl = `${siteUrl}/tiny-house/${cleanSlug(post.slug)}/`
   const imageHtml = post.image
     ? `<tr><td><img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" width="600" style="width: 100%; display: block; max-height: 320px; object-fit: cover;" /></td></tr>`
     : ''
 
   return `
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 32px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
       ${imageHtml}
       <tr>
-        <td style="padding: 24px 32px 32px;">
+        <td style="padding: 24px 32px 32px 32px;">
           <h2 style="color: #111827; margin: 0 0 16px; font-size: 24px; font-weight: 700; line-height: 1.3;">
             <a href="${escapeHtml(postUrl)}" style="color: #111827; text-decoration: none;">${escapeHtml(post.title)}</a>
           </h2>
@@ -99,29 +103,35 @@ function renderHeroBlock(post: PostRef, siteUrl: string): string {
 }
 
 function renderArticleBlock(post: PostRef, siteUrl: string): string {
-  const postUrl = `${siteUrl}/tiny-house/${post.slug}/`
+  const postUrl = `${siteUrl}/tiny-house/${cleanSlug(post.slug)}/`
   const imageCell = post.image
-    ? `<td width="200" valign="top" style="padding-right: 20px;">
+    ? `<td width="160" valign="top" style="padding-right: 20px;">
         <a href="${escapeHtml(postUrl)}">
-          <img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" width="200" style="width: 200px; display: block; border-radius: 8px; object-fit: cover; height: 140px;" />
+          <img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" width="160" style="width: 160px; display: block; border-radius: 8px; object-fit: cover; height: 120px;" />
         </a>
       </td>`
     : ''
 
   return `
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 32px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
-        ${imageCell}
-        <td valign="top">
-          <h3 style="color: #111827; margin: 0 0 8px; font-size: 18px; font-weight: 700; line-height: 1.3;">
-            <a href="${escapeHtml(postUrl)}" style="color: #111827; text-decoration: none;">${escapeHtml(post.title)}</a>
-          </h3>
-          <p style="color: #374151; line-height: 1.6; font-size: 14px; margin: 0 0 12px;">
-            ${escapeHtml(post.summary)}
-          </p>
-          <a href="${escapeHtml(postUrl)}" style="color: #05DE66; font-size: 14px; font-weight: 600; text-decoration: none;">
-            Weiterlesen &rarr;
-          </a>
+        <td style="padding: 0 32px 32px 32px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              ${imageCell}
+              <td valign="top">
+                <h3 style="color: #111827; margin: 0 0 8px; font-size: 18px; font-weight: 700; line-height: 1.3;">
+                  <a href="${escapeHtml(postUrl)}" style="color: #111827; text-decoration: none;">${escapeHtml(post.title)}</a>
+                </h3>
+                <p style="color: #374151; line-height: 1.6; font-size: 14px; margin: 0 0 12px;">
+                  ${escapeHtml(post.summary)}
+                </p>
+                <a href="${escapeHtml(postUrl)}" style="color: #05DE66; font-size: 14px; font-weight: 600; text-decoration: none;">
+                  Weiterlesen &rarr;
+                </a>
+              </td>
+            </tr>
+          </table>
         </td>
       </tr>
     </table>
@@ -130,33 +140,43 @@ function renderArticleBlock(post: PostRef, siteUrl: string): string {
 
 function renderTwoColumnBlock(postLeft: PostRef, postRight: PostRef, siteUrl: string): string {
   function renderCol(post: PostRef): string {
-    const postUrl = `${siteUrl}/tiny-house/${post.slug}/`
+    const postUrl = `${siteUrl}/tiny-house/${cleanSlug(post.slug)}/`
     const imageHtml = post.image
-      ? `<a href="${escapeHtml(postUrl)}"><img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" width="268" style="width: 100%; display: block; border-radius: 8px; max-height: 160px; object-fit: cover; margin-bottom: 12px;" /></a>`
+      ? `<a href="${escapeHtml(postUrl)}"><img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" width="236" style="width: 100%; height: 150px; display: block; border-radius: 8px; object-fit: cover;" /></a>`
       : ''
 
     return `
-      ${imageHtml}
-      <h3 style="color: #111827; margin: 0 0 8px; font-size: 16px; font-weight: 700; line-height: 1.3;">
-        <a href="${escapeHtml(postUrl)}" style="color: #111827; text-decoration: none;">${escapeHtml(post.title)}</a>
-      </h3>
-      <p style="color: #374151; line-height: 1.5; font-size: 13px; margin: 0 0 12px;">
-        ${escapeHtml(post.summary)}
-      </p>
-      <a href="${escapeHtml(postUrl)}" style="color: #05DE66; font-size: 13px; font-weight: 600; text-decoration: none;">
-        Weiterlesen &rarr;
-      </a>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr><td style="padding-bottom: 12px;">${imageHtml}</td></tr>
+        <tr><td>
+          <h3 style="color: #111827; margin: 0 0 8px; font-size: 16px; font-weight: 700; line-height: 1.3;">
+            <a href="${escapeHtml(postUrl)}" style="color: #111827; text-decoration: none;">${escapeHtml(post.title)}</a>
+          </h3>
+          <p style="color: #374151; line-height: 1.6; font-size: 14px; margin: 0 0 12px;">
+            ${escapeHtml(post.summary)}
+          </p>
+          <a href="${escapeHtml(postUrl)}" style="color: #05DE66; font-size: 14px; font-weight: 600; text-decoration: none;">
+            Weiterlesen &rarr;
+          </a>
+        </td></tr>
+      </table>
     `
   }
 
   return `
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 32px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
-        <td width="50%" valign="top" style="padding-right: 8px;">
-          ${renderCol(postLeft)}
-        </td>
-        <td width="50%" valign="top" style="padding-left: 8px;">
-          ${renderCol(postRight)}
+        <td style="padding: 0 32px 32px 32px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td width="50%" valign="top" style="padding-right: 12px;">
+                ${renderCol(postLeft)}
+              </td>
+              <td width="50%" valign="top" style="padding-left: 12px;">
+                ${renderCol(postRight)}
+              </td>
+            </tr>
+          </table>
         </td>
       </tr>
     </table>
@@ -166,12 +186,38 @@ function renderTwoColumnBlock(postLeft: PostRef, postRight: PostRef, siteUrl: st
 function renderTextBlock(content: string): string {
   const htmlContent = escapeHtml(content).replace(/\n/g, '<br />')
   return `
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 32px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
-        <td style="padding: 0 32px;">
+        <td style="padding: 0 32px 32px 32px;">
           <p style="color: #374151; line-height: 1.7; font-size: 15px; margin: 0;">
             ${htmlContent}
           </p>
+        </td>
+      </tr>
+    </table>
+  `
+}
+
+function renderSocialLinks(): string {
+  return `
+    <p style="margin: 0 0 16px; font-size: 13px;">
+      <a href="https://www.instagram.com/kokomo.house" style="color: #05DE66; text-decoration: none; font-weight: 500;">Instagram</a>
+      <span style="color: #d1d5db; padding: 0 6px;">&middot;</span>
+      <a href="https://www.facebook.com/groups/tinyhousecommunityschweiz" style="color: #05DE66; text-decoration: none; font-weight: 500;">Facebook</a>
+      <span style="color: #d1d5db; padding: 0 6px;">&middot;</span>
+      <a href="https://www.linkedin.com/in/michimauch/" style="color: #05DE66; text-decoration: none; font-weight: 500;">LinkedIn</a>
+      <span style="color: #d1d5db; padding: 0 6px;">&middot;</span>
+      <a href="mailto:michi.mauch@gmail.com" style="color: #05DE66; text-decoration: none; font-weight: 500;">E-Mail</a>
+    </p>
+  `
+}
+
+function renderSeparator(): string {
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        <td style="padding: 0 32px;">
+          <div style="border-top: 1px solid #e5e7eb; margin: 0 0 32px 0;"></div>
         </td>
       </tr>
     </table>
@@ -184,7 +230,7 @@ export function buildMultiBlockNewsletterHtml(
   siteUrl: string,
   unsubscribeUrl: string,
 ): string {
-  const blocksHtml = blocks
+  const renderedBlocks = blocks
     .map((block) => {
       switch (block.type) {
         case 'hero': {
@@ -204,23 +250,27 @@ export function buildMultiBlockNewsletterHtml(
           return block.content ? renderTextBlock(block.content) : ''
       }
     })
-    .join('\n')
+    .filter(Boolean)
+
+  const blocksHtml = renderedBlocks.join(renderSeparator())
+  const firstBlockIsHero = blocks.length > 0 && blocks[0].type === 'hero'
+  const contentPadding = firstBlockIsHero ? 'padding: 0;' : 'padding: 24px 0 0;'
 
   return `
-    <table width="600" cellpadding="0" cellspacing="0" border="0" align="center" style="font-family: 'Poppins', system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e5e7eb;">
+    <table width="600" cellpadding="0" cellspacing="0" border="0" align="center" style="table-layout: fixed; font-family: 'Poppins', system-ui, -apple-system, sans-serif; max-width: 600px; width: 100%; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e5e7eb;">
       <tr>
-        <td style="background: linear-gradient(135deg, #017734, #01ABE7); padding: 24px 32px; text-align: center;">
-          <img src="${escapeHtml(siteUrl)}/static/images/kokomo-bildmarke.svg" alt="KOKOMO" width="48" height="48" style="margin-bottom: 8px;" />
-          <p style="color: white; margin: 0; font-size: 20px; font-weight: 600;">KOKOMO House</p>
+        <td style="background: linear-gradient(135deg, #017734, #03B352); padding: 14px 32px; text-align: center;">
+          <img src="${escapeHtml(siteUrl)}/static/images/kokomo-bildmarke.svg" alt="KOKOMO" width="32" height="32" style="display: inline; width: 32px; height: 32px; vertical-align: middle; margin-right: 10px;" /><span style="color: white; font-size: 18px; font-weight: 600; vertical-align: middle;">KOKOMO House</span>
         </td>
       </tr>
       <tr>
-        <td style="padding: 32px 0 0;">
+        <td style="${contentPadding}">
           ${blocksHtml}
         </td>
       </tr>
       <tr>
-        <td style="background: #f9fafb; padding: 20px 32px; border-top: 1px solid #e5e7eb; text-align: center;">
+        <td style="background: #f9fafb; padding: 24px 32px; border-top: 1px solid #e5e7eb; text-align: center;">
+          ${renderSocialLinks()}
           <p style="color: #9ca3af; font-size: 12px; margin: 0 0 8px;">
             Du erhältst diesen Newsletter, weil du dich auf <a href="${escapeHtml(siteUrl)}" style="color: #05DE66; text-decoration: none;">kokomo.house</a> angemeldet hast.
           </p>

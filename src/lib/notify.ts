@@ -215,7 +215,8 @@ export async function sendNewsletterEmail(data: {
   postSummary: string
   postDate: string
 }): Promise<{ resendEmailId: string | null }> {
-  const postUrl = `${siteConfig.siteUrl}/tiny-house/${data.postSlug}/`
+  const slug = data.postSlug.replace(/\.md$/, '')
+  const postUrl = `${siteConfig.siteUrl}/tiny-house/${slug}/`
   const unsubscribeUrl = `${siteConfig.siteUrl}/unsubscribe?token=${data.unsubscribeToken}`
 
   const result = await resend.emails.send({
