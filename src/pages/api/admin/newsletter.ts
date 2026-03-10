@@ -187,46 +187,58 @@ export const POST: APIRoute = async ({ request }) => {
         }
       }
 
-      const CHUNK_SIZE = 15
       const SEND_DELAY_MS = 800
       const MAX_RETRIES = 2
-      let retrySent = 0
-      const chunk = failedRecipients.slice(0, CHUNK_SIZE)
 
-      for (let i = 0; i < chunk.length; i++) {
-        const sub = chunk[i]
-        for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-          try {
-            const result = await sendMultiBlockNewsletterEmail({
-              email: sub.email,
-              unsubscribeToken: sub.token,
-              subject: retrySubject,
-              blocks: typedBlocks,
-              postsMap,
-            })
-            await updateRecipientResendId(sendId, sub.email, result.resendEmailId ?? '')
-            retrySent++
-            break
-          } catch (err: any) {
-            const isRateLimit = err?.statusCode === 429 || err?.message?.includes('rate')
-            if (isRateLimit && attempt < MAX_RETRIES) {
-              await new Promise((resolve) => setTimeout(resolve, 3000 * (attempt + 1)))
-            } else {
-              console.error(`[newsletter retry] Failed to send to ${sub.email}:`, err?.message)
-              break
+      const stream = new ReadableStream({
+        async start(controller) {
+          const encoder = new TextEncoder()
+          let retrySent = 0
+
+          for (let i = 0; i < failedRecipients.length; i++) {
+            const sub = failedRecipients[i]
+            for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+              try {
+                const result = await sendMultiBlockNewsletterEmail({
+                  email: sub.email,
+                  unsubscribeToken: sub.token,
+                  subject: retrySubject,
+                  blocks: typedBlocks,
+                  postsMap,
+                })
+                await updateRecipientResendId(sendId, sub.email, result.resendEmailId ?? '')
+                retrySent++
+                break
+              } catch (err: any) {
+                const isRateLimit = err?.statusCode === 429 || err?.message?.includes('rate')
+                if (isRateLimit && attempt < MAX_RETRIES) {
+                  await new Promise((resolve) => setTimeout(resolve, 3000 * (attempt + 1)))
+                } else {
+                  console.error(`[newsletter retry] Failed to send to ${sub.email}:`, err?.message)
+                  break
+                }
+              }
+            }
+
+            controller.enqueue(encoder.encode(
+              JSON.stringify({ sent: retrySent, total: failedRecipients.length, remaining: failedRecipients.length - retrySent }) + '\n'
+            ))
+
+            if (i < failedRecipients.length - 1) {
+              await new Promise((resolve) => setTimeout(resolve, SEND_DELAY_MS))
             }
           }
-        }
-        if (i < chunk.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, SEND_DELAY_MS))
-        }
-      }
 
-      const remaining = failedRecipients.length - retrySent
-      return new Response(
-        JSON.stringify({ ok: true, sent: retrySent, total: failedRecipients.length, remaining }),
-        { status: 200, headers },
-      )
+          controller.enqueue(encoder.encode(
+            JSON.stringify({ done: true, sent: retrySent, total: failedRecipients.length }) + '\n'
+          ))
+          controller.close()
+        }
+      })
+
+      return new Response(stream, {
+        headers: { 'Content-Type': 'text/plain', 'Transfer-Encoding': 'chunked' },
+      })
     }
 
     if (action === 'delete') {
@@ -252,7 +264,6 @@ export const POST: APIRoute = async ({ request }) => {
       )
     }
 
-    // Sending is chunked: first 15 per request, client loops via retry-failed
     const MAX_RETRIES = 2
     let successCount = 0
     const sentRecipients: { email: string; resendEmailId: string | null }[] = []
@@ -307,45 +318,57 @@ export const POST: APIRoute = async ({ request }) => {
         subscribers.map((s) => ({ send_id: sendId, email: s.email, resend_email_id: null })),
       )
 
-      // Send first chunk
-      const CHUNK_SIZE = 15
-      const SEND_DELAY_MS_CHUNK = 800
-      const chunk = subscribers.slice(0, CHUNK_SIZE)
+      // Stream all emails sequentially with progress
+      const SEND_DELAY_MS = 800
 
-      for (let i = 0; i < chunk.length; i++) {
-        const sub = chunk[i]
-        for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-          try {
-            const result = await sendMultiBlockNewsletterEmail({
-              email: sub.email,
-              unsubscribeToken: sub.token,
-              subject,
-              blocks: typedBlocks,
-              postsMap,
-            })
-            successCount++
-            await updateRecipientResendId(sendId, sub.email, result.resendEmailId ?? '')
-            break
-          } catch (err: any) {
-            const isRateLimit = err?.statusCode === 429 || err?.message?.includes('rate')
-            if (isRateLimit && attempt < MAX_RETRIES) {
-              await new Promise((resolve) => setTimeout(resolve, 3000 * (attempt + 1)))
-            } else {
-              console.error(`[newsletter] Failed to send to ${sub.email}:`, err?.message)
-              break
+      const stream = new ReadableStream({
+        async start(controller) {
+          const encoder = new TextEncoder()
+
+          for (let i = 0; i < subscribers.length; i++) {
+            const sub = subscribers[i]
+            for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+              try {
+                const result = await sendMultiBlockNewsletterEmail({
+                  email: sub.email,
+                  unsubscribeToken: sub.token,
+                  subject,
+                  blocks: typedBlocks,
+                  postsMap,
+                })
+                successCount++
+                await updateRecipientResendId(sendId, sub.email, result.resendEmailId ?? '')
+                break
+              } catch (err: any) {
+                const isRateLimit = err?.statusCode === 429 || err?.message?.includes('rate')
+                if (isRateLimit && attempt < MAX_RETRIES) {
+                  await new Promise((resolve) => setTimeout(resolve, 3000 * (attempt + 1)))
+                } else {
+                  console.error(`[newsletter] Failed to send to ${sub.email}:`, err?.message)
+                  break
+                }
+              }
+            }
+
+            controller.enqueue(encoder.encode(
+              JSON.stringify({ sent: successCount, total: subscribers.length, remaining: subscribers.length - successCount }) + '\n'
+            ))
+
+            if (i < subscribers.length - 1) {
+              await new Promise((resolve) => setTimeout(resolve, SEND_DELAY_MS))
             }
           }
-        }
-        if (i < chunk.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, SEND_DELAY_MS_CHUNK))
-        }
-      }
 
-      const remaining = subscribers.length - successCount
-      return new Response(
-        JSON.stringify({ ok: true, sent: successCount, total: subscribers.length, remaining, sendId }),
-        { status: 200, headers },
-      )
+          controller.enqueue(encoder.encode(
+            JSON.stringify({ done: true, sent: successCount, total: subscribers.length }) + '\n'
+          ))
+          controller.close()
+        }
+      })
+
+      return new Response(stream, {
+        headers: { 'Content-Type': 'text/plain', 'Transfer-Encoding': 'chunked' },
+      })
     }
 
     // ─── Legacy single-post path ───
@@ -377,46 +400,58 @@ export const POST: APIRoute = async ({ request }) => {
       subscribers.map((s) => ({ send_id: sendId, email: s.email, resend_email_id: null })),
     )
 
-    const CHUNK_SIZE = 15
-    const SEND_DELAY_MS_CHUNK = 800
-    const chunk = subscribers.slice(0, CHUNK_SIZE)
+    const SEND_DELAY_MS = 800
 
-    for (let i = 0; i < chunk.length; i++) {
-      const sub = chunk[i]
-      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-        try {
-          const result = await sendNewsletterEmail({
-            email: sub.email,
-            unsubscribeToken: sub.token,
-            postTitle: post.data.title,
-            postSlug: post.id,
-            postImage: getFirstImage(post.data.images),
-            postSummary: post.data.summary ?? '',
-            postDate: post.data.date.toISOString().split('T')[0],
-          })
-          successCount++
-          await updateRecipientResendId(sendId, sub.email, result.resendEmailId ?? '')
-          break
-        } catch (err: any) {
-          const isRateLimit = err?.statusCode === 429 || err?.message?.includes('rate')
-          if (isRateLimit && attempt < MAX_RETRIES) {
-            await new Promise((resolve) => setTimeout(resolve, 3000 * (attempt + 1)))
-          } else {
-            console.error(`[newsletter] Failed to send to ${sub.email}:`, err?.message)
-            break
+    const stream = new ReadableStream({
+      async start(controller) {
+        const encoder = new TextEncoder()
+
+        for (let i = 0; i < subscribers.length; i++) {
+          const sub = subscribers[i]
+          for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+            try {
+              const result = await sendNewsletterEmail({
+                email: sub.email,
+                unsubscribeToken: sub.token,
+                postTitle: post.data.title,
+                postSlug: post.id,
+                postImage: getFirstImage(post.data.images),
+                postSummary: post.data.summary ?? '',
+                postDate: post.data.date.toISOString().split('T')[0],
+              })
+              successCount++
+              await updateRecipientResendId(sendId, sub.email, result.resendEmailId ?? '')
+              break
+            } catch (err: any) {
+              const isRateLimit = err?.statusCode === 429 || err?.message?.includes('rate')
+              if (isRateLimit && attempt < MAX_RETRIES) {
+                await new Promise((resolve) => setTimeout(resolve, 3000 * (attempt + 1)))
+              } else {
+                console.error(`[newsletter] Failed to send to ${sub.email}:`, err?.message)
+                break
+              }
+            }
+          }
+
+          controller.enqueue(encoder.encode(
+            JSON.stringify({ sent: successCount, total: subscribers.length, remaining: subscribers.length - successCount }) + '\n'
+          ))
+
+          if (i < subscribers.length - 1) {
+            await new Promise((resolve) => setTimeout(resolve, SEND_DELAY_MS))
           }
         }
-      }
-      if (i < chunk.length - 1) {
-        await new Promise((resolve) => setTimeout(resolve, SEND_DELAY_MS_CHUNK))
-      }
-    }
 
-    const remaining = subscribers.length - successCount
-    return new Response(
-      JSON.stringify({ ok: true, sent: successCount, total: subscribers.length, remaining, sendId }),
-      { status: 200, headers },
-    )
+        controller.enqueue(encoder.encode(
+          JSON.stringify({ done: true, sent: successCount, total: subscribers.length }) + '\n'
+        ))
+        controller.close()
+      }
+    })
+
+    return new Response(stream, {
+      headers: { 'Content-Type': 'text/plain', 'Transfer-Encoding': 'chunked' },
+    })
   } catch (err: any) {
     console.error('[admin/newsletter POST]', err)
     return new Response(

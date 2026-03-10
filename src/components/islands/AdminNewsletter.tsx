@@ -815,7 +815,7 @@ export default function AdminNewsletter() {
   const [subject, setSubject] = useState('')
   const [generatingSubject, setGeneratingSubject] = useState(false)
   const [sending, setSending] = useState(false)
-  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+  const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null)
   const [showPreview, setShowPreview] = useState(false)
   const [confirmSend, setConfirmSend] = useState(false)
   const [confirmAction, setConfirmAction] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null)
@@ -881,6 +881,43 @@ export default function AdminNewsletter() {
     setLoadingDetail(false)
   }
 
+  async function streamingSend(
+    body: object,
+    onProgress: (data: { sent: number; total: number; remaining: number }) => void
+  ): Promise<{ sent: number; total: number }> {
+    const res = await fetch('/api/admin/newsletter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+
+    if (!res.ok) {
+      const err = await res.json()
+      throw new Error(err.error || 'Fehler beim Versenden.')
+    }
+
+    const reader = res.body!.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+    let lastData = { sent: 0, total: 0 }
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() || ''
+      for (const line of lines) {
+        if (!line.trim()) continue
+        const data = JSON.parse(line)
+        lastData = data
+        if (!data.done) onProgress(data)
+      }
+    }
+
+    return lastData
+  }
+
   async function handleRetryFailed(send: NewsletterSend) {
     const failedCount = sendRecipients.filter((r) => !r.resend_email_id).length
     if (failedCount === 0) {
@@ -894,31 +931,18 @@ export default function AdminNewsletter() {
     }
     setRetryConfirm(false)
     setRetrying(true)
-    let totalSent = 0
     try {
-      let remaining = failedCount
-      while (remaining > 0) {
-        const res = await fetch('/api/admin/newsletter', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'retry-failed', sendId: send.id }),
-        })
-        const json = await res.json()
-        if (json.error) {
-          setToast({ type: 'error', message: json.error })
-          break
-        }
-        totalSent += json.sent
-        remaining = json.remaining ?? 0
-        setToast({ type: 'info', message: `${totalSent} gesendet, ${remaining} verbleibend…` })
-      }
-      if (totalSent > 0) {
-        setToast({ type: 'success', message: `${totalSent} erfolgreich nachgesendet.` })
+      const result = await streamingSend(
+        { action: 'retry-failed', sendId: send.id },
+        ({ sent, total }) => setToast({ type: 'info', message: `${sent} von ${total} nachgesendet…` })
+      )
+      if (result.sent > 0) {
+        setToast({ type: 'success', message: `${result.sent} erfolgreich nachgesendet.` })
       }
       await loadSendDetail(send)
       await loadData()
-    } catch (err) {
-      setToast({ type: 'error', message: `Nachversand abgebrochen nach ${totalSent} Emails.` })
+    } catch (err: any) {
+      setToast({ type: 'error', message: err.message })
     }
     setRetrying(false)
   }
@@ -1156,48 +1180,16 @@ export default function AdminNewsletter() {
   async function handleSendConfirmed() {
     setConfirmSend(false)
     setSending(true)
-
     try {
-      // First request: creates send record + sends first chunk
-      const res = await fetch('/api/admin/newsletter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'send', subject, blocks }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setToast({ type: 'error', message: data.error || 'Fehler beim Versenden.' })
-        setSending(false)
-        return
-      }
-
-      let totalSent = data.sent
-      let remaining = data.remaining ?? 0
-      const sendId = data.sendId
-
-      // Continue sending remaining in chunks via retry-failed
-      while (remaining > 0 && sendId) {
-        setToast({ type: 'info', message: `${totalSent} gesendet, ${remaining} verbleibend…` })
-        const retryRes = await fetch('/api/admin/newsletter', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'retry-failed', sendId }),
-        })
-        const retryData = await retryRes.json()
-        if (retryData.error) {
-          setToast({ type: 'error', message: retryData.error })
-          break
-        }
-        totalSent += retryData.sent
-        remaining = retryData.remaining ?? 0
-      }
-
-      setToast({ type: 'success', message: `Erfolgreich an ${totalSent} Empfänger versendet.` })
+      const result = await streamingSend(
+        { action: 'send', subject, blocks },
+        ({ sent, total }) => setToast({ type: 'info', message: `${sent} von ${total} gesendet…` })
+      )
+      setToast({ type: 'success', message: `Erfolgreich an ${result.sent} Empfänger versendet.` })
       goBackToPicker()
       loadData()
-    } catch (err) {
-      console.error('[Newsletter] Send error:', err)
-      setToast({ type: 'error', message: 'Verbindung fehlgeschlagen.' })
+    } catch (err: any) {
+      setToast({ type: 'error', message: err.message })
     } finally {
       setSending(false)
     }
@@ -1898,7 +1890,9 @@ export default function AdminNewsletter() {
             className={`pointer-events-auto flex items-center gap-3 rounded-2xl border px-5 py-3 shadow-xl backdrop-blur-md ${
               toast.type === 'success'
                 ? 'border-emerald-200/60 bg-emerald-50/90 text-emerald-800 dark:border-emerald-700/60 dark:bg-emerald-900/80 dark:text-emerald-200'
-                : 'border-red-200/60 bg-red-50/90 text-red-800 dark:border-red-700/60 dark:bg-red-900/80 dark:text-red-200'
+                : toast.type === 'info'
+                  ? 'border-blue-200/60 bg-blue-50/90 text-blue-800 dark:border-blue-700/60 dark:bg-blue-900/80 dark:text-blue-200'
+                  : 'border-red-200/60 bg-red-50/90 text-red-800 dark:border-red-700/60 dark:bg-red-900/80 dark:text-red-200'
             }`}
           >
             <span className="text-sm font-medium">{toast.message}</span>
