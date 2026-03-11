@@ -9,6 +9,7 @@ import '@fontsource/roboto/700.css'
 import Header from '../components/Header.astro'
 import Footer from '../components/Footer.astro'
 import AnimatedBackground from '../components/islands/AnimatedBackground'
+import NewsletterPopup from '../components/islands/NewsletterPopup'
 import { siteConfig } from '../lib/site-config'
 
 interface Props {
@@ -175,6 +176,7 @@ const breadcrumbLd = !article && pathSegments.length > 0 ? {
       <div class="page-curtain" id="page-curtain"></div>
       <Footer />
     </div>
+    <NewsletterPopup client:only="react" />
     <script is:inline>
       (function () {
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
