@@ -114,8 +114,8 @@ export const POST: APIRoute = async ({ request }) => {
       const typedBlocks = blocks as NewsletterBlock[]
       const slugs = new Set<string>()
       for (const block of typedBlocks) {
-        if (block.type === 'hero' || block.type === 'article') slugs.add(block.slug)
-        if (block.type === 'two-column') { slugs.add(block.slugLeft); slugs.add(block.slugRight) }
+        if (block.type === 'hero') slugs.add(block.slug)
+        if (block.type === 'link-list') block.slugs.forEach((s) => slugs.add(s))
       }
 
       const allPosts = await getCollection('posts')
@@ -171,8 +171,8 @@ export const POST: APIRoute = async ({ request }) => {
       const typedBlocks = JSON.parse(sendData.blocks_json) as NewsletterBlock[]
       const slugs = new Set<string>()
       for (const block of typedBlocks) {
-        if (block.type === 'hero' || block.type === 'article') slugs.add(block.slug)
-        if (block.type === 'two-column') { slugs.add(block.slugLeft); slugs.add(block.slugRight) }
+        if (block.type === 'hero') slugs.add(block.slug)
+        if (block.type === 'link-list') block.slugs.forEach((s) => slugs.add(s))
       }
 
       const allPosts = await getCollection('posts')
@@ -275,11 +275,8 @@ export const POST: APIRoute = async ({ request }) => {
       // Collect all slugs from blocks
       const slugs = new Set<string>()
       for (const block of typedBlocks) {
-        if (block.type === 'hero' || block.type === 'article') slugs.add(block.slug)
-        if (block.type === 'two-column') {
-          slugs.add(block.slugLeft)
-          slugs.add(block.slugRight)
-        }
+        if (block.type === 'hero') slugs.add(block.slug)
+        if (block.type === 'link-list') block.slugs.forEach((s) => slugs.add(s))
       }
 
       // Resolve posts

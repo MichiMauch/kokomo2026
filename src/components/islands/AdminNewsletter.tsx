@@ -110,9 +110,8 @@ const statusBadge: Record<string, { label: string; cls: string }> = {
 
 const blockTypeLabels: Record<NewsletterBlock['type'], string> = {
   hero: 'Hero',
-  article: 'Artikel',
-  'two-column': '2-Spaltig',
   text: 'Freitext',
+  'link-list': 'Link-Liste',
 }
 
 function createBlock(type: NewsletterBlock['type']): NewsletterBlock {
@@ -120,12 +119,10 @@ function createBlock(type: NewsletterBlock['type']): NewsletterBlock {
   switch (type) {
     case 'hero':
       return { id, type: 'hero', slug: '' }
-    case 'article':
-      return { id, type: 'article', slug: '' }
-    case 'two-column':
-      return { id, type: 'two-column', slugLeft: '', slugRight: '' }
     case 'text':
       return { id, type: 'text', content: '' }
+    case 'link-list':
+      return { id, type: 'link-list', slugs: [] }
   }
 }
 
@@ -138,12 +135,11 @@ function blocksAreValid(blocks: NewsletterBlock[]): boolean {
   return blocks.every((block) => {
     switch (block.type) {
       case 'hero':
-      case 'article':
         return block.slug !== ''
-      case 'two-column':
-        return block.slugLeft !== '' && block.slugRight !== ''
       case 'text':
         return block.content.trim() !== ''
+      case 'link-list':
+        return block.slugs.length > 0
     }
   })
 }
@@ -151,11 +147,8 @@ function blocksAreValid(blocks: NewsletterBlock[]): boolean {
 function buildPostsMap(blocks: NewsletterBlock[], posts: Post[]): Record<string, PostRef> {
   const slugs = new Set<string>()
   for (const block of blocks) {
-    if (block.type === 'hero' || block.type === 'article') slugs.add(block.slug)
-    if (block.type === 'two-column') {
-      slugs.add(block.slugLeft)
-      slugs.add(block.slugRight)
-    }
+    if (block.type === 'hero') slugs.add(block.slug)
+    if (block.type === 'link-list') block.slugs.forEach((s) => slugs.add(s))
   }
   const map: Record<string, PostRef> = {}
   for (const slug of slugs) {
@@ -205,12 +198,11 @@ function saveDrafts(drafts: NewsletterDraft[]) {
 function getUsedSlugs(blocks: NewsletterBlock[]): Set<string> {
   const slugs = new Set<string>()
   for (const block of blocks) {
-    if (block.type === 'hero' || block.type === 'article') {
+    if (block.type === 'hero') {
       if (block.slug) slugs.add(block.slug)
     }
-    if (block.type === 'two-column') {
-      if (block.slugLeft) slugs.add(block.slugLeft)
-      if (block.slugRight) slugs.add(block.slugRight)
+    if (block.type === 'link-list') {
+      block.slugs.forEach((s) => { if (s) slugs.add(s) })
     }
   }
   return slugs
@@ -428,21 +420,17 @@ const slotMiniIcons: Record<NewsletterBlock['type'], JSX.Element> = {
   hero: (
     <div className="mb-1 h-4 rounded bg-primary-200 dark:bg-primary-800" />
   ),
-  article: (
-    <div className="mb-1 flex gap-1">
-      <div className="h-2 flex-1 rounded bg-slate-300 dark:bg-slate-600" />
-    </div>
-  ),
-  'two-column': (
-    <div className="mb-1 flex gap-1">
-      <div className="h-3 flex-1 rounded bg-slate-300 dark:bg-slate-600" />
-      <div className="h-3 flex-1 rounded bg-slate-300 dark:bg-slate-600" />
-    </div>
-  ),
   text: (
     <div className="mb-1 space-y-0.5">
       <div className="h-1 w-full rounded bg-slate-200 dark:bg-slate-700" />
       <div className="h-1 w-3/4 rounded bg-slate-200 dark:bg-slate-700" />
+    </div>
+  ),
+  'link-list': (
+    <div className="mb-1 space-y-0.5">
+      <div className="h-1.5 w-full rounded bg-primary-100 dark:bg-primary-900" />
+      <div className="h-1.5 w-full rounded bg-primary-100 dark:bg-primary-900" />
+      <div className="h-1.5 w-3/4 rounded bg-primary-100 dark:bg-primary-900" />
     </div>
   ),
 }
@@ -500,9 +488,8 @@ function InsertToolbar({ onInsert, alwaysExpanded }: {
         onMouseLeave={alwaysExpanded ? undefined : () => setOpen(false)}
       >
         <button onClick={() => { onInsert('hero'); setOpen(false) }} className={btnCls}>+ Hero</button>
-        <button onClick={() => { onInsert('article'); setOpen(false) }} className={btnCls}>+ Artikel</button>
-        <button onClick={() => { onInsert('two-column'); setOpen(false) }} className={btnCls}>+ 2-Spaltig</button>
         <button onClick={() => { onInsert('text'); setOpen(false) }} className={btnCls}>+ Freitext</button>
+        <button onClick={() => { onInsert('link-list'); setOpen(false) }} className={btnCls}>+ Link-Liste</button>
       </div>
     )
   }
@@ -599,7 +586,7 @@ function SlotCard({
         )}
       </div>
 
-      {(block.type === 'hero' || block.type === 'article') && (
+      {block.type === 'hero' && (
         <DropSlot
           slug={block.slug}
           posts={posts}
@@ -608,22 +595,31 @@ function SlotCard({
         />
       )}
 
-      {block.type === 'two-column' && (
-        <div className="grid grid-cols-2 gap-3">
-          <DropSlot
-            slug={block.slugLeft}
-            posts={posts}
-            onDrop={(slug) => onUpdate({ ...block, slugLeft: slug })}
-            onClear={() => onUpdate({ ...block, slugLeft: '' })}
-            label="Links"
-          />
-          <DropSlot
-            slug={block.slugRight}
-            posts={posts}
-            onDrop={(slug) => onUpdate({ ...block, slugRight: slug })}
-            onClear={() => onUpdate({ ...block, slugRight: '' })}
-            label="Rechts"
-          />
+      {block.type === 'link-list' && (
+        <div className="space-y-2">
+          {block.slugs.map((slug, i) => (
+            <DropSlot
+              key={i}
+              slug={slug}
+              posts={posts}
+              onDrop={(newSlug) => {
+                const newSlugs = [...block.slugs]
+                newSlugs[i] = newSlug
+                onUpdate({ ...block, slugs: newSlugs })
+              }}
+              onClear={() => {
+                const newSlugs = block.slugs.filter((_, idx) => idx !== i)
+                onUpdate({ ...block, slugs: newSlugs })
+              }}
+              label={`Artikel ${i + 1}`}
+            />
+          ))}
+          <button
+            onClick={() => onUpdate({ ...block, slugs: [...block.slugs, ''] })}
+            className="w-full rounded-xl border-2 border-dashed border-slate-300 px-4 py-3 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:border-primary-400 hover:bg-primary-50 hover:text-primary-600 dark:border-slate-600 dark:hover:border-primary-500 dark:hover:bg-primary-900/20 dark:hover:text-primary-400"
+          >
+            + Artikel hinzufügen
+          </button>
         </div>
       )}
 
@@ -699,9 +695,8 @@ function TemplateBuilder({
         <label className="mb-2 block text-sm font-medium text-[var(--text)]">Blöcke hinzufügen</label>
         <div className="flex flex-wrap gap-2">
           <button onClick={() => addSlot('hero')} className={toolbarBtnCls}>+ Hero</button>
-          <button onClick={() => addSlot('article')} className={toolbarBtnCls}>+ Artikel</button>
-          <button onClick={() => addSlot('two-column')} className={toolbarBtnCls}>+ 2-Spaltig</button>
           <button onClick={() => addSlot('text')} className={toolbarBtnCls}>+ Freitext</button>
+          <button onClick={() => addSlot('link-list')} className={toolbarBtnCls}>+ Link-Liste</button>
         </div>
       </div>
 
@@ -1054,11 +1049,8 @@ export default function AdminNewsletter() {
           const post = posts.find((p) => p.slug === slug)
           if (post) postsMap[slug] = { title: post.title, summary: post.summary }
         }
-        if ((block.type === 'hero' || block.type === 'article') && block.slug) addPost(block.slug)
-        if (block.type === 'two-column') {
-          if (block.slugLeft) addPost(block.slugLeft)
-          if (block.slugRight) addPost(block.slugRight)
-        }
+        if (block.type === 'hero' && block.slug) addPost(block.slug)
+        if (block.type === 'link-list') block.slugs.forEach((s) => { if (s) addPost(s) })
       }
       const res = await fetch('/api/admin/suggest-subject', {
         method: 'POST',

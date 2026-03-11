@@ -16,26 +16,19 @@ export interface HeroBlock {
   slug: string
 }
 
-export interface SingleArticleBlock {
-  id: string
-  type: 'article'
-  slug: string
-}
-
-export interface TwoColumnBlock {
-  id: string
-  type: 'two-column'
-  slugLeft: string
-  slugRight: string
-}
-
 export interface TextBlock {
   id: string
   type: 'text'
   content: string
 }
 
-export type NewsletterBlock = HeroBlock | SingleArticleBlock | TwoColumnBlock | TextBlock
+export interface LinkListBlock {
+  id: string
+  type: 'link-list'
+  slugs: string[]
+}
+
+export type NewsletterBlock = HeroBlock | TextBlock | LinkListBlock
 
 export interface NewsletterTemplate {
   id: string
@@ -52,20 +45,9 @@ export const BUILT_IN_TEMPLATES: NewsletterTemplate[] = [
     slots: [{ type: 'hero' }, { type: 'text' }],
   },
   {
-    id: 'hero-2col',
-    name: 'Hero + 2 Artikel',
+    id: 'hero-links',
+    name: 'Hero + Freitext + Links',
     builtIn: true,
-    slots: [{ type: 'hero' }, { type: 'two-column' }],
-  },
-  {
-    id: 'full',
-    name: 'Komplett',
-    builtIn: true,
-    slots: [
-      { type: 'hero' },
-      { type: 'article' },
-      { type: 'two-column' },
-      { type: 'text' },
-    ],
+    slots: [{ type: 'hero' }, { type: 'text' }, { type: 'link-list' }],
   },
 ]

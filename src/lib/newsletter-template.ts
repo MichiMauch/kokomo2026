@@ -44,10 +44,10 @@ export function buildNewsletterHtml(data: {
         <p style="color: #05DE66; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 12px;">
           ${formattedDate}
         </p>
-        <h2 style="color: #111827; margin: 0 0 16px; font-size: 24px; font-weight: 700; line-height: 1.3;">
+        <h2 style="color: #111827; margin: 0 0 16px; font-size: 22px; font-weight: 700; line-height: 1.3;">
           ${escapeHtml(data.postTitle)}
         </h2>
-        <p style="color: #374151; line-height: 1.7; font-size: 15px; margin: 0 0 28px;">
+        <p style="color: #374151; line-height: 1.6; font-size: 14px; margin: 0 0 28px;">
           ${escapeHtml(data.postSummary)}
         </p>
         <p style="text-align: center; margin: 0 0 32px;">
@@ -85,10 +85,10 @@ function renderHeroBlock(post: PostRef, siteUrl: string): string {
       ${imageHtml}
       <tr>
         <td style="padding: 24px 32px 32px 32px;">
-          <h2 style="color: #111827; margin: 0 0 16px; font-size: 24px; font-weight: 700; line-height: 1.3;">
+          <h2 style="color: #111827; margin: 0 0 16px; font-size: 22px; font-weight: 700; line-height: 1.3;">
             <a href="${escapeHtml(postUrl)}" style="color: #111827; text-decoration: none;">${escapeHtml(post.title)}</a>
           </h2>
-          <p style="color: #374151; line-height: 1.7; font-size: 15px; margin: 0 0 24px;">
+          <p style="color: #374151; line-height: 1.6; font-size: 14px; margin: 0 0 24px;">
             ${escapeHtml(post.summary)}
           </p>
           <p style="text-align: center; margin: 0;">
@@ -102,80 +102,35 @@ function renderHeroBlock(post: PostRef, siteUrl: string): string {
   `
 }
 
-function renderArticleBlock(post: PostRef, siteUrl: string): string {
-  const postUrl = `${siteUrl}/tiny-house/${cleanSlug(post.slug)}/`
-  const imageCell = post.image
-    ? `<td width="160" valign="top" style="padding-right: 20px;">
-        <a href="${escapeHtml(postUrl)}">
-          <img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" width="160" style="width: 160px; display: block; border-radius: 8px; object-fit: cover; height: 120px;" />
-        </a>
-      </td>`
-    : ''
+function renderLinkListBlock(posts: PostRef[], siteUrl: string): string {
+  if (posts.length === 0) return ''
+
+  const rows = posts
+    .map((post) => {
+      const postUrl = `${siteUrl}/tiny-house/${cleanSlug(post.slug)}/`
+      return `
+        <tr>
+          <td style="padding: 0;">
+            <a href="${escapeHtml(postUrl)}" style="display: block; padding: 12px 0; border-bottom: 1px solid #f3f4f6; text-decoration: none;">
+              <span style="color: #05DE66; font-size: 15px; font-weight: 600; line-height: 1.4; display: block;">
+                ${escapeHtml(post.title)}
+              </span>
+              <span style="color: #6b7280; font-size: 13px; line-height: 1.5; display: block; margin-top: 4px;">
+                ${escapeHtml(post.summary)}
+              </span>
+            </a>
+          </td>
+        </tr>
+      `
+    })
+    .join('')
 
   return `
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
         <td style="padding: 0 32px 32px 32px;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
-            <tr>
-              ${imageCell}
-              <td valign="top">
-                <h3 style="color: #111827; margin: 0 0 8px; font-size: 18px; font-weight: 700; line-height: 1.3;">
-                  <a href="${escapeHtml(postUrl)}" style="color: #111827; text-decoration: none;">${escapeHtml(post.title)}</a>
-                </h3>
-                <p style="color: #374151; line-height: 1.6; font-size: 14px; margin: 0 0 12px;">
-                  ${escapeHtml(post.summary)}
-                </p>
-                <a href="${escapeHtml(postUrl)}" style="color: #05DE66; font-size: 14px; font-weight: 600; text-decoration: none;">
-                  Weiterlesen &rarr;
-                </a>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  `
-}
-
-function renderTwoColumnBlock(postLeft: PostRef, postRight: PostRef, siteUrl: string): string {
-  function renderCol(post: PostRef): string {
-    const postUrl = `${siteUrl}/tiny-house/${cleanSlug(post.slug)}/`
-    const imageHtml = post.image
-      ? `<a href="${escapeHtml(postUrl)}"><img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" width="236" style="width: 100%; height: 150px; display: block; border-radius: 8px; object-fit: cover;" /></a>`
-      : ''
-
-    return `
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr><td style="padding-bottom: 12px;">${imageHtml}</td></tr>
-        <tr><td>
-          <h3 style="color: #111827; margin: 0 0 8px; font-size: 16px; font-weight: 700; line-height: 1.3;">
-            <a href="${escapeHtml(postUrl)}" style="color: #111827; text-decoration: none;">${escapeHtml(post.title)}</a>
-          </h3>
-          <p style="color: #374151; line-height: 1.6; font-size: 14px; margin: 0 0 12px;">
-            ${escapeHtml(post.summary)}
-          </p>
-          <a href="${escapeHtml(postUrl)}" style="color: #05DE66; font-size: 14px; font-weight: 600; text-decoration: none;">
-            Weiterlesen &rarr;
-          </a>
-        </td></tr>
-      </table>
-    `
-  }
-
-  return `
-    <table width="100%" cellpadding="0" cellspacing="0" border="0">
-      <tr>
-        <td style="padding: 0 32px 32px 32px;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0">
-            <tr>
-              <td width="50%" valign="top" style="padding-right: 12px;">
-                ${renderCol(postLeft)}
-              </td>
-              <td width="50%" valign="top" style="padding-left: 12px;">
-                ${renderCol(postRight)}
-              </td>
-            </tr>
+            ${rows}
           </table>
         </td>
       </tr>
@@ -189,7 +144,7 @@ function renderTextBlock(content: string): string {
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
         <td style="padding: 0 32px 32px 32px;">
-          <p style="color: #374151; line-height: 1.7; font-size: 15px; margin: 0;">
+          <p style="color: #374151; line-height: 1.6; font-size: 14px; margin: 0;">
             ${htmlContent}
           </p>
         </td>
@@ -237,14 +192,9 @@ export function buildMultiBlockNewsletterHtml(
           const post = postsMap[block.slug]
           return post ? renderHeroBlock(post, siteUrl) : ''
         }
-        case 'article': {
-          const post = postsMap[block.slug]
-          return post ? renderArticleBlock(post, siteUrl) : ''
-        }
-        case 'two-column': {
-          const left = postsMap[block.slugLeft]
-          const right = postsMap[block.slugRight]
-          return left && right ? renderTwoColumnBlock(left, right, siteUrl) : ''
+        case 'link-list': {
+          const posts = block.slugs.map((s) => postsMap[s]).filter(Boolean)
+          return posts.length > 0 ? renderLinkListBlock(posts, siteUrl) : ''
         }
         case 'text':
           return block.content ? renderTextBlock(block.content) : ''

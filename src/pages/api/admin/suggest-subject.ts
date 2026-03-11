@@ -58,14 +58,14 @@ export const POST: APIRoute = async ({ request }) => {
       if (block.type === 'text' && block.content) {
         contentParts.push(`Freitext: ${block.content}`)
       }
-      if ((block.type === 'hero' || block.type === 'article') && block.slug) {
+      if (block.type === 'hero' && block.slug) {
         const post = posts?.[block.slug]
         if (post) {
           contentParts.push(`Artikel: "${post.title}" — ${post.summary}`)
         }
       }
-      if (block.type === 'two-column') {
-        for (const slug of [block.slugLeft, block.slugRight]) {
+      if (block.type === 'link-list' && block.slugs) {
+        for (const slug of block.slugs) {
           if (slug) {
             const post = posts?.[slug]
             if (post) {
