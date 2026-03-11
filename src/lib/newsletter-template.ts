@@ -68,25 +68,6 @@ export function buildNewsletterHtml(data: {
   `
 }
 
-// ─── Responsive Styles ───────────────────────────────────────────────
-
-function responsiveStyles(): string {
-  return `
-    <style>
-      @media (max-width: 620px) {
-        .nl-outer { width: 100% !important; }
-        .nl-pad { padding-left: 16px !important; padding-right: 16px !important; }
-        .nl-article-img { display: block !important; width: 100% !important; padding-right: 0 !important; padding-bottom: 16px !important; }
-        .nl-article-img img { width: 100% !important; height: auto !important; }
-        .nl-article-text { display: block !important; width: 100% !important; }
-        .nl-twocol-left, .nl-twocol-right { display: block !important; width: 100% !important; padding-left: 0 !important; padding-right: 0 !important; padding-bottom: 24px !important; }
-        .nl-hero-img img { max-height: none !important; height: auto !important; }
-        .nl-btn { padding: 16px 36px !important; min-height: 44px !important; }
-      }
-    </style>
-  `
-}
-
 // ─── Multi-Block Newsletter ──────────────────────────────────────────
 
 function cleanSlug(slug: string): string {
@@ -96,14 +77,14 @@ function cleanSlug(slug: string): string {
 function renderHeroBlock(post: PostRef, siteUrl: string): string {
   const postUrl = `${siteUrl}/tiny-house/${cleanSlug(post.slug)}/`
   const imageHtml = post.image
-    ? `<tr><td class="nl-hero-img"><img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" width="600" style="width: 100%; display: block; max-height: 400px; object-fit: cover;" /></td></tr>`
+    ? `<tr><td><img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" width="600" style="width: 100%; display: block; max-height: 320px; object-fit: cover;" /></td></tr>`
     : ''
 
   return `
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       ${imageHtml}
       <tr>
-        <td class="nl-pad" style="padding: 24px 32px 32px 32px;">
+        <td style="padding: 24px 32px 32px 32px;">
           <h2 style="color: #111827; margin: 0 0 16px; font-size: 24px; font-weight: 700; line-height: 1.3;">
             <a href="${escapeHtml(postUrl)}" style="color: #111827; text-decoration: none;">${escapeHtml(post.title)}</a>
           </h2>
@@ -111,7 +92,7 @@ function renderHeroBlock(post: PostRef, siteUrl: string): string {
             ${escapeHtml(post.summary)}
           </p>
           <p style="text-align: center; margin: 0;">
-            <a href="${escapeHtml(postUrl)}" class="nl-btn" style="display: inline-block; background: #05DE66; color: white; padding: 14px 36px; border-radius: 999px; text-decoration: none; font-weight: 600; font-size: 15px;">
+            <a href="${escapeHtml(postUrl)}" style="display: inline-block; background: #05DE66; color: white; padding: 14px 36px; border-radius: 999px; text-decoration: none; font-weight: 600; font-size: 15px;">
               Weiterlesen
             </a>
           </p>
@@ -124,9 +105,9 @@ function renderHeroBlock(post: PostRef, siteUrl: string): string {
 function renderArticleBlock(post: PostRef, siteUrl: string): string {
   const postUrl = `${siteUrl}/tiny-house/${cleanSlug(post.slug)}/`
   const imageCell = post.image
-    ? `<td class="nl-article-img" width="160" valign="top" style="padding-right: 20px;">
+    ? `<td width="160" valign="top" style="padding-right: 20px;">
         <a href="${escapeHtml(postUrl)}">
-          <img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" width="160" style="width: 160px; display: block; border-radius: 8px; object-fit: cover; height: auto;" />
+          <img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" width="160" style="width: 160px; display: block; border-radius: 8px; object-fit: cover; height: 120px;" />
         </a>
       </td>`
     : ''
@@ -134,11 +115,11 @@ function renderArticleBlock(post: PostRef, siteUrl: string): string {
   return `
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
-        <td class="nl-pad" style="padding: 0 32px 32px 32px;">
+        <td style="padding: 0 32px 32px 32px;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
               ${imageCell}
-              <td class="nl-article-text" valign="top">
+              <td valign="top">
                 <h3 style="color: #111827; margin: 0 0 8px; font-size: 18px; font-weight: 700; line-height: 1.3;">
                   <a href="${escapeHtml(postUrl)}" style="color: #111827; text-decoration: none;">${escapeHtml(post.title)}</a>
                 </h3>
@@ -185,13 +166,13 @@ function renderTwoColumnBlock(postLeft: PostRef, postRight: PostRef, siteUrl: st
   return `
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
-        <td class="nl-pad" style="padding: 0 32px 32px 32px;">
+        <td style="padding: 0 32px 32px 32px;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
-              <td class="nl-twocol-left" width="50%" valign="top" style="padding-right: 12px;">
+              <td width="50%" valign="top" style="padding-right: 12px;">
                 ${renderCol(postLeft)}
               </td>
-              <td class="nl-twocol-right" width="50%" valign="top" style="padding-left: 12px;">
+              <td width="50%" valign="top" style="padding-left: 12px;">
                 ${renderCol(postRight)}
               </td>
             </tr>
@@ -207,7 +188,7 @@ function renderTextBlock(content: string): string {
   return `
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
-        <td class="nl-pad" style="padding: 0 32px 32px 32px;">
+        <td style="padding: 0 32px 32px 32px;">
           <p style="color: #374151; line-height: 1.7; font-size: 15px; margin: 0;">
             ${htmlContent}
           </p>
@@ -235,7 +216,7 @@ function renderSeparator(): string {
   return `
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
-        <td class="nl-pad" style="padding: 0 32px;">
+        <td style="padding: 0 32px;">
           <div style="border-top: 1px solid #e5e7eb; margin: 0 0 32px 0;"></div>
         </td>
       </tr>
@@ -276,10 +257,9 @@ export function buildMultiBlockNewsletterHtml(
   const contentPadding = firstBlockIsHero ? 'padding: 0;' : 'padding: 24px 0 0;'
 
   return `
-    ${responsiveStyles()}
-    <table class="nl-outer" width="600" cellpadding="0" cellspacing="0" border="0" align="center" style="table-layout: fixed; font-family: 'Poppins', system-ui, -apple-system, sans-serif; max-width: 600px; width: 100%; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e5e7eb;">
+    <table width="600" cellpadding="0" cellspacing="0" border="0" align="center" style="table-layout: fixed; font-family: 'Poppins', system-ui, -apple-system, sans-serif; max-width: 600px; width: 100%; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e5e7eb;">
       <tr>
-        <td class="nl-pad" style="background: linear-gradient(135deg, #017734, #03B352); padding: 14px 32px; text-align: center;">
+        <td style="background: linear-gradient(135deg, #017734, #03B352); padding: 14px 32px; text-align: center;">
           <img src="${escapeHtml(siteUrl)}/static/images/kokomo-bildmarke.svg" alt="KOKOMO" width="32" height="32" style="display: inline; width: 32px; height: 32px; vertical-align: middle; margin-right: 10px;" /><span style="color: white; font-size: 18px; font-weight: 600; vertical-align: middle;">KOKOMO House</span>
         </td>
       </tr>
@@ -289,13 +269,13 @@ export function buildMultiBlockNewsletterHtml(
         </td>
       </tr>
       <tr>
-        <td class="nl-pad" style="background: #f9fafb; padding: 24px 32px; border-top: 1px solid #e5e7eb; text-align: center;">
+        <td style="background: #f9fafb; padding: 24px 32px; border-top: 1px solid #e5e7eb; text-align: center;">
           ${renderSocialLinks()}
-          <p style="color: #9ca3af; font-size: 13px; margin: 0 0 8px;">
+          <p style="color: #9ca3af; font-size: 12px; margin: 0 0 8px;">
             Du erhältst diesen Newsletter, weil du dich auf <a href="${escapeHtml(siteUrl)}" style="color: #05DE66; text-decoration: none;">kokomo.house</a> angemeldet hast.
           </p>
           <p style="margin: 0;">
-            <a href="${escapeHtml(unsubscribeUrl)}" style="color: #9ca3af; font-size: 13px; text-decoration: underline;">Newsletter abbestellen</a>
+            <a href="${escapeHtml(unsubscribeUrl)}" style="color: #9ca3af; font-size: 12px; text-decoration: underline;">Newsletter abbestellen</a>
           </p>
         </td>
       </tr>
