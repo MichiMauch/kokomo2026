@@ -112,7 +112,7 @@ function renderLinkListBlock(posts: PostRef[], siteUrl: string): string {
         <tr>
           <td style="padding: 0;">
             <a href="${escapeHtml(postUrl)}" style="display: block; padding: 12px 0; border-bottom: 1px solid #f3f4f6; text-decoration: none;">
-              <span style="color: #05DE66; font-size: 15px; font-weight: 600; line-height: 1.4; display: block;">
+              <span style="color: #017734; font-size: 15px; font-weight: 600; line-height: 1.4; display: block;">
                 ${escapeHtml(post.title)}
               </span>
               <span style="color: #6b7280; font-size: 13px; line-height: 1.5; display: block; margin-top: 4px;">
