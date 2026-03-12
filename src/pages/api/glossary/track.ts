@@ -3,8 +3,19 @@ import { trackGlossaryTerm } from '../../../lib/turso'
 
 export const prerender = false
 
+const corsHeaders = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+}
+
+export const OPTIONS: APIRoute = async () => {
+  return new Response(null, { status: 204, headers: corsHeaders })
+}
+
 export const POST: APIRoute = async ({ request }) => {
-  const headers = { 'Content-Type': 'application/json' }
+  const headers = corsHeaders
 
   try {
     const { term, type } = await request.json()

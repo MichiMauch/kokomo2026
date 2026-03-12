@@ -86,9 +86,18 @@ export default function Search({ posts }: Props) {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, results, selectedIndex])
 
-  // Reset selected index on query change
+  // Reset selected index on query change + Matomo tracking
   useEffect(() => {
     setSelectedIndex(0)
+
+    if (query.length < 2) return
+    const timer = setTimeout(() => {
+      const paq = (window as any)._paq
+      if (paq) {
+        paq.push(['trackSiteSearch', query, 'Blog', results.length])
+      }
+    }, 1000)
+    return () => clearTimeout(timer)
   }, [query])
 
   // Scroll selected item into view

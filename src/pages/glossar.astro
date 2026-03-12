@@ -197,6 +197,12 @@ const definedTermSetLd = {
             body: JSON.stringify({ term: matchedTerm, type: 'search' }),
           }).catch(() => {})
         }
+        // Matomo Site Search tracking
+        const visibleCount = Array.from(entries).filter((e) => e.style.display !== 'none').length
+        const _paq = (window as any)._paq
+        if (_paq) {
+          _paq.push(['trackSiteSearch', q, 'Glossar', visibleCount])
+        }
       }, 500)
     }
   })
