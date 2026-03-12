@@ -10,6 +10,14 @@ const widgetScript = `
   var STYLE_ID = 'kokomo-glossar-style';
   var TOOLTIP_ID = 'kokomo-glossar-tooltip';
 
+  // Track widget load
+  try {
+    var xhr0 = new XMLHttpRequest();
+    xhr0.open('POST', API_BASE + '/widget-ping');
+    xhr0.setRequestHeader('Content-Type', 'application/json');
+    xhr0.send(JSON.stringify({ domain: window.location.hostname, url: window.location.href }));
+  } catch(e) {}
+
   // Inject styles once
   if (!document.getElementById(STYLE_ID)) {
     var style = document.createElement('style');

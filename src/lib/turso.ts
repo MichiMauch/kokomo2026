@@ -226,6 +226,37 @@ export async function getGlossaryStats(): Promise<GlossaryStat[]> {
   }))
 }
 
+// ─── Widget Loads ───────────────────────────────────────────────────────
+
+export async function trackWidgetLoad(domain: string, pageUrl?: string): Promise<void> {
+  const db = getClient()
+  await db.execute({
+    sql: `INSERT INTO widget_loads (domain, page_url) VALUES (?, ?)`,
+    args: [domain, pageUrl || null],
+  })
+}
+
+export interface WidgetLoadStats {
+  domain: string
+  loads: number
+  last_loaded: string
+}
+
+export async function getWidgetLoadStats(): Promise<WidgetLoadStats[]> {
+  const db = getClient()
+  const result = await db.execute(
+    `SELECT domain, COUNT(*) AS loads, MAX(loaded_at) AS last_loaded
+     FROM widget_loads
+     GROUP BY domain
+     ORDER BY loads DESC`,
+  )
+  return result.rows.map((row) => ({
+    domain: row.domain as string,
+    loads: row.loads as number,
+    last_loaded: row.last_loaded as string,
+  }))
+}
+
 export async function setGlossaryBoost(term: string, boost: number): Promise<void> {
   const db = getClient()
   await db.execute({
