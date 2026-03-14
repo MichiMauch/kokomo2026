@@ -5,6 +5,7 @@ summary: 'Unser Gas-Einbaubackofen im Tiny House war erst defekt, dann verbogen 
 tags: ['tiny house', 'wohnwagon', 'Tiny House Alltag', 'schweiz', 'autarkie']
 authors: ['default']
 draft: false
+images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/unser-gasbackofen-drama-von-kohle-pizza-zu-glueck-titelbild.webp?v=1773478095688'
 ---
 
 Wir haben im Tiny House so ein paar Dinge, die uns jedes Mal kurz daran erinnern, dass wir nicht in einer 08/15-Wohnung leben. Der Gasbackofen gehört definitiv dazu.
