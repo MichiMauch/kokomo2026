@@ -22,6 +22,14 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(JSON.stringify({ error: 'Domain fehlt.' }), { status: 400, headers: corsHeaders })
     }
 
+    if (domain.length > 253) {
+      return new Response(JSON.stringify({ error: 'Domain zu lang.' }), { status: 400, headers: corsHeaders })
+    }
+
+    if (url && (typeof url !== 'string' || url.length > 2048)) {
+      return new Response(JSON.stringify({ error: 'URL ungültig oder zu lang.' }), { status: 400, headers: corsHeaders })
+    }
+
     // Eigene Domain nicht tracken
     if (domain === 'www.kokomo.house' || domain === 'kokomo.house') {
       return new Response(JSON.stringify({ ok: true, tracked: false }), { status: 200, headers: corsHeaders })

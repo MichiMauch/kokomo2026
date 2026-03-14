@@ -44,11 +44,15 @@ export const GET: APIRoute = async ({ url }) => {
 
     // Search
     if (search) {
+      const safeSearch = search.slice(0, 100)
       terms = terms.filter(
-        (t) => t.term.toLowerCase().includes(search) || t.definition.toLowerCase().includes(search)
+        (t) => t.term.toLowerCase().includes(safeSearch) || t.definition.toLowerCase().includes(safeSearch)
       )
-      if (search.length >= 2) {
-        trackGlossaryTerm(search, 'search').catch(() => {})
+      if (safeSearch.length >= 2) {
+        const matchedTerm = terms.find((t) => t.term.toLowerCase().includes(safeSearch))
+        if (matchedTerm) {
+          trackGlossaryTerm(matchedTerm.term, 'search').catch(() => {})
+        }
       }
     }
 

@@ -40,7 +40,7 @@ export const POST: APIRoute = async ({ request }) => {
       status: 200,
       headers: {
         ...headers,
-        'Set-Cookie': `admin_session=${sessionToken}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${7 * 24 * 60 * 60}`,
+        'Set-Cookie': `admin_session=${sessionToken}; HttpOnly${import.meta.env.PROD ? '; Secure' : ''}; SameSite=Strict; Path=/; Max-Age=${7 * 24 * 60 * 60}`,
       },
     })
   } catch {

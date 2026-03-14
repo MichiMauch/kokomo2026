@@ -1,0 +1,186 @@
+---
+export const prerender = true
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="Glossar-Widget — Einbindung & Dokumentation"
+  description="Binde das Kokomo Glossar als Tooltip-Widget in deine eigene Website ein. Anleitung, Live-Beispiele und API-Dokumentation."
+>
+  <div class="my-8 mx-auto max-w-3xl">
+    <div class="glass-card rounded-2xl p-6 md:p-8">
+      <h1 class="mb-2 text-3xl font-bold tracking-tight md:text-4xl">Glossar-Widget</h1>
+      <p class="mb-8 text-[var(--text-secondary)]">
+        Binde das Kokomo Glossar als Tooltip-Widget in deine eigene Website ein — kostenlos.
+      </p>
+
+      <!-- Einbindung -->
+      <section class="mb-10">
+        <span class="mb-3 inline-block rounded-full bg-primary-500 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white">
+          Anleitung
+        </span>
+        <h2 class="mb-4 text-xl font-bold">Einbindung</h2>
+        <p class="mb-3 text-[var(--text-secondary)]">
+          Das Widget wird mit einem einzigen Script-Tag eingebunden — direkt vor <code class="rounded bg-[var(--border)]/40 px-1.5 py-0.5 text-sm">&lt;/body&gt;</code>:
+        </p>
+        <pre class="mb-6 overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm leading-relaxed text-green-300"><code>&lt;script src="https://www.kokomo.house/api/glossary/widget.js"&gt;&lt;/script&gt;</code></pre>
+
+        <h3 class="mb-2 font-semibold">Variante A: Auto-Highlight</h3>
+        <p class="mb-3 text-sm text-[var(--text-secondary)]">Begriffe werden automatisch erkannt und markiert:</p>
+        <pre class="mb-6 overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm leading-relaxed text-green-300"><code>&lt;article data-kokomo-glossar-auto&gt;
+  Dein Text mit Begriffen wie Tiny House, Autarkie, etc.
+&lt;/article&gt;</code></pre>
+
+        <h3 class="mb-2 font-semibold">Variante B: Manuell</h3>
+        <p class="mb-3 text-sm text-[var(--text-secondary)]">Einzelne Begriffe gezielt markieren:</p>
+        <pre class="mb-6 overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm leading-relaxed text-green-300"><code>&lt;span data-kokomo-glossar="holzofen"&gt;Holzofen&lt;/span&gt;</code></pre>
+
+        <h3 class="mb-2 font-semibold">Variante C: API</h3>
+        <p class="mb-3 text-sm text-[var(--text-secondary)]">Glossar-Daten als JSON abrufen:</p>
+        <pre class="overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm leading-relaxed text-green-300"><code>fetch("https://www.kokomo.house/api/glossary?slug=holzofen")
+fetch("https://www.kokomo.house/api/glossary?q=solar")
+fetch("https://www.kokomo.house/api/glossary?letter=A")
+fetch("https://www.kokomo.house/api/glossary")</code></pre>
+      </section>
+
+      <hr class="mb-10 border-[var(--border)]/30">
+
+      <!-- Live-Beispiel: Auto-Highlight -->
+      <section class="mb-10">
+        <span class="mb-3 inline-block rounded-full bg-primary-500 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white">
+          Modus 1
+        </span>
+        <h2 class="mb-4 text-xl font-bold">Auto-Highlight</h2>
+        <p class="mb-4 text-sm text-[var(--text-secondary)]">
+          <code class="rounded bg-[var(--border)]/40 px-1.5 py-0.5 text-sm">data-kokomo-glossar-auto</code> auf dem Container — das Widget findet und markiert Begriffe automatisch.
+        </p>
+        <div class="rounded-xl border border-[var(--border)] p-5" data-kokomo-glossar-auto>
+          <p class="mb-3 leading-relaxed text-[var(--text-secondary)]">
+            Wer ein Tiny House on Wheels plant, sollte sich mit Themen wie
+            Autarkie, Komposttoilette und Solaranlage beschäftigen. Auch eine
+            Regenwassernutzung kann sinnvoll sein. Die Bauweise in Holzrahmenbauweise
+            ist besonders beliebt, da sie leicht und nachhaltig ist.
+          </p>
+          <p class="leading-relaxed text-[var(--text-secondary)]">
+            Für die Energieversorgung kommen oft Photovoltaik-Anlagen zum Einsatz.
+            Wer komplett autark leben möchte, setzt zusätzlich auf eine Trenntoilette
+            und einen Wärmetauscher. Der Stellplatz ist ein weiteres wichtiges Thema —
+            nicht überall darf man ein Tiny House aufstellen.
+          </p>
+        </div>
+      </section>
+
+      <!-- Live-Beispiel: Manuelle Markierung -->
+      <section class="mb-10">
+        <span class="mb-3 inline-block rounded-full bg-primary-500 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white">
+          Modus 2
+        </span>
+        <h2 class="mb-4 text-xl font-bold">Manuelle Markierung</h2>
+        <p class="mb-4 text-sm text-[var(--text-secondary)]">
+          <code class="rounded bg-[var(--border)]/40 px-1.5 py-0.5 text-sm">data-kokomo-glossar="slug"</code> auf einzelnen Begriffen — volle Kontrolle über markierte Wörter.
+        </p>
+        <div class="rounded-xl border border-[var(--border)] p-5">
+          <p class="leading-relaxed text-[var(--text-secondary)]">
+            Ein <span data-kokomo-glossar="tiny-house">Tiny House</span> ist ein
+            kleines Wohnhaus, das oft auf einem
+            <span data-kokomo-glossar="trailer">Trailer</span> gebaut wird. Die
+            <span data-kokomo-glossar="grundflaeche">Grundfläche</span> beträgt
+            meist zwischen 15 und 45 Quadratmeter. Viele Bewohner setzen auf
+            <span data-kokomo-glossar="minimalismus">Minimalismus</span> und
+            einen bewussten Lebensstil.
+          </p>
+        </div>
+      </section>
+
+      <!-- Live-Beispiel: Custom Styling -->
+      <section class="mb-10">
+        <span class="mb-3 inline-block rounded-full bg-primary-500 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white">
+          Styling
+        </span>
+        <h2 class="mb-4 text-xl font-bold">Custom CSS Override</h2>
+        <p class="mb-4 text-sm text-[var(--text-secondary)]">
+          Die Widget-Styles lassen sich per CSS überschreiben:
+        </p>
+        <style>
+          .custom-styled .kokomo-glossar-term {
+            border-bottom-color: #e67e22;
+            border-bottom-width: 2px;
+          }
+        </style>
+        <div class="custom-styled rounded-xl border border-[var(--border)] p-5">
+          <p class="leading-relaxed text-[var(--text-secondary)]">
+            In diesem Abschnitt haben die Begriffe eine orange Unterstreichung.
+            Probier es aus: <span data-kokomo-glossar="nachhaltigkeit">Nachhaltigkeit</span>
+            und <span data-kokomo-glossar="offgrid">Offgrid-Living</span> sind wichtige Themen
+            beim <span data-kokomo-glossar="tiny-house">Tiny House</span>.
+          </p>
+        </div>
+      </section>
+
+      <hr class="mb-10 border-[var(--border)]/30">
+
+      <!-- API Tester -->
+      <section>
+        <span class="mb-3 inline-block rounded-full bg-blue-500 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white">
+          API
+        </span>
+        <h2 class="mb-4 text-xl font-bold text-blue-600 dark:text-blue-400">JSON-API testen</h2>
+        <p class="mb-4 text-sm text-[var(--text-secondary)]">
+          Die Glossar-Daten sind auch als REST-API verfügbar. Klick auf einen Endpunkt:
+        </p>
+        <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <button class="api-btn rounded-lg border border-[var(--border)] bg-[var(--bg)] p-3 text-left text-sm transition-colors hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10" data-api-path="/api/glossary?slug=holzofen">
+            <strong class="block font-semibold">Einzelner Begriff</strong>
+            <code class="text-xs text-[var(--text-secondary)]">?slug=holzofen</code>
+          </button>
+          <button class="api-btn rounded-lg border border-[var(--border)] bg-[var(--bg)] p-3 text-left text-sm transition-colors hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10" data-api-path="/api/glossary?q=solar">
+            <strong class="block font-semibold">Suche</strong>
+            <code class="text-xs text-[var(--text-secondary)]">?q=solar</code>
+          </button>
+          <button class="api-btn rounded-lg border border-[var(--border)] bg-[var(--bg)] p-3 text-left text-sm transition-colors hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10" data-api-path="/api/glossary?letter=A">
+            <strong class="block font-semibold">Nach Buchstabe</strong>
+            <code class="text-xs text-[var(--text-secondary)]">?letter=A</code>
+          </button>
+          <button class="api-btn rounded-lg border border-[var(--border)] bg-[var(--bg)] p-3 text-left text-sm transition-colors hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10" data-api-path="/api/glossary">
+            <strong class="block font-semibold">Alle Begriffe</strong>
+            <code class="text-xs text-[var(--text-secondary)]">/api/glossary</code>
+          </button>
+          <button class="api-btn rounded-lg border border-[var(--border)] bg-[var(--bg)] p-3 text-left text-sm transition-colors hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10" data-api-path="/api/glossary/top">
+            <strong class="block font-semibold">Top-Begriffe</strong>
+            <code class="text-xs text-[var(--text-secondary)]">/api/glossary/top</code>
+          </button>
+        </div>
+        <pre id="api-result" class="overflow-auto rounded-lg bg-gray-900 p-4 text-sm leading-relaxed text-green-300" style="max-height: 400px;">// Klicke oben auf einen Button...</pre>
+      </section>
+    </div>
+
+    <!-- Zurück zum Glossar -->
+    <div class="mt-6 text-center">
+      <a href="/glossar/" class="text-sm font-semibold text-primary-600 transition-colors hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">
+        ← Zurück zum Glossar
+      </a>
+    </div>
+  </div>
+
+  <!-- Widget laden -->
+  <script is:inline src="/api/glossary/widget.js"></script>
+  <script>
+    document.querySelectorAll('.api-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const path = (btn as HTMLElement).dataset.apiPath
+        if (!path || !path.startsWith('/api/glossary')) return
+        const el = document.getElementById('api-result')
+        if (!el) return
+        el.textContent = '// Lade...'
+        fetch(path)
+          .then((r) => r.json())
+          .then((data) => {
+            el.textContent = JSON.stringify(data, null, 2)
+          })
+          .catch((err) => {
+            el.textContent = '// Fehler: ' + err.message
+          })
+      })
+    })
+  </script>
+</BaseLayout>

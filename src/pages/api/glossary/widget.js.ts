@@ -88,10 +88,12 @@ const widgetScript = `
     var maxDef = data.definition.length > 200
       ? data.definition.substring(0, 200).replace(/\\s+\\S*$/, '') + '...'
       : data.definition;
+    var safeUrl = (typeof data.url === 'string' && data.url.indexOf('https://www.kokomo.house/') === 0)
+      ? data.url : 'https://www.kokomo.house/glossar/';
     tooltip.innerHTML =
       '<strong>' + escapeHtml(data.term) + '</strong>' +
       '<span>' + escapeHtml(maxDef) + '</span>' +
-      '<a class="kokomo-source" href="' + escapeHtml(data.url) + '" target="_blank" rel="noopener">→ kokomo.house/glossar</a>';
+      '<a class="kokomo-source" href="' + escapeHtml(safeUrl) + '" target="_blank" rel="noopener">→ kokomo.house/glossar</a>';
 
     var rect = el.getBoundingClientRect();
     var top = rect.bottom + 8;

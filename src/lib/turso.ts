@@ -178,7 +178,9 @@ export interface GlossaryStat {
 
 export async function trackGlossaryTerm(term: string, type: 'click' | 'search' | 'hover'): Promise<void> {
   const db = getClient()
-  const col = type === 'click' ? 'clicks' : type === 'search' ? 'searches' : 'hovers'
+  const colMap = { click: 'clicks', search: 'searches', hover: 'hovers' } as const
+  const col = colMap[type]
+  if (!col) throw new Error(`Invalid tracking type: ${type}`)
   await db.execute({
     sql: `INSERT INTO glossary_stats (term, ${col}, updated_at)
           VALUES (?, 1, datetime('now'))
