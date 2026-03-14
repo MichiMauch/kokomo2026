@@ -7,7 +7,6 @@ authors: ['default']
 draft: false
 images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/unser-gasbackofen-drama-von-kohle-pizza-zu-glueck-titelbild.webp?v=1773478095688'
 ---
-
 Wir haben im Tiny House so ein paar Dinge, die uns jedes Mal kurz daran erinnern, dass wir nicht in einer 08/15-Wohnung leben. Der Gasbackofen gehört definitiv dazu.
 
 Am Anfang klang das alles ziemlich romantisch. Backen mit Gas. Unabhängiger sein. Nicht jedes Mal überlegen müssen, ob die Batterie gerade Lust auf 2000 Watt hat. Und ganz ehrlich: Ein Ofen ist im Alltag einfach so ein stiller Held. Erst wenn er fehlt, merkst du, wie oft du ihn eigentlich brauchst.
@@ -88,6 +87,8 @@ Also bestellten wir.
 ## Der dritte Ofen: diesmal machen wir es richtig
 
 Als der neue Ofen ankam, waren wir fast schon ehrfürchtig. Keine Dellen. Keine verbogenen Bleche. Kein Hammer-Einsatz.
+
+![](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/unser-gasbackofen-drama-von-kohle-pizza-zu-glueck-1773478167920.webp)
 
 Und diesmal wollten wir nicht wieder auf gut Glück starten. Wir haben uns informiert, was eingestellt werden muss: Gasdüse, Gasart, all diese Details, die man beim ersten Mal so charmant ignorieren kann.
 
