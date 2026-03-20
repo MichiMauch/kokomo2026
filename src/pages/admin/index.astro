@@ -1,21 +1,13 @@
 ---
 export const prerender = false
-import BaseLayout from '../../../layouts/BaseLayout.astro'
-import AdminPostDetail from '../../../components/islands/AdminPostDetail'
-
-const { slug } = Astro.params
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import AdminDashboard from '../../components/islands/AdminDashboard'
 ---
 
-<BaseLayout title="Post bearbeiten" noIndex>
+<BaseLayout title="Dashboard" noIndex>
   <div class="py-12">
     <div class="mb-8 flex items-center gap-4">
-      <h1 class="text-2xl font-bold text-[var(--text)]">Post bearbeiten</h1>
-      <a
-        href="/admin"
-        class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
-      >
-        Dashboard
-      </a>
+      <h1 class="text-2xl font-bold text-[var(--text)]">Dashboard</h1>
       <a
         href="/admin/posts"
         class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
@@ -47,6 +39,6 @@ const { slug } = Astro.params
         Glossar
       </a>
     </div>
-    <AdminPostDetail client:load slug={slug!} />
+    <AdminDashboard client:load />
   </div>
 </BaseLayout>

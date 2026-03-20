@@ -1,32 +1,18 @@
 ---
 export const prerender = false
-import BaseLayout from '../../../layouts/BaseLayout.astro'
-import AdminPostDetail from '../../../components/islands/AdminPostDetail'
-
-const { slug } = Astro.params
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import AdminAgentChat from '../../components/islands/AdminAgentChat'
 ---
 
-<BaseLayout title="Post bearbeiten" noIndex>
+<BaseLayout title="Blog-Agent" noIndex>
   <div class="py-12">
     <div class="mb-8 flex items-center gap-4">
-      <h1 class="text-2xl font-bold text-[var(--text)]">Post bearbeiten</h1>
+      <h1 class="text-2xl font-bold text-[var(--text)]">Content Agent</h1>
       <a
         href="/admin"
         class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
       >
         Dashboard
-      </a>
-      <a
-        href="/admin/posts"
-        class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
-      >
-        Posts
-      </a>
-      <a
-        href="/admin/agent"
-        class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
-      >
-        Content Agent
       </a>
       <a
         href="/admin/comments"
@@ -46,7 +32,13 @@ const { slug } = Astro.params
       >
         Glossar
       </a>
+      <a
+        href="/admin/posts"
+        class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
+      >
+        Posts
+      </a>
     </div>
-    <AdminPostDetail client:load slug={slug!} />
+    <AdminAgentChat client:load />
   </div>
 </BaseLayout>

@@ -1,0 +1,54 @@
+/**
+ * Terminal formatting helpers for the blog agent CLI
+ */
+
+// ANSI color codes
+const RESET = '\x1b[0m'
+const BOLD = '\x1b[1m'
+const DIM = '\x1b[2m'
+const GREEN = '\x1b[32m'
+const CYAN = '\x1b[36m'
+const YELLOW = '\x1b[33m'
+const RED = '\x1b[31m'
+const MAGENTA = '\x1b[35m'
+
+export function agentHeader() {
+  console.log(`
+${CYAN}${BOLD} _  __  ___  _  __  ___  __  __  ___        ____ _     ___
+| |/ / / _ \\| |/ / / _ \\|  \\/  |/ _ \\      / ___| |   |_ _|
+| ' / | | | | ' / | | | | |\\/| | | | |____| |   | |    | |
+| . \\ | |_| | . \\ | |_| | |  | | |_| |____| |___| |___ | |
+|_|\\_\\ \\___/|_|\\_\\ \\___/|_|  |_|\\___/      \\____|_____|___|${RESET}
+
+${CYAN}  B l o g - A g e n t${RESET}  ${DIM}made with love by Michi${RESET}
+${DIM}Befehle: /publish  /quit${RESET}
+`)
+}
+
+export function printAgent(text: string) {
+  console.log(`${GREEN}${BOLD}Agent:${RESET} ${text}`)
+}
+
+export function printUser(text: string) {
+  console.log(`\n${CYAN}${BOLD}Du:${RESET} ${text}`)
+}
+
+export function printSystem(text: string) {
+  console.log(`${DIM}${text}${RESET}`)
+}
+
+export function printError(text: string) {
+  console.log(`${RED}${BOLD}Fehler:${RESET} ${text}`)
+}
+
+export function printToolUse(toolName: string, input?: string) {
+  console.log(`${MAGENTA}${DIM}  ⚙ ${toolName}${input ? `: ${input.slice(0, 80)}` : ''}${RESET}`)
+}
+
+export function printCost(costUsd: number, turns: number) {
+  console.log(`${DIM}  (${turns} Turns, $${costUsd.toFixed(4)})${RESET}`)
+}
+
+export function printDivider() {
+  console.log(`${DIM}${'─'.repeat(50)}${RESET}`)
+}

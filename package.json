@@ -10,9 +10,12 @@
     "upload": "npx tsx pipeline/upload-to-r2.ts",
     "generate-image": "npx tsx pipeline/generate-images.ts",
     "publish-post": "npx tsx pipeline/publish.ts",
-    "import-comments": "npx tsx pipeline/import-comments.ts"
+    "import-comments": "npx tsx pipeline/import-comments.ts",
+    "blog-agent": "npx tsx agent/blog-agent.ts"
   },
   "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.2.80",
+    "@anthropic-ai/sdk": "^0.80.0",
     "@astrojs/mdx": "^4.3.13",
     "@astrojs/react": "^4.4.2",
     "@astrojs/rss": "^4.0.15",

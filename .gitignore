@@ -25,3 +25,10 @@ pnpm-debug.log*
 .idea/
 .vercel
 .env*.local
+
+# Next.js
+.next/
+next-env.d.ts
+
+# Claude Code
+.claude/settings.local.json
