@@ -149,6 +149,14 @@ export async function getAllSubscribers(): Promise<Subscriber[]> {
   }))
 }
 
+export async function getSubscriberByToken(token: string): Promise<{ email: string; token: string } | null> {
+  const db = getClient()
+  const result = await db.execute({ sql: 'SELECT email, token FROM newsletter_subscribers WHERE token = ?', args: [token] })
+  const row = result.rows[0]
+  if (!row) return null
+  return { email: row.email as string, token: row.token as string }
+}
+
 export async function getConfirmedSubscribers(): Promise<Pick<Subscriber, 'email' | 'token'>[]> {
   const db = getClient()
 
@@ -184,6 +192,16 @@ export async function recordNewsletterSend(data: {
   })
 
   return Number(result.lastInsertRowid)
+}
+
+export async function getLastSendWithBlocks(): Promise<{ subject: string; blocks_json: string; post_slug: string } | null> {
+  const db = getClient()
+  const result = await db.execute(
+    "SELECT subject, blocks_json, post_slug FROM newsletter_sends WHERE status = 'sent' ORDER BY sent_at DESC LIMIT 1"
+  )
+  const row = result.rows[0]
+  if (!row || !row.blocks_json) return null
+  return { subject: row.subject as string, blocks_json: row.blocks_json as string, post_slug: row.post_slug as string }
 }
 
 export async function getSendForRetry(sendId: number): Promise<{ subject: string; blocks_json: string } | null> {
