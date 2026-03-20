@@ -7,7 +7,6 @@ authors: ['default']
 draft: false
 images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/tadelakt-in-der-dusche-unser-fazit-nach-3-5-jahren-titelbild.webp'
 ---
-
 Es gibt Entscheidungen beim Hausbau, über die man lange nachdenkt. Und dann gibt es welche, die sich einfach richtig anfühlen — von Anfang an. Die Tadelakt-Dusche war für uns so eine Entscheidung.
 
 Heute, gut 3,5 Jahre nach unserem Einzug in KOKOMO, können wir sagen: **Wir bereuen es keinen einzigen Tag.** Aber der Reihe nach.
@@ -17,6 +16,8 @@ Heute, gut 3,5 Jahre nach unserem Einzug in KOKOMO, können wir sagen: **Wir ber
 Tadelakt ist kein Trend. Es ist ein Handwerk, das seit **Jahrhunderten in Marokko** praktiziert wird — genauer gesagt in der Region rund um Marrakesch, wo ein besonders geeigneter Kalk gewonnen wird. Der Name kommt aus dem Arabischen und bedeutet so viel wie «einreiben» oder «kneten» — und beschreibt damit genau das, was bei der Verarbeitung passiert.
 
 Traditionell wurde Tadelakt in **Hammams, Palästen und Moscheen** verwendet. Also überall dort, wo Wasser, Wärme und Würde aufeinandertreffen. Der Putz wird aus gebranntem Kalk angemischt, in mehreren Schichten aufgetragen und dann mit einem glatten Stein poliert — stundenlang, von Hand. Abschliessend wird er mit schwarzer Seife (Savon beldi) behandelt, die dem Kalk seine wasserabweisenden Eigenschaften verleiht.
+
+![](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/tadelakt-in-der-dusche-unser-fazit-nach-3-5-jahren-1774039035624.webp)
 
 Was diesen Putz handwerklich so besonders macht: **Es gibt keine Fugen.** Die gesamte Fläche ist aus einem Guss, eine einzige lebendige Oberfläche mit leichten Farbvariationen, die je nach Lichteinfall anders wirkt. Kein Industrieprodukt der Welt kann diesen Charakter imitieren.
 
@@ -29,6 +30,8 @@ Fliesen kamen für uns nie wirklich in Frage. **Fugen bedeuten Schimmelrisiko**,
 Dazu kommt der Aspekt der Nachhaltigkeit. Kalk ist ein **natürlicher, mineralischer Baustoff** ohne synthetische Zusätze. Das passte perfekt zu unserem Anspruch, so naturnah wie möglich zu bauen und zu leben.
 
 «Als wir das erste Mal die fertige Dusche gesehen haben, war uns klar: Das ist genau das, was wir wollten» — dieser Moment ist uns noch heute präsent.
+
+![](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/tadelakt-in-der-dusche-unser-fazit-nach-3-5-jahren-1774039100122.webp)
 
 ## Die ersten Monate: gut informiert von Anfang an
 
