@@ -1,6 +1,6 @@
 ---
 title: 'Baugesuch für ein Tiny House: Was steckt dahinter?'
-date: '2026-03-22'
+date: '2026-03-24'
 summary: 'Ein Baugesuch für ein Tiny House – was braucht es wirklich? Wir zeigen, was dahintersteckt, was du selber machen kannst und wo Hilfe sinnvoll ist.'
 tags: ['tiny house', 'baugesuch', 'Tiny House Schweiz', 'schweiz', 'baubewilligung']
 authors: ['default']
