@@ -7,7 +7,6 @@ authors: ['default']
 draft: false
 images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/bauvisiere-selber-stellen-lohnt-sich-das-titelbild.webp?v=1774161638291'
 ---
-
 Endlich war es so weit: Das Baugesuch war eingereicht, die Unterlagen komplett — und als nächstes stand eine Aufgabe an, die wir vorher noch nie gemacht hatten: **Bauvisiere selber stellen**. Für viele vielleicht nur ein bürokratischer Schritt, für uns war es das erste Mal, dass unser Tiny House auf dem Grundstück sichtbar wurde. Zumindest in Form von ein paar langen Holzstangen.
 
 ## Was ist ein Bauvisier — und wozu braucht man es?
@@ -21,6 +20,8 @@ Kurz gesagt: Kein Bauvisier, kein Baugesuch. So einfach ist das.
 Wir hatten uns vorgängig zwei Offerten eingeholt. Die lagen zwischen **CHF 700 und CHF 1'200** — für ein paar Holzstangen, die ein paar Wochen stehen und dann wieder weg sind. Das hat uns zu denken gegeben.
 
 Den entscheidenden Tipp bekamen wir aus der Community: Jemand aus dem Verein [Kleinwohnformen](https://www.kleinwohnformen.ch/) hatte die Bauvisiere für sein Haus in Muhen ebenfalls selbst gestellt. Wenn die das können, können wir das auch, dachten wir. Und wer sich gerade mit dem Thema **Baugesuch Tiny House** beschäftigt, weiss: Man sucht überall, wo man Kosten sparen kann.
+
+![](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/bauvisiere-selber-stellen-lohnt-sich-das-1774161743380.webp)
 
 ## Was wir gebraucht haben
 
@@ -41,6 +42,10 @@ Das Kniffligste beim Bauvisiere stellen ist das **korrekte Vermessen und Ausrich
 «Ich war mehrheitlich der Zudiener» — das muss ich zugeben. Urs hat den Grossteil der handwerklichen Arbeit übernommen, während ich Stangen angereicht und gelegentlich den Hammer geschwungen habe. Nach etwas mehr als **2.5 Stunden** standen alle 10 Stangen. Fertig.
 
 Was ich mir danach natürlich nicht nehmen lassen konnte: mich schon mal an die Stelle zu legen, wo später unser Schlafzimmer sein würde. Einfach so, um zu spüren, dass es wirklich passiert.
+
+![](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/bauvisiere-selber-stellen-lohnt-sich-das-1774161780580.webp)
+![](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/bauvisiere-selber-stellen-lohnt-sich-das-1774161797085.webp)
+![](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/bauvisiere-selber-stellen-lohnt-sich-das-1774161812405.webp)
 
 ## Unser Fazit — und ein paar Tipps
 
