@@ -44,7 +44,9 @@ Das Kniffligste beim Bauvisiere stellen ist das **korrekte Vermessen und Ausrich
 Was ich mir danach natürlich nicht nehmen lassen konnte: mich schon mal an die Stelle zu legen, wo später unser Schlafzimmer sein würde. Einfach so, um zu spüren, dass es wirklich passiert.
 
 ![](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/bauvisiere-selber-stellen-lohnt-sich-das-1774161780580.webp)
+
 ![](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/bauvisiere-selber-stellen-lohnt-sich-das-1774161797085.webp)
+
 ![](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/bauvisiere-selber-stellen-lohnt-sich-das-1774161812405.webp)
 
 ## Unser Fazit — und ein paar Tipps
