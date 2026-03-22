@@ -4,8 +4,10 @@
 
 import { tool } from '@anthropic-ai/claude-agent-sdk'
 import { z } from 'zod/v4'
-import { readFileSync, readdirSync } from 'fs'
+import { readFileSync, readdirSync, existsSync } from 'fs'
 import { resolve } from 'path'
+import sharp from 'sharp'
+import { uploadBufferToR2 } from '../../pipeline/upload-to-r2.js'
 import matter from 'gray-matter'
 import { execSync } from 'child_process'
 import { generateImage } from '../../pipeline/generate-images.js'
@@ -218,6 +220,38 @@ export const saveSocialTextsTool = tool(
   }
 )
 
+// --- upload_photo ---
+export const uploadPhotoTool = tool(
+  'upload_photo',
+  'Upload a local photo for a blog post. Converts to WebP, uploads to R2, returns markdown image syntax. Use type "header" for title images (1200x675 cover crop) or "inline" (default) for body images (max 1000px wide). For galleries: call this tool multiple times and place the markdown images on consecutive lines separated by blank lines.',
+  {
+    filePath: z.string().describe('Absolute or ~-relative path to the local image file'),
+    slug: z.string().describe('The post slug (used for the filename on R2)'),
+    alt: z.string().optional().describe('Alt text for the image'),
+    type: z.enum(['header', 'inline']).default('inline').describe('Image type: header (1200x675 cover crop) or inline (max 1000px wide)'),
+  },
+  async ({ filePath, slug, alt, type }) => {
+    const resolved = resolve(filePath.replace(/^~/, process.env.HOME || ''))
+    if (!existsSync(resolved)) {
+      return { content: [{ type: 'text' as const, text: `File not found: ${resolved}` }], isError: true }
+    }
+
+    const buffer = type === 'header'
+      ? await sharp(resolved).resize(1200, 675, { fit: 'cover' }).webp({ quality: 85 }).toBuffer()
+      : await sharp(resolved).resize(1000, null, { withoutEnlargement: true }).webp({ quality: 85 }).toBuffer()
+
+    const filename = type === 'header'
+      ? `${slug}-titelbild.webp`
+      : `${slug}-${Date.now()}.webp`
+    const url = await uploadBufferToR2(buffer, filename)
+    const markdown = alt ? `![${alt}](${url})` : `![](${url})`
+
+    return {
+      content: [{ type: 'text' as const, text: `Photo uploaded.\nURL: ${url}\nMarkdown: ${markdown}` }]
+    }
+  }
+)
+
 export const allTools = [
   readStyleConfigTool,
   listRecentPostsTool,
@@ -226,4 +260,5 @@ export const allTools = [
   createPostFileTool,
   gitPublishTool,
   saveSocialTextsTool,
+  uploadPhotoTool,
 ]

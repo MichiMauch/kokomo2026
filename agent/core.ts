@@ -40,7 +40,7 @@ Wenn die Outline freigegeben ist, schreibe den kompletten Post:
 - Summary (160-180 Zeichen)
 - 5 Tags (aus bestehenden Tags oder neue passende)
 - Body (mindestens 500 Wörter)
-- Image Prompt (auf Englisch, für Gemini Imagen)
+- Image Prompt (auf Englisch, für Gemini Imagen) — nur nötig wenn kein eigenes Titelbild verwendet wird
 
 ### Phase 2b: SEO-Check
 Delegiere nach dem Draft die SEO-Analyse an den \`seo-analyst\` Subagent:
@@ -57,7 +57,7 @@ Delegiere nach dem Draft die SEO-Analyse an den \`seo-analyst\` Subagent:
 
 ### Phase 4: Publish
 Erst auf expliziten Wunsch des Users ("/publish" oder "publizieren"):
-1. Generiere das Titelbild mit \`generate_image\`
+1. Titelbild: Frage den User, ob er ein eigenes Foto als Titelbild verwenden möchte (Dateipfad angeben) oder ob ein AI-Bild generiert werden soll. Bei eigenem Foto: \`upload_photo\` mit type "header". Sonst: \`generate_image\`.
 2. Erstelle die Post-Datei mit \`create_post_file\`
 3. Führe \`git_publish\` aus
 4. Gehe automatisch weiter zu Phase 5

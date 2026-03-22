@@ -184,7 +184,7 @@ async function main() {
     if (input === '/publish') {
       printSystem('Starte Publishing...')
       sessionId = await processQuery(
-        'Der User möchte jetzt publizieren. Führe Phase 4 aus: Generiere das Titelbild, erstelle die Post-Datei und publiziere via git. Danach automatisch weiter mit Phase 5 (Social Media).',
+        'Der User möchte jetzt publizieren. Führe Phase 4 aus: Frage zuerst, ob der User ein eigenes Foto als Titelbild verwenden möchte (Dateipfad) oder ob ein AI-Bild generiert werden soll. Dann erstelle die Post-Datei und publiziere via git. Danach automatisch weiter mit Phase 5 (Social Media).',
         sessionId,
       )
       continue
