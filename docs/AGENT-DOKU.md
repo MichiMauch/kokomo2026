@@ -43,7 +43,7 @@ Oder einfach `kokomo` eingeben — dann wird man nach dem Thema gefragt.
 ┌─────────────────────────────────────────────────────┐
 │  Eigene Tools (kokomo-tools.ts)                     │
 │                                                     │
-│  Die KI hat Zugriff auf 7 massgeschneiderte Tools:  │
+│  Die KI hat Zugriff auf 8 massgeschneiderte Tools:  │
 │                                                     │
 │  - read_style_config   → Liest unsere Stilregeln    │
 │  - list_recent_posts   → Zeigt bestehende Posts     │
@@ -52,6 +52,7 @@ Oder einfach `kokomo` eingeben — dann wird man nach dem Thema gefragt.
 │  - generate_image      → Erstellt ein Titelbild     │
 │  - create_post_file    → Erstellt die Markdown-Datei│
 │  - git_publish         → Committed & pushed via Git │
+│  - save_social_texts   → Speichert Social-Media-Texte│
 └──────────────┬──────────────────────────────────────┘
                │
                ▼
@@ -67,9 +68,9 @@ Oder einfach `kokomo` eingeben — dann wird man nach dem Thema gefragt.
 
 ---
 
-## Der 4-Phasen-Workflow
+## Der 5-Phasen-Workflow
 
-Der Agent arbeitet in einem festen Ablauf mit 4 Phasen:
+Der Agent arbeitet in einem festen Ablauf mit 5 Phasen:
 
 ### Phase 1 — Outline
 Die KI liest zuerst unsere **Stilregeln** (writing-style.yaml) und die **letzten Blogposts**, um den Stil zu kennen und Duplikate zu vermeiden. Dann schlägt sie eine Gliederung vor:
@@ -111,6 +112,24 @@ Erst wenn man `/publish` eingibt, passiert:
 3. **Git commit & push** — der Post landet im Repository
 4. **Vercel baut die Seite neu** — der Post ist live auf kokomo.house
 
+Danach geht es automatisch weiter mit Phase 5.
+
+### Phase 5 — Social Media
+Direkt nach dem Publishing generiert der Agent **Social-Media-Texte** für 4 Plattformen:
+- **Facebook** (max ~1200 Zeichen): Storytelling, 2–3 Absätze, Emojis, Hashtags
+- **Twitter/X** (max 280 Zeichen): Punchy, 1–2 Sätze, 2–3 Hashtags
+- **Telegram** (max ~1000 Zeichen): Markdown-formatiert, informativ
+- **WhatsApp** (max ~700 Zeichen): Persönlich, wie eine Nachricht an Freunde
+
+Dafür delegiert der Agent an einen spezialisierten **Social-Writer-Subagent** (Claude Sonnet). Die generierten Texte werden angezeigt — man kann **Feedback geben** und Anpassungen verlangen. Wenn alles passt, werden die Texte in der **Turso-Datenbank** gespeichert.
+
+Die Texte können danach im **Admin-Dashboard** unter `/admin/posts/[slug]#social` reviewed und direkt geteilt werden (Telegram-Bot, Share-URLs).
+
+Man kann Phase 5 auch separat auslösen — z.B. für bereits publizierte Posts:
+```bash
+/social mein-post-slug
+```
+
 ---
 
 ## Die Stilregeln — das "Gehirn" des Agents
@@ -138,8 +157,9 @@ Definiert **wie** Bilder generiert werden:
 
 | Komponente | Technologie | Zweck |
 |---|---|---|
-| KI-Modell | Claude Sonnet 4.6 (Anthropic) | Text-Generierung, Workflow-Steuerung und SEO-Analyse |
+| KI-Modell | Claude Sonnet 4.6 (Anthropic) | Text-Generierung, Workflow-Steuerung, SEO-Analyse und Social-Media-Texte |
 | Agent Framework | Claude Agent SDK | Verbindet KI mit unseren Tools (inkl. Agent-to-Agent-Calls) |
+| Datenbank | Turso (LibSQL) | Speichert Social-Media-Texte |
 | Bildgenerierung | Google Gemini Imagen | Erstellt Titelbilder |
 | Bildoptimierung | Sharp | Konvertiert Bilder zu WebP, richtige Grösse |
 | Bild-Hosting | Cloudflare R2 | Speichert die Bilder |
@@ -186,6 +206,14 @@ Definiert **wie** Bilder generiert werden:
 
 12. Vercel erkennt den Push → baut die Seite neu
     → Post ist live auf kokomo.house
+
+13. Claude delegiert an social-writer Subagent
+    → Generiert Texte für Facebook, Twitter, Telegram, WhatsApp
+    → Du kannst Feedback geben oder anpassen
+
+14. Claude ruft Tool auf:  save_social_texts(slug, texts)
+    → Texte werden in Turso gespeichert
+    → Im Admin-Dashboard unter #social reviewen und teilen
 ```
 
 ---
@@ -239,6 +267,7 @@ Viele Leute nutzen ChatGPT oder Claude direkt im Browser, um Blogposts zu schrei
 1. kokomo "Mein Thema"
 2. Feedback geben
 3. /publish
+4. Social-Media-Texte reviewen → fertig
 ```
 
 **Was der Agent besser macht:**
@@ -254,6 +283,7 @@ Viele Leute nutzen ChatGPT oder Claude direkt im Browser, um Blogposts zu schrei
 | **Publishing** | 5+ manuelle Schritte (Datei erstellen, Git, etc.) | Ein Befehl: `/publish` |
 | **Frontmatter** | Von Hand: Titel, Datum, Tags, Summary... | Wird automatisch korrekt generiert |
 | **Umlaute / ß** | KI macht oft Fehler (ß statt ss, ue statt ü) | Automatische Korrektur eingebaut |
+| **Social Media** | Separat texten, Format/Limits im Kopf behalten | Agent generiert 4 plattform-optimierte Texte automatisch |
 | **Feedback-Loop** | Neuen Chat starten oder scrollen | Direkt im selben Dialog, Agent merkt sich alles |
 | **Kosten-Transparenz** | Unklar (Abo-Modell) | Wird pro Post angezeigt (unter 20 Rappen) |
 

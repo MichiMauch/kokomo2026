@@ -1,11 +1,23 @@
 ---
 export const prerender = false
-import { unsubscribeByToken } from '../lib/newsletter'
+import { unsubscribeByToken, getSubscriberByToken } from '../lib/newsletter'
+import { cancelEnrollments } from '../lib/automation'
 
 const token = Astro.url.searchParams.get('token')
 if (!token) {
   return Astro.redirect('/')
 }
+
+// Cancel automation enrollments before unsubscribing
+const subscriber = await getSubscriberByToken(token)
+if (subscriber) {
+  try {
+    await cancelEnrollments(subscriber.email)
+  } catch (err) {
+    console.error('[unsubscribe] Cancel enrollments failed:', err)
+  }
+}
+
 await unsubscribeByToken(token)
 return Astro.redirect('/newsletter/abgemeldet')
 ---

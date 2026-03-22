@@ -5,6 +5,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import { confirmSubscriber, getSubscriberByToken, getLastSendWithBlocks } from '../../lib/newsletter'
 import { sendMultiBlockNewsletterEmail } from '../../lib/notify'
 import type { NewsletterBlock, PostRef } from '../../lib/newsletter-blocks'
+import { enrollSubscriber } from '../../lib/automation'
 
 const token = Astro.url.searchParams.get('token')
 let success = false
@@ -55,6 +56,16 @@ if (success && token) {
     }
   } catch (err) {
     console.error('[bestaetigen] Willkommens-Newsletter fehlgeschlagen:', err)
+  }
+
+  // Enroll in active automations
+  try {
+    const sub = await getSubscriberByToken(token)
+    if (sub) {
+      await enrollSubscriber(sub.email, 'subscriber_confirmed')
+    }
+  } catch (err) {
+    console.error('[bestaetigen] Automation-Enrollment fehlgeschlagen:', err)
   }
 }
 

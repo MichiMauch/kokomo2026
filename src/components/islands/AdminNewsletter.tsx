@@ -1,4 +1,5 @@
 import React, { useState, useEffect, type FormEvent } from 'react'
+import AutomationEditor from './AutomationEditor'
 import { buildMultiBlockNewsletterHtml } from '../../lib/newsletter-template'
 import {
   BUILT_IN_TEMPLATES,
@@ -70,7 +71,7 @@ interface Post {
   date: string
 }
 
-type Tab = 'compose' | 'subscribers' | 'history' | 'settings'
+type Tab = 'compose' | 'subscribers' | 'history' | 'settings' | 'automations'
 type ComposeMode = 'pick-template' | 'fill-slots' | 'build-template'
 
 // ─── Helpers ───────────────────────────────────────────────────────────
@@ -1264,6 +1265,9 @@ export default function AdminNewsletter() {
         <button onClick={() => { setTab('settings'); if (!promptsLoaded) loadPrompts() }} className={tabCls('settings')}>
           Einstellungen
         </button>
+        <button onClick={() => setTab('automations')} className={tabCls('automations')}>
+          Automatisierung
+        </button>
       </div>
 
       {/* ─── Compose Tab ─────────────────────────────────────────── */}
@@ -1873,6 +1877,11 @@ export default function AdminNewsletter() {
             </>
           )}
         </div>
+      )}
+
+      {/* ─── Automations Tab ─────────────────────────────────────── */}
+      {tab === 'automations' && (
+        <AutomationEditor posts={posts.map(p => ({ slug: p.slug, title: p.title, summary: p.summary, image: p.image, date: p.date }))} />
       )}
 
       {/* ─── Toast ─────────────────────────────────────────────── */}

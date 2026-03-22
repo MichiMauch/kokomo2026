@@ -15,6 +15,20 @@ interface TopPost {
   prev_nb_visits: number
 }
 
+interface TopPostAllTime {
+  label: string
+  url: string
+  nb_visits: number
+}
+
+interface SearchQuery {
+  query: string
+  clicks: number
+  impressions: number
+  ctr: number
+  position: number
+}
+
 interface DashboardData {
   total_confirmed: number
   new_last_7_days: number
@@ -23,6 +37,8 @@ interface DashboardData {
   last_send: LastSend | null
   visitors: Record<string, number> | null
   top_posts: TopPost[] | null
+  top_posts_all_time: TopPostAllTime[] | null
+  search_queries: SearchQuery[] | null
 }
 
 const MONTH_LABELS: Record<string, string> = {
@@ -152,6 +168,68 @@ function TopPosts({ posts }: { posts: TopPost[] }) {
           )
         })}
       </div>
+    </div>
+  )
+}
+
+function TopPostsAllTime({ posts }: { posts: TopPostAllTime[] }) {
+  return (
+    <div className="glass-card rounded-2xl p-6 shadow-lg">
+      <h3 className="mb-4 text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+        Top Posts aller Zeiten
+      </h3>
+      <div className="space-y-3">
+        {posts.map((post, i) => (
+          <div key={post.url} className="flex items-center gap-3">
+            <span className="w-5 text-right text-xs font-bold text-[var(--text-secondary)]">{i + 1}.</span>
+            <div className="min-w-0 flex-1">
+              <a
+                href={post.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block truncate text-sm font-medium text-[var(--text)] hover:text-primary-500 dark:hover:text-primary-400"
+              >
+                {post.label}
+              </a>
+            </div>
+            <span className="text-sm font-bold text-[var(--text)]">{post.nb_visits.toLocaleString('de-CH')}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function SearchConsoleQueries({ queries }: { queries: SearchQuery[] }) {
+  return (
+    <div className="glass-card rounded-2xl p-6 shadow-lg">
+      <h3 className="mb-4 text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+        Top Suchbegriffe (28 Tage)
+      </h3>
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="text-[10px] uppercase tracking-wider text-[var(--text-secondary)]">
+            <th className="pb-2 text-left font-medium" />
+            <th className="pb-2 text-left font-medium">Suchbegriff</th>
+            <th className="pb-2 text-right font-medium">Klicks</th>
+            <th className="pb-2 text-right font-medium">Impr.</th>
+            <th className="pb-2 text-right font-medium">CTR</th>
+            <th className="pb-2 text-right font-medium">Position</th>
+          </tr>
+        </thead>
+        <tbody>
+          {queries.map((q, i) => (
+            <tr key={q.query} className="border-t border-[var(--text-secondary)]/10">
+              <td className="py-1.5 pr-2 text-right text-xs font-bold text-[var(--text-secondary)]">{i + 1}.</td>
+              <td className="py-1.5 pr-4 font-medium text-[var(--text)]">{q.query}</td>
+              <td className="py-1.5 text-right font-bold text-[var(--text)]">{q.clicks}</td>
+              <td className="py-1.5 text-right text-[var(--text-secondary)]">{q.impressions.toLocaleString('de-CH')}</td>
+              <td className="py-1.5 text-right text-[var(--text-secondary)]">{q.ctr}%</td>
+              <td className="py-1.5 text-right text-[var(--text-secondary)]">{q.position}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   )
 }
@@ -352,11 +430,19 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* Besucher-Diagramm & Top Posts */}
-      {(data.visitors || data.top_posts) && (
-        <div className="grid gap-6 sm:col-span-2 sm:grid-cols-2 lg:col-span-3">
-          {data.visitors && <VisitorChart visitors={data.visitors} />}
+      {/* Besucher-Diagramm */}
+      {data.visitors && (
+        <div className="sm:col-span-2 lg:col-span-3">
+          <VisitorChart visitors={data.visitors} />
+        </div>
+      )}
+
+      {/* Top Posts & Suchbegriffe */}
+      {(data.top_posts || data.top_posts_all_time || data.search_queries) && (
+        <div className="grid gap-6 sm:col-span-2 sm:grid-cols-2 lg:col-span-3 lg:grid-cols-2">
           {data.top_posts && <TopPosts posts={data.top_posts} />}
+          {data.top_posts_all_time && <TopPostsAllTime posts={data.top_posts_all_time} />}
+          {data.search_queries && <SearchConsoleQueries queries={data.search_queries} />}
         </div>
       )}
     </div>

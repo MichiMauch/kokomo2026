@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro'
 import { Webhook } from 'svix'
 import { updateRecipientEvent } from '../../../lib/newsletter'
+import { updateAutomationSendEvent } from '../../../lib/automation'
 
 export const prerender = false
 
@@ -78,6 +79,13 @@ export const POST: APIRoute = async ({ request }) => {
       case 'email.complained':
         await updateRecipientEvent(emailId, 'complained', created_at)
         break
+    }
+    // Also check automation sends
+    const automationEvent = type.replace('email.', '') as 'delivered' | 'opened' | 'clicked' | 'bounced' | 'complained'
+    if (['delivered', 'opened', 'clicked', 'bounced', 'complained'].includes(automationEvent)) {
+      await updateAutomationSendEvent(emailId, automationEvent, created_at, {
+        bounce_type: data.bounce?.bounce_type,
+      })
     }
   } catch (err) {
     console.error(`[webhook/resend] Error processing ${type}:`, err)

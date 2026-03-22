@@ -2,15 +2,15 @@
  * Custom MCP tools for the KOKOMO Blog Agent (CLI / filesystem-based)
  */
 
-import { tool, query } from '@anthropic-ai/claude-agent-sdk'
+import { tool } from '@anthropic-ai/claude-agent-sdk'
 import { z } from 'zod/v4'
 import { readFileSync, readdirSync } from 'fs'
 import { resolve } from 'path'
-import { parse as parseYaml } from 'yaml'
 import matter from 'gray-matter'
 import { execSync } from 'child_process'
 import { generateImage } from '../../pipeline/generate-images.js'
 import { createPostFile, slugify, buildPostContent } from '../../pipeline/create-post-file.js'
+import { createClient } from '@libsql/client'
 
 const ROOT = process.cwd()
 
@@ -169,130 +169,50 @@ export const gitPublishTool = tool(
   }
 )
 
-// --- analyze_seo ---
-const SEO_SYSTEM_PROMPT = `Du bist ein SEO-Experte für deutschsprachige Blogs im Bereich Tiny House, nachhaltiges Wohnen und Selbstversorgung.
+// --- save_social_texts ---
 
-Analysiere den gegebenen Blogpost-Draft und gib eine strukturierte SEO-Bewertung ab.
+function getTursoClient() {
+  const url = process.env.TURSO_DB_URL
+  const authToken = process.env.TURSO_DB_TOKEN
+  if (!url || !authToken) {
+    throw new Error('TURSO_DB_URL and TURSO_DB_TOKEN must be set in .env.local')
+  }
+  return createClient({ url, authToken })
+}
 
-## Prüfkriterien
-
-1. **Titel** (max 60 Zeichen für Google SERP)
-   - Enthält das Hauptkeyword?
-   - Weckt Neugier / hat einen klaren Nutzen?
-
-2. **Meta-Description / Summary** (optimal 150-160 Zeichen)
-   - Enthält das Hauptkeyword?
-   - Hat einen Call-to-Action oder Nutzenversprechen?
-
-3. **Keyword-Verteilung**
-   - Hauptkeyword im Titel, Summary, erstem Absatz, mindestens einer H2?
-   - Natürliche Keyword-Dichte (nicht erzwungen)?
-   - Verwandte Begriffe / LSI-Keywords vorhanden?
-
-4. **Struktur**
-   - Mindestens 2-3 H2-Überschriften?
-   - Logischer Aufbau?
-   - Absätze nicht zu lang (max 3-4 Sätze)?
-
-5. **Content-Qualität**
-   - Mindestens 500 Wörter?
-   - Einzigartiger Angle / Mehrwert?
-   - Persönliche Erfahrung / E-E-A-T Signale?
-
-6. **Interne Verlinkung**
-   - Welche der bestehenden Posts passen thematisch und sollten verlinkt werden?
-   - Welche Glossar-Begriffe kommen im Text vor und könnten verlinkt werden?
-
-## Antwortformat
-
-Antworte auf Deutsch mit:
-- **SEO-Score**: Zahl von 1-10
-- **Stärken**: Was gut ist (kurze Bullet-Liste)
-- **Verbesserungen**: Konkrete, umsetzbare Vorschläge (kurze Bullet-Liste)
-- **Keyword-Vorschlag**: Hauptkeyword und 3-5 verwandte Keywords
-- **Verlinkungsvorschläge**: Interne Links zu bestehenden Posts und Glossar-Begriffen (mit Slugs)
-
-Sei konkret und praxisnah. Keine generischen Tipps.`
-
-export const analyzeSeoTool = tool(
-  'analyze_seo',
-  'Analyze a blog post draft for SEO quality using Claude Sonnet. Checks title, meta description, keyword usage, structure, content quality, and suggests internal links to existing posts and glossary terms. Call this after writing a draft (Phase 2) to optimize before publishing.',
+export const saveSocialTextsTool = tool(
+  'save_social_texts',
+  'Save social media texts for a blog post to the database. The texts are stored per platform and can be reviewed/shared in the admin dashboard.',
   {
-    title: z.string().describe('Post title'),
-    summary: z.string().describe('Post summary / meta description'),
-    tags: z.array(z.string()).describe('Post tags'),
-    body: z.string().describe('Post body in Markdown'),
-    focusKeyword: z.string().optional().describe('Optional main keyword to optimize for'),
+    slug: z.string().describe('The post slug'),
+    texts: z.object({
+      facebook: z.string().describe('Facebook post text (max ~1200 chars)'),
+      twitter: z.string().describe('Twitter/X post text (max 280 chars)'),
+      telegram: z.string().describe('Telegram post text (max ~1000 chars)'),
+      whatsapp: z.string().describe('WhatsApp message text (max ~700 chars)'),
+    }),
   },
-  async ({ title, summary, tags, body, focusKeyword }) => {
-    // Gather context: existing posts for internal linking
-    const postsDir = resolve(ROOT, 'src/content/posts')
-    const files = readdirSync(postsDir)
-      .filter(f => f.endsWith('.md'))
-      .sort()
-      .reverse()
-      .slice(0, 30)
-
-    const existingPosts = files.map(file => {
-      const raw = readFileSync(resolve(postsDir, file), 'utf-8')
-      const { data } = matter(raw)
-      return `- ${data.title} (Slug: ${file.replace('.md', '')}, Tags: ${(data.tags || []).join(', ')})`
-    }).join('\n')
-
-    // Gather glossary terms
-    let glossaryTerms = ''
-    try {
-      const glossaryRaw = readFileSync(resolve(ROOT, 'src/data/glossary.yaml'), 'utf-8')
-      const terms = parseYaml(glossaryRaw) as { term: string }[]
-      glossaryTerms = terms.map(t => t.term).join(', ')
-    } catch { /* glossary not available */ }
-
-    const prompt = `Analysiere diesen Blogpost-Draft:
-
-## Titel
-${title}
-
-## Summary
-${summary}
-
-## Tags
-${tags.join(', ')}
-
-${focusKeyword ? `## Fokus-Keyword\n${focusKeyword}\n` : ''}
-## Body
-${body}
-
----
-
-## Kontext: Bestehende Posts (für interne Verlinkung)
-${existingPosts}
-
-## Kontext: Glossar-Begriffe (für Verlinkung zu /glossar#begriff)
-${glossaryTerms}
-
-## Website
-URL-Struktur: https://www.kokomo.house/tiny-house/{slug}
-Glossar: https://www.kokomo.house/glossar#{begriff-slug}`
-
-    // Call Claude Sonnet for SEO analysis
-    let seoResult = ''
-    for await (const message of query({ prompt, options: {
-      systemPrompt: SEO_SYSTEM_PROMPT,
-      model: 'claude-sonnet-4-6',
-      maxTurns: 1,
-      permissionMode: 'bypassPermissions',
-      allowDangerouslySkipPermissions: true,
-    }})) {
-      const msg = message as any
-      if (msg.type === 'result' && msg.subtype === 'success' && msg.result) {
-        seoResult = msg.result
-      }
+  async ({ slug, texts }) => {
+    const db = getTursoClient()
+    const platformMap: Record<string, string> = {
+      facebook: 'facebook_page',
+      twitter: 'twitter',
+      telegram: 'telegram',
+      whatsapp: 'whatsapp',
     }
-
+    for (const [key, text] of Object.entries(texts)) {
+      const platform = platformMap[key]
+      await db.execute({
+        sql: `INSERT INTO social_texts (post_slug, platform, text, generated_at, updated_at)
+              VALUES (?, ?, ?, datetime('now'), datetime('now'))
+              ON CONFLICT(post_slug, platform) DO UPDATE SET text = ?, updated_at = datetime('now')`,
+        args: [slug, platform, text, text],
+      })
+    }
     return {
       content: [{
         type: 'text' as const,
-        text: seoResult || 'SEO-Analyse konnte nicht durchgeführt werden.',
+        text: `Social-Media-Texte für "${slug}" gespeichert (${Object.keys(texts).join(', ')}). Im Admin-Dashboard unter /admin/posts/${slug}#social reviewen und teilen.`
       }]
     }
   }
@@ -305,5 +225,5 @@ export const allTools = [
   generateImageTool,
   createPostFileTool,
   gitPublishTool,
-  analyzeSeoTool,
+  saveSocialTextsTool,
 ]

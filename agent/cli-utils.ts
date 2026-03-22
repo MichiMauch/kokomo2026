@@ -21,7 +21,7 @@ ${CYAN}${BOLD} _  __  ___  _  __  ___  __  __  ___        ____ _     ___
 |_|\\_\\ \\___/|_|\\_\\ \\___/|_|  |_|\\___/      \\____|_____|___|${RESET}
 
 ${CYAN}  B l o g - A g e n t${RESET}  ${DIM}made with love by Michi${RESET}
-${DIM}Befehle: /publish  /quit${RESET}
+${DIM}Befehle: /publish  /social [slug]  /quit${RESET}
 `)
 }
 
@@ -43,6 +43,10 @@ export function printError(text: string) {
 
 export function printToolUse(toolName: string, input?: string) {
   console.log(`${MAGENTA}${DIM}  ⚙ ${toolName}${input ? `: ${input.slice(0, 80)}` : ''}${RESET}`)
+}
+
+export function printToolProgress(toolName: string, elapsedSeconds: number) {
+  process.stdout.write(`\r${MAGENTA}${DIM}  ⏳ ${toolName} (${Math.round(elapsedSeconds)}s)${RESET}`)
 }
 
 export function printCost(costUsd: number, turns: number) {

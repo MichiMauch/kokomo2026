@@ -157,6 +157,17 @@ export async function getSubscriberByToken(token: string): Promise<{ email: stri
   return { email: row.email as string, token: row.token as string }
 }
 
+export async function getSubscriberByEmail(email: string): Promise<Pick<Subscriber, 'email' | 'token'> | null> {
+  const db = getClient()
+  const result = await db.execute({
+    sql: "SELECT email, token FROM newsletter_subscribers WHERE email = ? AND status = 'confirmed'",
+    args: [email],
+  })
+  const row = result.rows[0]
+  if (!row) return null
+  return { email: row.email as string, token: row.token as string }
+}
+
 export async function getConfirmedSubscribers(): Promise<Pick<Subscriber, 'email' | 'token'>[]> {
   const db = getClient()
 

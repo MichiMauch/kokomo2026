@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro'
+import { createSign } from 'node:crypto'
 import { getAllSubscribers, getNewsletterSendsWithStats } from '../../../lib/newsletter'
 import { getAllComments } from '../../../lib/turso'
 import { isAuthenticated } from '../../../lib/admin-auth'
@@ -79,6 +80,140 @@ async function fetchMatomoTopPosts(): Promise<TopPost[] | null> {
   }
 }
 
+interface TopPostAllTime {
+  label: string
+  url: string
+  nb_visits: number
+}
+
+async function fetchMatomoTopPostsAllTime(): Promise<TopPostAllTime[] | null> {
+  const token = import.meta.env.MATOMO_TOKEN
+  const siteId = import.meta.env.MATOMO_SITE_ID
+  const baseUrl = (import.meta.env.MATOMO_URL || '').replace(/\/+$/, '')
+
+  if (!token || !baseUrl || !siteId) return null
+
+  try {
+    const apiUrl = `${baseUrl}/index.php?module=API&method=Actions.getPageUrls&period=range&date=2022-09-01,today&format=JSON&idSite=${siteId}&flat=1&filter_limit=100`
+    const res = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `token_auth=${encodeURIComponent(token)}`,
+    })
+    if (!res.ok) return null
+    const json = await res.json()
+    if (!Array.isArray(json)) return null
+
+    const isPostUrl = (url: string) => {
+      const match = url.match(/^\/tiny-house\/([^/]+)\/?$/)
+      return match && match[1] !== 'page'
+    }
+
+    const posts: TopPostAllTime[] = json
+      .filter((page: any) => isPostUrl(page.label || ''))
+      .sort((a: any, b: any) => (b.nb_visits || 0) - (a.nb_visits || 0))
+      .slice(0, 5)
+      .map((page: any) => {
+        const url = (page.label || '').replace(/\/$/, '')
+        const slug = url.split('/').pop() || ''
+        const title = slug.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
+        return { label: title, url, nb_visits: page.nb_visits || 0 }
+      })
+
+    return posts.length > 0 ? posts : null
+  } catch {
+    return null
+  }
+}
+
+interface SearchQuery {
+  query: string
+  clicks: number
+  impressions: number
+  ctr: number
+  position: number
+}
+
+async function fetchSearchConsoleTopQueries(): Promise<SearchQuery[] | null> {
+  const keyRaw = import.meta.env.GOOGLE_SEARCH_CONSOLE_KEY_JSON
+  if (!keyRaw) return null
+
+  try {
+    // Support both raw JSON and base64-encoded JSON
+    let keyJson: string
+    if (keyRaw.trimStart().startsWith('{')) {
+      keyJson = keyRaw
+    } else {
+      keyJson = Buffer.from(keyRaw, 'base64').toString('utf-8')
+    }
+    const key = JSON.parse(keyJson)
+    const now = Math.floor(Date.now() / 1000)
+    const header = { alg: 'RS256', typ: 'JWT' }
+    const payload = {
+      iss: key.client_email,
+      scope: 'https://www.googleapis.com/auth/webmasters.readonly',
+      aud: 'https://oauth2.googleapis.com/token',
+      iat: now,
+      exp: now + 3600,
+    }
+
+    const toBase64Url = (obj: object) =>
+      Buffer.from(JSON.stringify(obj)).toString('base64url')
+
+    const signInput = `${toBase64Url(header)}.${toBase64Url(payload)}`
+    const sign = createSign('RSA-SHA256')
+    sign.update(signInput)
+    const signature = sign.sign(key.private_key, 'base64url')
+    const jwt = `${signInput}.${signature}`
+
+    // Exchange JWT for access token
+    const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
+    })
+    if (!tokenRes.ok) return null
+    const tokenData = await tokenRes.json()
+    const accessToken = tokenData.access_token
+    if (!accessToken) return null
+
+    // Query Search Console API (last 28 days)
+    const endDate = new Date()
+    const startDate = new Date(endDate.getTime() - 28 * 24 * 60 * 60 * 1000)
+    const fmt = (d: Date) => d.toISOString().slice(0, 10)
+
+    const siteUrl = 'https://www.kokomo.house'
+    const apiUrl = `https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`
+    const apiRes = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        startDate: fmt(startDate),
+        endDate: fmt(endDate),
+        dimensions: ['query'],
+        rowLimit: 10,
+      }),
+    })
+    if (!apiRes.ok) return null
+    const apiData = await apiRes.json()
+
+    if (!apiData.rows || !Array.isArray(apiData.rows)) return null
+
+    return apiData.rows.map((row: any) => ({
+      query: row.keys[0],
+      clicks: row.clicks,
+      impressions: row.impressions,
+      ctr: Math.round(row.ctr * 1000) / 10,
+      position: Math.round(row.position * 10) / 10,
+    }))
+  } catch {
+    return null
+  }
+}
+
 async function fetchMatomoVisitors(): Promise<Record<string, number> | null> {
   const token = import.meta.env.MATOMO_TOKEN
   const siteId = import.meta.env.MATOMO_SITE_ID
@@ -112,12 +247,14 @@ export const GET: APIRoute = async ({ request }) => {
   }
 
   try {
-    const [subscribersResult, commentsResult, sendsResult, visitorsResult, topPostsResult] = await Promise.allSettled([
+    const [subscribersResult, commentsResult, sendsResult, visitorsResult, topPostsResult, topPostsAllTimeResult, searchQueriesResult] = await Promise.allSettled([
       getAllSubscribers(),
       getAllComments(),
       getNewsletterSendsWithStats(),
       fetchMatomoVisitors(),
       fetchMatomoTopPosts(),
+      fetchMatomoTopPostsAllTime(),
+      fetchSearchConsoleTopQueries(),
     ])
 
     // Subscribers (existing logic)
@@ -164,9 +301,11 @@ export const GET: APIRoute = async ({ request }) => {
 
     // Top posts
     const top_posts = topPostsResult.status === 'fulfilled' ? topPostsResult.value : null
+    const top_posts_all_time = topPostsAllTimeResult.status === 'fulfilled' ? topPostsAllTimeResult.value : null
+    const search_queries = searchQueriesResult.status === 'fulfilled' ? searchQueriesResult.value : null
 
     return new Response(
-      JSON.stringify({ total_confirmed, new_last_7_days, change, pending_comments, last_send, visitors, top_posts }),
+      JSON.stringify({ total_confirmed, new_last_7_days, change, pending_comments, last_send, visitors, top_posts, top_posts_all_time, search_queries }),
       { status: 200, headers },
     )
   } catch (err: any) {
