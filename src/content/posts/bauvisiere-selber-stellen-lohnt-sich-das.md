@@ -5,7 +5,7 @@ summary: 'Bauvisiere selber stellen statt Profi beauftragen — für unser Tiny 
 tags: ['tiny house', 'schweiz', 'baubewilligung', 'Tiny House Schweiz', 'bauvorbereitung']
 authors: ['default']
 draft: false
-images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/bauvisiere-selber-stellen-titelbild.webp'
+images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/bauvisiere-selber-stellen-lohnt-sich-das-titelbild.webp?v=1774161638291'
 ---
 
 Endlich war es so weit: Das Baugesuch war eingereicht, die Unterlagen komplett — und als nächstes stand eine Aufgabe an, die wir vorher noch nie gemacht hatten: **Bauvisiere selber stellen**. Für viele vielleicht nur ein bürokratischer Schritt, für uns war es das erste Mal, dass unser Tiny House auf dem Grundstück sichtbar wurde. Zumindest in Form von ein paar langen Holzstangen.
