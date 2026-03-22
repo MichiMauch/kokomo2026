@@ -5,6 +5,7 @@
     { "source": "/was-kostet-unser-tiny-house", "destination": "/tiny-house/unser-leben-im-tiny-house-zwei-jahre-spaeter/", "permanent": true },
     { "source": "/was-fasziniert-uns-an-einem-tiny-house", "destination": "/", "permanent": true },
     { "source": "/tiny-house", "destination": "/", "permanent": true },
-    { "source": "/tiny-house/glossar", "destination": "/glossar/", "permanent": true }
+    { "source": "/tiny-house/glossar", "destination": "/glossar/", "permanent": true },
+    { "source": "/tiny-house/baugesuch-und-bauvisiere", "destination": "/tiny-house/bauvisiere-selber-stellen-lohnt-sich-das/", "permanent": true }
   ]
 }
