@@ -1,5 +1,5 @@
 ---
-import { formatDate, getPostImage } from '../lib/utils'
+import { formatDate, getPostImage, getPostImageThumb } from '../lib/utils'
 import Pin from './Pin.astro'
 
 interface Props {
@@ -15,6 +15,7 @@ interface Props {
 
 const { title, slug, date, summary, tags = [], images, pinColor = 'blue', eager = false } = Astro.props
 const imageUrl = getPostImage(images)
+const thumbUrl = getPostImageThumb(images)
 ---
 
 <article class="polaroid group">
@@ -24,15 +25,16 @@ const imageUrl = getPostImage(images)
   <a href={`/tiny-house/${slug}/`} class="block overflow-hidden rounded-sm">
     {imageUrl ? (
       <img
-        src={imageUrl}
+        src={thumbUrl || imageUrl}
+        srcset={thumbUrl && imageUrl !== thumbUrl ? `${thumbUrl} 600w, ${imageUrl} 1200w` : undefined}
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         alt={title}
         class="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
         loading={eager ? 'eager' : 'lazy'}
         decoding="async"
         fetchpriority={eager ? 'high' : undefined}
-        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-        width="800"
-        height="600"
+        width="600"
+        height="450"
       />
     ) : (
       <div class="aspect-[4/3] w-full bg-gradient-to-br from-primary-400 to-secondary-400 rounded-sm" />

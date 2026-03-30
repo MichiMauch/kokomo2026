@@ -81,6 +81,20 @@ export function getPostImage(images: string | string[] | undefined): string | un
 }
 
 /**
+ * Get thumbnail URL for a post image (600px wide variant)
+ */
+export function getPostImageThumb(images: string | string[] | undefined): string | undefined {
+  const url = getPostImage(images)
+  if (!url) return undefined
+  // Only titelbild images have thumbnails
+  if (!url.includes('-titelbild.webp')) return url
+  // Strip query params, add -thumb, re-add query
+  const [base, query] = url.split('?')
+  const thumbBase = base.replace('-titelbild.webp', '-titelbild-thumb.webp')
+  return query ? `${thumbBase}?${query}` : thumbBase
+}
+
+/**
  * Truncate text to a maximum length
  */
 export function truncate(text: string, maxLength: number): string {
