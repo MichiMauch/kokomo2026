@@ -53,6 +53,7 @@ export async function uploadBufferToR2(
       Key: targetFilename,
       Body: buffer instanceof Buffer ? buffer : Buffer.from(buffer),
       ContentType: getContentType(targetFilename),
+      CacheControl: 'public, max-age=31536000, immutable',
     })
   )
 
