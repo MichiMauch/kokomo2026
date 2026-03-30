@@ -1,11 +1,10 @@
 ---
 import '../styles/global.css'
-import '@fontsource/poppins/400.css'
-import '@fontsource/poppins/500.css'
-import '@fontsource/poppins/700.css'
-import '@fontsource/roboto/400.css'
-import '@fontsource/roboto/500.css'
-import '@fontsource/roboto/700.css'
+import '@fontsource/poppins/latin-400.css'
+import '@fontsource/poppins/latin-700.css'
+import '@fontsource/roboto/latin-400.css'
+import '@fontsource/roboto/latin-500.css'
+import '@fontsource/roboto/latin-700.css'
 import Header from '../components/Header.astro'
 import Footer from '../components/Footer.astro'
 import AnimatedBackground from '../components/islands/AnimatedBackground'
@@ -168,7 +167,7 @@ const breadcrumbLd = !article && pathSegments.length > 0 ? {
     </script>
   </head>
   <body class="min-h-screen text-[var(--text)] antialiased">
-    <AnimatedBackground client:visible />
+    <AnimatedBackground client:idle />
     <Header />
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <main class="mb-auto">

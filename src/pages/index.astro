@@ -114,6 +114,7 @@ const sortedPosts = sortPostsByDate(allPosts)
               tags={post.data.tags}
               images={post.data.images}
               pinColor={(['blue', 'green', 'beige'] as const)[i % 3]}
+              eager={i < 3}
             />
           </div>
         </>

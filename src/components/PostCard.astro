@@ -10,9 +10,10 @@ interface Props {
   tags?: string[]
   images?: string | string[]
   pinColor?: 'red' | 'blue' | 'green' | 'beige'
+  eager?: boolean
 }
 
-const { title, slug, date, summary, tags = [], images, pinColor = 'blue' } = Astro.props
+const { title, slug, date, summary, tags = [], images, pinColor = 'blue', eager = false } = Astro.props
 const imageUrl = getPostImage(images)
 ---
 
@@ -26,8 +27,9 @@ const imageUrl = getPostImage(images)
         src={imageUrl}
         alt={title}
         class="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
-        loading="lazy"
+        loading={eager ? 'eager' : 'lazy'}
         decoding="async"
+        fetchpriority={eager ? 'high' : undefined}
       />
     ) : (
       <div class="aspect-[4/3] w-full bg-gradient-to-br from-primary-400 to-secondary-400 rounded-sm" />
