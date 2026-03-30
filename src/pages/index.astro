@@ -15,6 +15,8 @@ const now = new Date()
 const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000)
 const todayTerm = allTerms[dayOfYear % allTerms.length]
 const sortedPosts = sortPostsByDate(allPosts)
+const moveInDate = new Date(2022, 8, 17)
+const daysSinceMoveIn = Math.floor((Date.now() - moveInDate.getTime()) / 86400000)
 ---
 
 <BaseLayout>
@@ -70,13 +72,13 @@ const sortedPosts = sortPostsByDate(allPosts)
           ))}
         </span>
       </h1>
-      <div class="mb-5 flex items-center justify-center gap-3 text-sm text-[var(--text-secondary)]">
-        <span id="days-counter"></span>
+      <div class="mb-5 flex min-h-[1.25rem] items-center justify-center gap-3 text-sm text-[var(--text-secondary)]">
+        <span id="days-counter">seit {daysSinceMoveIn} Tagen</span>
         <span id="battery-status" class="flex items-center gap-1"></span>
       </div>
-      <p class="text-lg leading-relaxed text-[var(--text-secondary)] md:text-xl">
-        <strong class="text-[var(--text)]"><span id="typewriter" class="typewriter"></span></strong>
-        <br /><span id="typewriter-sub" class="typewriter"></span>
+      <p class="min-h-[5rem] text-lg leading-relaxed text-[var(--text-secondary)] sm:min-h-[4rem] md:min-h-[4.5rem] md:text-xl">
+        <strong class="text-[var(--text)]"><span id="typewriter" class="typewriter">Brauchen wir wirklich 100 Quadratmeter, um zufrieden und glücklich zu sein?</span></strong>
+        <br /><span id="typewriter-sub" class="typewriter">Seit September 2022 leben wir in unserem Tiny House KOKOMO. Erfahre auf unserem Blog alles über das Leben in einem Tiny House auf 36m².</span>
       </p>
     </div>
   </section>
@@ -187,9 +189,13 @@ const sortedPosts = sortPostsByDate(allPosts)
     })
   }
 
-  // Sofort starten
-  ;(async () => {
-    if (el1) await typeText(el1, line1, 35)
-    if (el2) await typeText(el2, line2, 20)
-  })()
+  // Typewriter nur bei Nicht-Reduced-Motion starten
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (el1) el1.textContent = ''
+    if (el2) el2.textContent = ''
+    ;(async () => {
+      if (el1) await typeText(el1, line1, 35)
+      if (el2) await typeText(el2, line2, 20)
+    })()
+  }
 </script>

@@ -14,7 +14,7 @@ import sharp from 'sharp'
 config({ path: resolve(process.cwd(), '.env.local') })
 config({ path: resolve(process.cwd(), '.env') })
 
-const QUALITY = 75
+const QUALITY = 60
 const MAX_WIDTH = 1200
 const MAX_HEIGHT = 675
 const dryRun = process.argv.includes('--dry-run')

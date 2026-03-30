@@ -167,7 +167,8 @@ const breadcrumbLd = !article && pathSegments.length > 0 ? {
     </script>
   </head>
   <body class="min-h-screen text-[var(--text)] antialiased">
-    <AnimatedBackground client:idle />
+    <div class="pointer-events-none fixed inset-0 -z-10 bg-gradient-to-br from-[rgba(0,178,255,0.75)] via-[rgba(0,255,127,0.50)] to-[rgba(230,194,136,0.70)] md:hidden" aria-hidden="true"></div>
+    <AnimatedBackground client:media="(min-width: 768px)" />
     <Header />
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <main class="mb-auto">
