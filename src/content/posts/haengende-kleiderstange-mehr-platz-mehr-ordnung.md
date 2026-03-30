@@ -4,10 +4,9 @@ date: '2026-03-30'
 summary: 'Weg mit dem Kleidergestell, her mit der hängenden Stange! Wie wir mit wenig Aufwand mehr Platz und sogar einen flexiblen Homeoffice-Platz gewonnen haben.'
 tags: ['tiny house', 'minimalismus', 'Tiny House Alltag', 'homeoffice', 'einrichtung']
 authors: ['default']
-draft: true
-images: "https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/haengende-kleiderstange-mehr-platz-mehr-ordnung-titelbild.webp"
+draft: false
+images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/haengende-kleiderstange-mehr-platz-mehr-ordnung-titelbild.webp'
 ---
-
 Manchmal braucht es nur eine kleine Idee, um einen grossen Unterschied zu machen. Bei uns war es eine Stange. Genauer gesagt: eine **hängende Kleiderstange** — und die hat einiges verändert.
 
 ## Das Problem mit dem Gestell
