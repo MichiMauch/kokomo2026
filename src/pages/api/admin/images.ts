@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro'
 import { isAuthenticated } from '../../../lib/admin-auth'
 import { listPostFiles, getFileContent, updateFile } from '../../../lib/github'
 import { uploadBufferToR2 } from '../../../lib/r2'
+import sharp from 'sharp'
 import { parse as parseYaml } from 'yaml'
 import { enhancePhoto } from '../../../lib/image-enhance'
 
@@ -118,6 +119,14 @@ export const POST: APIRoute = async ({ request }) => {
     const rawUrl = await uploadBufferToR2(optimized, filename)
     const imageUrl = `${rawUrl}?v=${Date.now()}`
     console.log(`[admin/images POST] Image uploaded: ${imageUrl}`)
+
+    // Generate and upload thumbnail
+    const thumb = await sharp(optimized)
+      .resize(600, undefined, { withoutEnlargement: true })
+      .webp({ quality: 60 })
+      .toBuffer()
+    await uploadBufferToR2(thumb, `${slug}-titelbild-thumb.webp`)
+    console.log(`[admin/images POST] Thumbnail uploaded (${(thumb.length / 1024).toFixed(1)} KB)`)
 
     // Update post frontmatter via GitHub API
     const content = await getFileContent(filePath)

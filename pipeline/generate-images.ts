@@ -118,6 +118,17 @@ export async function generateImage(
   console.log(`✅ Image uploaded: ${url}`)
   console.log(`   Size: ${(optimized.length / 1024).toFixed(1)} KB`)
 
+  // Generate and upload thumbnail for header images
+  if (type === 'header') {
+    const thumb = await sharp(optimized)
+      .resize(600, undefined, { withoutEnlargement: true })
+      .webp({ quality: 60 })
+      .toBuffer()
+    const thumbFilename = `${slug}-titelbild-thumb.webp`
+    await uploadBufferToR2(thumb, thumbFilename)
+    console.log(`✅ Thumbnail uploaded: ${thumbFilename} (${(thumb.length / 1024).toFixed(1)} KB)`)
+  }
+
   return { url, prompt: fullPrompt }
 }
 
