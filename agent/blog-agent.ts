@@ -16,6 +16,7 @@
 import { config } from 'dotenv'
 import { resolve } from 'path'
 import { createInterface } from 'readline'
+import { execSync } from 'child_process'
 import { queryBlogAgent } from './core.js'
 import {
   agentHeader,
@@ -26,6 +27,7 @@ import {
   printToolProgress,
   printCost,
   printDivider,
+  formatMarkdownLine,
 } from './cli-utils.js'
 import type { SDKMessage, Query } from '@anthropic-ai/claude-agent-sdk'
 
@@ -58,12 +60,13 @@ async function processQuery(prompt: string, sessionId?: string) {
 
   let resultSessionId: string | undefined
   let isStreaming = false
+  let lineBuffer = ''
   const activeTools = new Map<string, string>()
 
   for await (const message of queryInstance) {
     const msg = message as SDKMessage
 
-    // Echtzeit-Streaming: Text Wort für Wort anzeigen
+    // Echtzeit-Streaming: Text zeilenweise mit Markdown-Formatierung anzeigen
     if (msg.type === 'stream_event') {
       const event = msg.event
       if (event.type === 'content_block_start') {
@@ -75,9 +78,19 @@ async function processQuery(prompt: string, sessionId?: string) {
         }
       } else if (event.type === 'content_block_delta') {
         if (event.delta.type === 'text_delta') {
-          process.stdout.write(event.delta.text)
+          lineBuffer += event.delta.text
+          while (lineBuffer.includes('\n')) {
+            const idx = lineBuffer.indexOf('\n')
+            const completeLine = lineBuffer.slice(0, idx)
+            process.stdout.write(formatMarkdownLine(completeLine) + '\n')
+            lineBuffer = lineBuffer.slice(idx + 1)
+          }
         }
       } else if (event.type === 'message_stop') {
+        if (lineBuffer) {
+          process.stdout.write(formatMarkdownLine(lineBuffer))
+          lineBuffer = ''
+        }
         if (isStreaming) {
           process.stdout.write('\n')
           isStreaming = false
@@ -132,6 +145,16 @@ async function processQuery(prompt: string, sessionId?: string) {
 
 async function main() {
   agentHeader()
+
+  // Git pull um sicherzustellen, dass wir auf dem neusten Stand sind
+  try {
+    const result = execSync('git pull --rebase', { cwd: process.cwd(), stdio: 'pipe' }).toString().trim()
+    if (result !== 'Already up to date.') {
+      printSystem(`Git: ${result.split('\n').pop()}`)
+    }
+  } catch (err: any) {
+    printError(`Git pull fehlgeschlagen: ${err.message.split('\n')[0]}`)
+  }
 
   // Ctrl+C: aktive Query sauber unterbrechen
   process.on('SIGINT', async () => {

@@ -11,9 +11,8 @@ Allow: /
 Sitemap: ${siteConfig.siteUrl}/sitemap-index.xml
 Host: ${siteConfig.siteUrl}
 
-# LLM / AI content
-# See https://llmstxt.org
-LLMs-Txt: ${siteConfig.siteUrl}/llms.txt
+# LLM / AI content — see https://llmstxt.org
+# LLMs-Txt: ${siteConfig.siteUrl}/llms.txt
 `.trim()
 
   return new Response(robotsTxt, {

@@ -13,6 +13,7 @@ const posts = defineCollection({
     draft: z.boolean().default(false),
     canonicalUrl: z.string().url().optional(),
     youtube: z.string().optional(),
+    postType: z.enum(['article', 'howto', 'faq']).optional(),
   }),
 })
 

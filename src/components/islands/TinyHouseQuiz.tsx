@@ -271,7 +271,7 @@ export default function TinyHouseQuiz() {
           </p>
           <button
             onClick={handleStart}
-            className="inline-flex cursor-pointer items-center justify-center rounded-full bg-primary-500 px-8 py-3.5 text-base font-semibold text-white shadow-lg transition-all hover:bg-primary-600 hover:shadow-xl dark:bg-primary-600 dark:hover:bg-primary-500"
+            className="inline-flex cursor-pointer items-center justify-center rounded-full bg-primary-700px-8 py-3.5 text-base font-semibold text-white shadow-lg transition-all hover:bg-primary-800 hover:shadow-xl dark:bg-primary-600 dark:hover:bg-primary-500"
           >
             Test starten
           </button>
@@ -462,7 +462,7 @@ export default function TinyHouseQuiz() {
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 32, flexWrap: 'wrap' }}>
             <button
               onClick={handleRestart}
-              className="inline-flex cursor-pointer items-center justify-center rounded-full bg-primary-500 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:bg-primary-600 hover:shadow-xl dark:bg-primary-600 dark:hover:bg-primary-500"
+              className="inline-flex cursor-pointer items-center justify-center rounded-full bg-primary-700px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:bg-primary-800 hover:shadow-xl dark:bg-primary-600 dark:hover:bg-primary-500"
             >
               Nochmal testen
             </button>

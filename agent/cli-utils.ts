@@ -56,3 +56,29 @@ export function printCost(costUsd: number, turns: number) {
 export function printDivider() {
   console.log(`${DIM}${'─'.repeat(50)}${RESET}`)
 }
+
+const UNDERLINE = '\x1b[4m'
+
+export function formatMarkdownLine(line: string): string {
+  // Headings (check longest prefix first)
+  if (line.startsWith('### ')) return `${CYAN}${BOLD}${line.slice(4)}${RESET}`
+  if (line.startsWith('## '))  return `${CYAN}${BOLD}${line.slice(3).toUpperCase()}${RESET}`
+  if (line.startsWith('# '))   return `${CYAN}${BOLD}${UNDERLINE}${line.slice(2).toUpperCase()}${RESET}`
+
+  // Horizontal rule
+  if (/^(-{3,}|\*{3,})$/.test(line.trim())) return `${DIM}${'─'.repeat(50)}${RESET}`
+
+  // Blockquote
+  if (line.startsWith('> ')) return `${DIM}│ ${line.slice(2)}${RESET}`
+
+  // List items
+  line = line.replace(/^(\s*)[-*] /, '$1  • ')
+
+  // Inline formatting (order matters: bold before italic)
+  line = line.replace(/\*\*(.+?)\*\*/g, `${BOLD}$1${RESET}`)
+  line = line.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, `${DIM}$1${RESET}`)
+  line = line.replace(/_([^_]+)_/g, `${DIM}$1${RESET}`)
+  line = line.replace(/`([^`]+)`/g, `${YELLOW}$1${RESET}`)
+
+  return line
+}

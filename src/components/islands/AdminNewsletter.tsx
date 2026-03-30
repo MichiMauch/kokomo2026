@@ -71,6 +71,22 @@ interface Post {
   date: string
 }
 
+interface SendTrend {
+  id: number
+  subject: string
+  sent_at: string
+  recipient_count: number
+  open_rate: number
+  click_rate: number
+  bounce_rate: number
+}
+
+interface SubscriberGrowth {
+  month: string
+  total: number
+  new_count: number
+}
+
 type Tab = 'compose' | 'subscribers' | 'history' | 'settings' | 'automations'
 type ComposeMode = 'pick-template' | 'fill-slots' | 'build-template'
 
@@ -400,7 +416,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-full bg-primary-500 px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-600 hover:shadow-md disabled:opacity-50 dark:bg-primary-600 dark:hover:bg-primary-500"
+            className="w-full rounded-full bg-primary-700px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md disabled:opacity-50 dark:bg-primary-600 dark:hover:bg-primary-500"
           >
             {loading ? 'Wird angemeldet…' : 'Anmelden'}
           </button>
@@ -754,7 +770,7 @@ function TemplateBuilder({
         <button
           onClick={handleSave}
           disabled={!name.trim() || slots.length === 0}
-          className="rounded-full bg-primary-500 px-5 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-600 hover:shadow-md disabled:opacity-50"
+          className="rounded-full bg-primary-700px-5 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md disabled:opacity-50"
         >
           Template speichern
         </button>
@@ -795,6 +811,262 @@ function PreviewModal({
   )
 }
 
+// ─── Trend Charts ──────────────────────────────────────────────────────
+
+const MONTH_LABELS: Record<string, string> = {
+  '01': 'Jan', '02': 'Feb', '03': 'Mär', '04': 'Apr',
+  '05': 'Mai', '06': 'Jun', '07': 'Jul', '08': 'Aug',
+  '09': 'Sep', '10': 'Okt', '11': 'Nov', '12': 'Dez',
+}
+
+function EngagementTrendChart({ trends }: { trends: SendTrend[] }) {
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
+
+  if (trends.length < 2) return null
+
+  const chartHeight = 180
+  const paddingLeft = 36
+  const paddingRight = 12
+  const paddingTop = 16
+  const paddingBottom = 32
+  const innerHeight = chartHeight - paddingTop - paddingBottom
+  const maxRate = Math.max(
+    ...trends.map((t) => t.click_rate),
+    10
+  )
+  // Round up to next nice number
+  const yMax = Math.ceil(maxRate / 10) * 10
+
+  const pointSpacing = trends.length > 1 ? 100 / (trends.length - 1) : 50
+
+  function yPos(value: number): number {
+    return paddingTop + innerHeight - (value / yMax) * innerHeight
+  }
+
+  const clickRates = trends.map((t) => t.click_rate)
+
+  // Grid lines
+  const gridStep = yMax <= 20 ? 5 : yMax <= 50 ? 10 : 20
+  const gridLines: number[] = []
+  for (let v = gridStep; v <= yMax; v += gridStep) gridLines.push(v)
+
+  const svgWidth = Math.max(trends.length * 60, 400)
+
+  return (
+    <div className="glass-card rounded-2xl p-6 shadow-lg">
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+          Engagement pro Newsletter
+        </h3>
+        <div className="flex items-center gap-4 text-xs">
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block h-2 w-2 rounded-full bg-blue-500" />
+            Klickrate
+          </span>
+        </div>
+      </div>
+      <div className="overflow-x-auto">
+        <svg
+          viewBox={`0 0 ${svgWidth} ${chartHeight}`}
+          width={svgWidth}
+          height={chartHeight}
+          className="w-full"
+          style={{ minWidth: svgWidth }}
+        >
+          {/* Grid lines */}
+          {gridLines.map((v) => (
+            <g key={v}>
+              <line
+                x1={0}
+                y1={yPos(v)}
+                x2={svgWidth}
+                y2={yPos(v)}
+                stroke="currentColor"
+                className="text-[var(--text-secondary)]"
+                strokeDasharray="4 4"
+                opacity={0.15}
+              />
+              <text
+                x={0}
+                y={yPos(v) - 4}
+                className="text-[var(--text-secondary)]"
+                fill="currentColor"
+                fontSize={10}
+                opacity={0.5}
+              >
+                {v}%
+              </text>
+            </g>
+          ))}
+
+          {/* Click rate line */}
+          <polyline
+            points={clickRates.map((v, i) => `${i * pointSpacing},${yPos(v)}`).join(' ')}
+            fill="none"
+            stroke="#3b82f6"
+            strokeWidth={2}
+            strokeLinejoin="round"
+          />
+
+          {/* Interactive points + labels */}
+          {trends.map((t, i) => {
+            const x = i * pointSpacing
+            const dateLabel = new Date(t.sent_at).toLocaleDateString('de-CH', { day: 'numeric', month: 'numeric' })
+            const isHovered = hoveredIdx === i
+
+            return (
+              <g key={t.id}>
+                {/* Hover area */}
+                <rect
+                  x={x - pointSpacing / 2}
+                  y={0}
+                  width={pointSpacing}
+                  height={chartHeight}
+                  fill="transparent"
+                  onMouseEnter={() => setHoveredIdx(i)}
+                  onMouseLeave={() => setHoveredIdx(null)}
+                />
+
+                {/* Vertical guide on hover */}
+                {isHovered && (
+                  <line
+                    x1={x}
+                    y1={paddingTop}
+                    x2={x}
+                    y2={chartHeight - paddingBottom}
+                    stroke="currentColor"
+                    className="text-[var(--text-secondary)]"
+                    strokeDasharray="2 2"
+                    opacity={0.3}
+                  />
+                )}
+
+                {/* Points */}
+                <circle cx={x} cy={yPos(t.click_rate)} r={isHovered ? 5 : 3} fill="#3b82f6" />
+
+                {/* X-axis label */}
+                <text
+                  x={x}
+                  y={chartHeight - 8}
+                  textAnchor="middle"
+                  fill="currentColor"
+                  className="text-[var(--text-secondary)]"
+                  fontSize={10}
+                  opacity={0.6}
+                >
+                  {dateLabel}
+                </text>
+
+                {/* Tooltip */}
+                {isHovered && (
+                  <g>
+                    <rect
+                      x={x - 80}
+                      y={paddingTop - 14}
+                      width={160}
+                      height={40}
+                      rx={8}
+                      fill="var(--bg)"
+                      stroke="var(--border)"
+                      strokeWidth={1}
+                      opacity={0.95}
+                    />
+                    <text x={x} y={paddingTop + 2} textAnchor="middle" fontSize={10} fontWeight={600} fill="var(--text)">
+                      {t.subject.length > 28 ? t.subject.slice(0, 28) + '…' : t.subject}
+                    </text>
+                    <text x={x} y={paddingTop + 16} textAnchor="middle" fontSize={10} fill="#3b82f6">
+                      Klickrate: {t.click_rate}% · {t.recipient_count} Empfänger
+                    </text>
+                  </g>
+                )}
+              </g>
+            )
+          })}
+        </svg>
+      </div>
+    </div>
+  )
+}
+
+function SubscriberGrowthChart({ data }: { data: SubscriberGrowth[] }) {
+  if (data.length < 2) return null
+
+  const max = Math.max(...data.map((d) => d.total), 1)
+  const steps = [5, 10, 25, 50, 100, 250, 500, 1000]
+  const step = steps.find((s) => max / s <= 5) || 2500
+  const gridLines: number[] = []
+  for (let v = step; v <= max; v += step) gridLines.push(v)
+
+  const chartHeight = 140
+
+  return (
+    <div className="glass-card rounded-2xl p-6 shadow-lg">
+      <h3 className="mb-4 text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+        Abonnenten-Wachstum
+      </h3>
+      <div style={{ position: 'relative', height: chartHeight, paddingLeft: 36, marginTop: 20 }}>
+        {/* Grid lines */}
+        {gridLines.map((v) => (
+          <div
+            key={v}
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: `${(v / max) * ((chartHeight - 20) / chartHeight) * 100}%`,
+            }}
+          >
+            <span
+              className="text-[var(--text-secondary)]"
+              style={{ position: 'absolute', left: 0, top: -6, fontSize: 10, opacity: 0.5, lineHeight: 1 }}
+            >
+              {v}
+            </span>
+            <div
+              style={{ marginLeft: 36, borderTop: '1px dashed', opacity: 0.2 }}
+              className="text-[var(--text-secondary)]"
+            />
+          </div>
+        ))}
+        {/* Bars */}
+        <div className="flex items-end gap-2 sm:gap-3" style={{ position: 'relative', zIndex: 1, height: '100%' }}>
+          {data.map(({ month, total, new_count }) => {
+            const [year, m] = month.split('-')
+            const label = `${MONTH_LABELS[m] || m} ${year.slice(2)}`
+            const barHeight = Math.max(Math.round((total / max) * (chartHeight - 20)), 4)
+
+            return (
+              <div
+                key={month}
+                className="group flex flex-col items-center gap-1"
+                style={{ flex: '1 1 0', minWidth: 32, maxWidth: 64, alignSelf: 'flex-end' }}
+                title={`${label}: ${total} total (+${new_count} neu)`}
+              >
+                <span className="text-[10px] font-medium text-[var(--text-secondary)]">
+                  {total}
+                </span>
+                <div className="relative w-full">
+                  <div
+                    className="w-full rounded-t bg-primary-500/80 dark:bg-primary-400/80"
+                    style={{ height: barHeight }}
+                  />
+                  {new_count > 0 && (
+                    <div
+                      className="absolute bottom-0 w-full rounded-t bg-primary-600 dark:bg-primary-300"
+                      style={{ height: Math.max(Math.round((new_count / max) * (chartHeight - 20)), 2) }}
+                    />
+                  )}
+                </div>
+                <span className="text-[10px] text-[var(--text-secondary)]">{label}</span>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Main Component ────────────────────────────────────────────────────
 
 export default function AdminNewsletter() {
@@ -823,6 +1095,8 @@ export default function AdminNewsletter() {
   const [testEmail, setTestEmail] = useState('')
 
   // Reporting state
+  const [sendTrends, setSendTrends] = useState<SendTrend[]>([])
+  const [subscriberGrowth, setSubscriberGrowth] = useState<SubscriberGrowth[]>([])
   const [overallStats, setOverallStats] = useState<OverallStatsData | null>(null)
   const [selectedSend, setSelectedSend] = useState<NewsletterSend | null>(null)
   const [sendRecipients, setSendRecipients] = useState<NewsletterRecipientRow[]>([])
@@ -860,6 +1134,18 @@ export default function AdminNewsletter() {
       setPhase('loaded')
     } catch {
       setPhase('login')
+    }
+  }
+
+  async function loadTrends() {
+    try {
+      const res = await fetch('/api/admin/newsletter-trends')
+      if (!res.ok) return
+      const data = await res.json()
+      setSendTrends(data.trends || [])
+      setSubscriberGrowth(data.subscriberGrowth || [])
+    } catch {
+      // ignore
     }
   }
 
@@ -946,6 +1232,12 @@ export default function AdminNewsletter() {
   useEffect(() => {
     loadData()
   }, [])
+
+  useEffect(() => {
+    if (tab === 'history' && sendTrends.length === 0) {
+      loadTrends()
+    }
+  }, [tab])
 
   // Toast auto-dismiss
   useEffect(() => {
@@ -1225,7 +1517,7 @@ export default function AdminNewsletter() {
   const tabCls = (t: Tab) =>
     `rounded-full px-5 py-2 text-sm font-medium transition-colors ${
       tab === t
-        ? 'bg-primary-500 text-white'
+        ? 'bg-primary-700text-white'
         : 'border border-slate-300 text-[var(--text-secondary)] hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800'
     }`
 
@@ -1463,7 +1755,7 @@ export default function AdminNewsletter() {
                 <button
                   onClick={handleSendClick}
                   disabled={sending || !canSend}
-                  className="flex-1 rounded-full bg-primary-500 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-600 hover:shadow-md disabled:opacity-50"
+                  className="flex-1 rounded-full bg-primary-700px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md disabled:opacity-50"
                 >
                   {sending
                     ? 'Wird versendet…'
@@ -1566,6 +1858,14 @@ export default function AdminNewsletter() {
                 </div>
                 <div className="mt-1 text-xs text-[var(--text-secondary)]">Beschwerden</div>
               </div>
+            </div>
+          )}
+
+          {/* Trend Charts */}
+          {!selectedSend && (
+            <div className="grid gap-6 lg:grid-cols-2">
+              {sendTrends.length >= 2 && <div className="lg:col-span-2"><EngagementTrendChart trends={sendTrends} /></div>}
+              {subscriberGrowth.length >= 2 && <div className="lg:col-span-2"><SubscriberGrowthChart data={subscriberGrowth} /></div>}
             </div>
           )}
 
@@ -1862,7 +2162,7 @@ export default function AdminNewsletter() {
                 <button
                   onClick={savePrompts}
                   disabled={savingPrompt}
-                  className="rounded-full bg-primary-500 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600 disabled:opacity-50"
+                  className="rounded-full bg-primary-700px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-800 disabled:opacity-50"
                 >
                   {savingPrompt ? 'Speichern…' : 'Beide Prompts speichern'}
                 </button>
@@ -1929,7 +2229,7 @@ export default function AdminNewsletter() {
               </button>
               <button
                 onClick={handleSendConfirmed}
-                className="rounded-full bg-primary-500 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600"
+                className="rounded-full bg-primary-700px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-800"
               >
                 Jetzt senden
               </button>

@@ -201,7 +201,20 @@
       "Bash(npm list:*)",
       "Bash(xargs cat:*)",
       "Bash(git checkout:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(claude skill:*)",
+      "Read(//Users/michaelmauch/.claude/skills/**)",
+      "Read(//Users/michaelmauch/.claude/**)",
+      "Bash(claude mcp:*)",
+      "Bash(claude registry:*)",
+      "Bash(claude plugins:*)",
+      "Bash(claude plugin:*)",
+      "WebFetch(domain:docs.astro.build)",
+      "WebFetch(domain:astro.build)",
+      "Bash(hcloud image:*)",
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+      "Read(//Users/michaelmauch/**)"
     ]
   }
 }

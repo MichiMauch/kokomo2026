@@ -115,7 +115,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-full bg-primary-500 px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-600 hover:shadow-md disabled:opacity-50 dark:bg-primary-600 dark:hover:bg-primary-500"
+            className="w-full rounded-full bg-primary-700px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md disabled:opacity-50 dark:bg-primary-600 dark:hover:bg-primary-500"
           >
             {loading ? 'Wird angemeldet…' : 'Anmelden'}
           </button>
@@ -208,7 +208,7 @@ function ThreadCard({
         <button
           onClick={() => setReplyOpen(!replyOpen)}
           disabled={busy}
-          className="rounded-full bg-primary-500 px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-primary-600 disabled:opacity-50"
+          className="rounded-full bg-primary-700px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-primary-800 disabled:opacity-50"
         >
           Antworten
         </button>
@@ -239,7 +239,7 @@ function ThreadCard({
                 })
               }
               disabled={busy || !replyContent.trim()}
-              className="rounded-full bg-primary-500 px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-primary-600 disabled:opacity-50"
+              className="rounded-full bg-primary-700px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-primary-800 disabled:opacity-50"
             >
               Absenden
             </button>
@@ -374,7 +374,7 @@ export default function AdminComments() {
             onClick={() => setFilter(f.key)}
             className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
               filter === f.key
-                ? 'bg-primary-500 text-white'
+                ? 'bg-primary-700text-white'
                 : 'border border-slate-300 text-[var(--text-secondary)] hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800'
             }`}
           >

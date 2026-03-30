@@ -493,3 +493,73 @@ export async function getOverallNewsletterStats(): Promise<OverallStats> {
     total_complaints: (row.total_complaints as number) || 0,
   }
 }
+
+// ─── Trends ─────────────────────────────────────────────────────────────
+
+export interface SendTrend {
+  id: number
+  subject: string
+  sent_at: string
+  recipient_count: number
+  open_rate: number
+  click_rate: number
+  bounce_rate: number
+}
+
+export interface SubscriberGrowth {
+  month: string
+  total: number
+  new_count: number
+}
+
+export async function getNewsletterTrends(): Promise<SendTrend[]> {
+  const db = getClient()
+  const result = await db.execute(`
+    SELECT
+      id, subject, sent_at, recipient_count,
+      CASE WHEN recipient_count > 0
+        THEN ROUND(CAST(opened_count AS REAL) / recipient_count * 100, 1)
+        ELSE 0 END as open_rate,
+      CASE WHEN recipient_count > 0
+        THEN ROUND(CAST(clicked_count AS REAL) / recipient_count * 100, 1)
+        ELSE 0 END as click_rate,
+      CASE WHEN recipient_count > 0
+        THEN ROUND(CAST(bounced_count AS REAL) / recipient_count * 100, 1)
+        ELSE 0 END as bounce_rate
+    FROM newsletter_sends
+    ORDER BY sent_at ASC
+  `)
+  return result.rows.map((row) => ({
+    id: row.id as number,
+    subject: row.subject as string,
+    sent_at: row.sent_at as string,
+    recipient_count: (row.recipient_count as number) || 0,
+    open_rate: (row.open_rate as number) || 0,
+    click_rate: (row.click_rate as number) || 0,
+    bounce_rate: (row.bounce_rate as number) || 0,
+  }))
+}
+
+export async function getSubscriberGrowth(): Promise<SubscriberGrowth[]> {
+  const db = getClient()
+  const result = await db.execute(`
+    SELECT
+      strftime('%Y-%m', confirmed_at) as month,
+      COUNT(*) as new_count
+    FROM newsletter_subscribers
+    WHERE status = 'confirmed' AND confirmed_at IS NOT NULL
+    GROUP BY month
+    ORDER BY month ASC
+  `)
+
+  let cumulative = 0
+  return result.rows.map((row) => {
+    const newCount = (row.new_count as number) || 0
+    cumulative += newCount
+    return {
+      month: row.month as string,
+      total: cumulative,
+      new_count: newCount,
+    }
+  })
+}

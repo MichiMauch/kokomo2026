@@ -286,7 +286,7 @@ export default function CommentSection({ slug }: { slug: string }) {
         <button
           type="submit"
           disabled={formStatus === 'loading'}
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-primary-500 px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-600 hover:shadow-md disabled:opacity-50 dark:bg-primary-600 dark:hover:bg-primary-500"
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-primary-700px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md disabled:opacity-50 dark:bg-primary-600 dark:hover:bg-primary-500"
         >
           {formStatus === 'loading' ? (
             <>

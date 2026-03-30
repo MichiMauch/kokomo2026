@@ -56,7 +56,7 @@ const inputCls =
   'w-full rounded-xl border border-slate-300 bg-white/70 px-4 py-3 text-sm text-slate-900 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-400/30 dark:border-slate-600/50 dark:bg-slate-800/50 dark:text-white'
 
 const btnPrimary =
-  'rounded-full bg-primary-500 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600 disabled:opacity-50'
+  'rounded-full bg-primary-700px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-800 disabled:opacity-50'
 
 const btnSecondary =
   'rounded-full border border-slate-300 px-5 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800'

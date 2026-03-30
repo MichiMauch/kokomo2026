@@ -41,6 +41,7 @@ Wenn die Outline freigegeben ist, schreibe den kompletten Post:
 - 5 Tags (aus bestehenden Tags oder neue passende)
 - Body (mindestens 500 Wörter)
 - Image Prompt (auf Englisch, für Gemini Imagen) — nur nötig wenn kein eigenes Titelbild verwendet wird
+- Post-Typ: Bei Anleitungs-Posts setze postType auf "howto" und strukturiere die Schritte als nummerierte H2-Überschriften (z.B. "## 1. Fundament vorbereiten"). Das aktiviert automatisch HowTo-Schema für Google Rich Snippets.
 
 ### Phase 2b: SEO-Check
 Delegiere nach dem Draft die SEO-Analyse an den \`seo-analyst\` Subagent:
@@ -255,6 +256,11 @@ export const BLOG_DRAFT_SCHEMA: JsonSchemaOutputFormat = {
         type: 'string',
         description: 'Bildgenerierungs-Prompt auf Englisch für Gemini Imagen',
       },
+      postType: {
+        type: 'string',
+        enum: ['article', 'howto', 'faq'],
+        description: 'Post-Typ: "howto" für Anleitungen (aktiviert HowTo-Schema), "faq" für FAQ-Posts, "article" für Standard-Posts. Nur setzen wenn nicht "article".',
+      },
     },
     additionalProperties: false,
   },
@@ -267,6 +273,7 @@ export interface BlogDraft {
   tags: string[]
   body: string
   imagePrompt: string
+  postType?: 'article' | 'howto' | 'faq'
 }
 
 /**

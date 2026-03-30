@@ -20,6 +20,7 @@ export interface PostData {
   youtube?: string
   date?: string // YYYY-MM-DD, defaults to today
   draft?: boolean
+  postType?: 'article' | 'howto' | 'faq'
 }
 
 /**
@@ -60,6 +61,10 @@ export function buildPostContent(data: PostData): string {
 
   if (data.youtube) {
     lines.push(`youtube: '${data.youtube}'`)
+  }
+
+  if (data.postType && data.postType !== 'article') {
+    lines.push(`postType: '${data.postType}'`)
   }
 
   lines.push('---', '', data.body)

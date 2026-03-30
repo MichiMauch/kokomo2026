@@ -88,7 +88,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-full bg-primary-500 px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-600 hover:shadow-md disabled:opacity-50 dark:bg-primary-600 dark:hover:bg-primary-500"
+            className="w-full rounded-full bg-primary-700px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md disabled:opacity-50 dark:bg-primary-600 dark:hover:bg-primary-500"
           >
             {loading ? 'Wird angemeldet…' : 'Anmelden'}
           </button>
@@ -132,7 +132,7 @@ function SuggestionCard({
       <button
         onClick={onSelect}
         disabled={disabled}
-        className="rounded-full bg-primary-500 px-5 py-2 text-xs font-medium text-white transition-colors hover:bg-primary-600 disabled:opacity-50"
+        className="rounded-full bg-primary-700px-5 py-2 text-xs font-medium text-white transition-colors hover:bg-primary-800 disabled:opacity-50"
       >
         Ausarbeiten
       </button>
@@ -334,7 +334,7 @@ function WordCountSelector({ value, onChange }: { value: WordCountOption; onChan
             onClick={() => onChange(opt)}
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
               value === opt
-                ? 'bg-primary-500 text-white'
+                ? 'bg-primary-700text-white'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
             }`}
           >
@@ -367,7 +367,7 @@ function PostTypeSelector({ value, onChange }: { value: PostType; onChange: (v: 
             onClick={() => onChange(pt.value)}
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
               value === pt.value
-                ? 'bg-primary-500 text-white'
+                ? 'bg-primary-700text-white'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
             }`}
           >
@@ -591,7 +591,7 @@ export default function AdminContent() {
             <h2 className="mb-4 text-lg font-semibold text-[var(--text)]">Neuen Blogpost erstellen</h2>
             <button
               onClick={handleSuggest}
-              className="rounded-full bg-primary-500 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-600 hover:shadow-md"
+              className="rounded-full bg-primary-700px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md"
             >
               Themen vorschlagen
             </button>
@@ -637,7 +637,7 @@ export default function AdminContent() {
             <button
               onClick={() => handleGenerate()}
               disabled={!customTopic.trim()}
-              className="rounded-full bg-primary-500 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-600 hover:shadow-md disabled:opacity-50"
+              className="rounded-full bg-primary-700px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md disabled:opacity-50"
             >
               Post generieren
             </button>
@@ -694,7 +694,7 @@ export default function AdminContent() {
                   <div className="flex gap-3">
                     <button
                       onClick={() => handleGenerate(selectedSuggestion)}
-                      className="rounded-full bg-primary-500 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-600 hover:shadow-md"
+                      className="rounded-full bg-primary-700px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md"
                     >
                       Post generieren
                     </button>
@@ -792,7 +792,7 @@ export default function AdminContent() {
           </div>
           <button
             onClick={handleReset}
-            className="rounded-full bg-primary-500 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-600 hover:shadow-md"
+            className="rounded-full bg-primary-700px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md"
           >
             Neuen Post erstellen
           </button>

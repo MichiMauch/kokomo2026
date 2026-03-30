@@ -187,7 +187,7 @@ export default function AdminGlossar() {
                         <button
                           onClick={() => saveBoost(stat.term)}
                           disabled={saving}
-                          className="rounded bg-primary-500 px-2 py-1 text-xs text-white hover:bg-primary-600 disabled:opacity-50"
+                          className="rounded bg-primary-700px-2 py-1 text-xs text-white hover:bg-primary-800 disabled:opacity-50"
                         >
                           {saving ? '...' : 'OK'}
                         </button>

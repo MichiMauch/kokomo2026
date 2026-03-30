@@ -74,7 +74,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-full bg-primary-500 px-6 py-3 text-sm font-medium text-white transition-all hover:bg-primary-600 disabled:opacity-50"
+            className="w-full rounded-full bg-primary-700px-6 py-3 text-sm font-medium text-white transition-all hover:bg-primary-800 disabled:opacity-50"
           >
             {loading ? 'Anmelden...' : 'Anmelden'}
           </button>
@@ -112,7 +112,7 @@ function ChatMessage({ msg }: { msg: Message }) {
   if (msg.role === 'user') {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[75%] rounded-2xl rounded-br-md bg-primary-500 px-4 py-3 text-sm text-white shadow-sm">
+        <div className="max-w-[75%] rounded-2xl rounded-br-md bg-primary-700px-4 py-3 text-sm text-white shadow-sm">
           {msg.content}
         </div>
       </div>
@@ -407,7 +407,7 @@ export default function AdminAgentChat() {
                 <button
                   type="submit"
                   disabled={isStreaming || !input.trim()}
-                  className="rounded-full bg-primary-500 px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-primary-600 disabled:opacity-50"
+                  className="rounded-full bg-primary-700px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-primary-800 disabled:opacity-50"
                 >
                   Senden
                 </button>

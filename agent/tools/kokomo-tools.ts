@@ -119,8 +119,9 @@ export const createPostFileTool = tool(
     body: z.string(),
     imageUrl: z.string().optional(),
     draft: z.boolean().default(false),
+    postType: z.enum(['article', 'howto', 'faq']).optional().describe('Post type: "howto" for tutorials (enables HowTo schema), "faq" for FAQ posts'),
   },
-  async ({ title, summary, tags, body, imageUrl, draft }) => {
+  async ({ title, summary, tags, body, imageUrl, draft, postType }) => {
     const result = createPostFile({
       title,
       summary,
@@ -128,6 +129,7 @@ export const createPostFileTool = tool(
       body,
       imageUrl,
       draft,
+      postType,
     })
     return {
       content: [{

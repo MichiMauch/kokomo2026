@@ -102,7 +102,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-full bg-primary-500 px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-600 hover:shadow-md disabled:opacity-50 dark:bg-primary-600 dark:hover:bg-primary-500"
+            className="w-full rounded-full bg-primary-700px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md disabled:opacity-50 dark:bg-primary-600 dark:hover:bg-primary-500"
           >
             {loading ? 'Wird angemeldet…' : 'Anmelden'}
           </button>
@@ -516,7 +516,7 @@ function TabInhalt({
         <button
           onClick={handleSave}
           disabled={saving || !dirty}
-          className="rounded-full bg-primary-500 px-6 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-600 disabled:opacity-50 dark:bg-primary-600 dark:hover:bg-primary-500"
+          className="rounded-full bg-primary-700px-6 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 disabled:opacity-50 dark:bg-primary-600 dark:hover:bg-primary-500"
         >
           {saving ? 'Wird gespeichert…' : 'Speichern'}
         </button>
@@ -727,7 +727,7 @@ function TabSocial({
         <button
           onClick={handleGenerate}
           disabled={generating}
-          className="rounded-full bg-primary-500 px-5 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-600 disabled:opacity-50 dark:bg-primary-600 dark:hover:bg-primary-500"
+          className="rounded-full bg-primary-700px-5 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 disabled:opacity-50 dark:bg-primary-600 dark:hover:bg-primary-500"
         >
           {generating ? 'Texte werden generiert…' : texts.length > 0 ? 'Neu generieren' : 'Texte generieren'}
         </button>
