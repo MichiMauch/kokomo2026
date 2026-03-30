@@ -30,6 +30,9 @@ const imageUrl = getPostImage(images)
         loading={eager ? 'eager' : 'lazy'}
         decoding="async"
         fetchpriority={eager ? 'high' : undefined}
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        width="800"
+        height="600"
       />
     ) : (
       <div class="aspect-[4/3] w-full bg-gradient-to-br from-primary-400 to-secondary-400 rounded-sm" />

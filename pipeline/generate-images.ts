@@ -107,7 +107,7 @@ export async function generateImage(
   // Resize and convert to WebP with sharp
   const optimized = await sharp(imageBuffer)
     .resize(cfg.width, cfg.height, { fit: 'cover' })
-    .webp({ quality: 85 })
+    .webp({ quality: 75 })
     .toBuffer()
 
   // Upload to R2

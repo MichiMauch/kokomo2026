@@ -95,7 +95,7 @@ export async function enhancePhoto(opts: {
   const fit = variant === 'inline' ? 'inside' as const : 'cover' as const
   const optimized = await sharp(imageBuffer)
     .resize(cfg.width || 1200, cfg.height || 675, { fit, withoutEnlargement: true })
-    .webp({ quality: 85 })
+    .webp({ quality: 75 })
     .toBuffer()
 
   return optimized
