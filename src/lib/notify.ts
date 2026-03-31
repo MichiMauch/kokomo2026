@@ -1,7 +1,5 @@
 import { Resend } from 'resend'
 import { siteConfig } from './site-config'
-import { buildNewsletterHtml, buildMultiBlockNewsletterHtml } from './newsletter-template'
-import type { NewsletterBlock, PostRef } from './newsletter-blocks'
 
 const resend = new Resend(import.meta.env.RESEND_API_KEY)
 
@@ -169,104 +167,5 @@ export async function notifyCommentReply(data: ReplyNotification) {
     })
   } catch (err) {
     console.error('[notify] Failed to send reply email:', err)
-  }
-}
-
-// ─── Newsletter: Bestätigungs-E-Mail ──────────────────────────────────
-
-export async function sendConfirmationEmail(data: { email: string; token: string }) {
-  const confirmUrl = `${siteConfig.siteUrl}/newsletter/bestaetigen?token=${data.token}`
-
-  try {
-    await resend.emails.send({
-      from: fromEmail(),
-      to: data.email,
-      subject: 'Bitte bestätige deine Newsletter-Anmeldung auf KOKOMO House',
-      html: emailWrapper(`
-        <h2 style="color: #111827; margin-top: 0;">Fast geschafft!</h2>
-        <p style="color: #374151; line-height: 1.6;">
-          Du hast dich für den KOKOMO House Newsletter angemeldet.
-          Bitte bestätige deine E-Mail-Adresse, damit wir dir künftig
-          direkt schreiben können, wenn es Neuigkeiten aus unserem Tiny House gibt.
-        </p>
-        <p style="text-align: center; margin: 32px 0;">
-          <a href="${confirmUrl}" style="display: inline-block; background: #05DE66; color: white; padding: 14px 36px; border-radius: 999px; text-decoration: none; font-weight: 600; font-size: 15px;">
-            Anmeldung bestätigen
-          </a>
-        </p>
-        <p style="color: #9ca3af; font-size: 13px; line-height: 1.5;">
-          Wenn du dich nicht angemeldet hast, kannst du diese E-Mail einfach ignorieren.
-        </p>
-      `),
-    })
-  } catch (err) {
-    console.error('[notify] Failed to send confirmation email:', err)
-  }
-}
-
-// ─── Newsletter: Newsletter-E-Mail ────────────────────────────────────
-
-export async function sendNewsletterEmail(data: {
-  email: string
-  unsubscribeToken: string
-  postTitle: string
-  postSlug: string
-  postImage: string | null
-  postSummary: string
-  postDate: string
-}): Promise<{ resendEmailId: string | null }> {
-  const slug = data.postSlug.replace(/\.md$/, '')
-  const postUrl = `${siteConfig.siteUrl}/tiny-house/${slug}/`
-  const unsubscribeUrl = `${siteConfig.siteUrl}/unsubscribe?token=${data.unsubscribeToken}`
-
-  const result = await resend.emails.send({
-    from: fromEmail(),
-    to: data.email,
-    subject: data.postTitle,
-    html: buildNewsletterHtml({
-      postTitle: data.postTitle,
-      postUrl,
-      postImage: data.postImage,
-      postSummary: data.postSummary,
-      postDate: data.postDate,
-      unsubscribeUrl,
-      siteUrl: siteConfig.siteUrl,
-    }),
-    headers: {
-      'List-Unsubscribe': `<${unsubscribeUrl}>`,
-      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
-    },
-  })
-
-  return { resendEmailId: result.data?.id ?? null }
-}
-
-// ─── Newsletter: Multi-Block Newsletter ────────────────────────────────
-
-export async function sendMultiBlockNewsletterEmail(data: {
-  email: string
-  unsubscribeToken: string
-  subject: string
-  blocks: NewsletterBlock[]
-  postsMap: Record<string, PostRef>
-}): Promise<{ resendEmailId: string | null }> {
-  const unsubscribeUrl = `${siteConfig.siteUrl}/unsubscribe?token=${data.unsubscribeToken}`
-
-  try {
-    const result = await resend.emails.send({
-      from: fromEmail(),
-      to: data.email,
-      subject: data.subject,
-      html: buildMultiBlockNewsletterHtml(data.blocks, data.postsMap, siteConfig.siteUrl, unsubscribeUrl),
-      headers: {
-        'List-Unsubscribe': `<${unsubscribeUrl}>`,
-        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
-      },
-    })
-
-    return { resendEmailId: result.data?.id ?? null }
-  } catch (err) {
-    console.error(`[notify] Failed to send multi-block newsletter to ${data.email}:`, err)
-    throw err
   }
 }

@@ -148,7 +148,15 @@ async function main() {
 
   // Git pull um sicherzustellen, dass wir auf dem neusten Stand sind
   try {
+    const status = execSync('git status --porcelain', { cwd: process.cwd(), stdio: 'pipe' }).toString().trim()
+    const hasChanges = status.length > 0
+    if (hasChanges) {
+      execSync('git stash', { cwd: process.cwd(), stdio: 'pipe' })
+    }
     const result = execSync('git pull --rebase', { cwd: process.cwd(), stdio: 'pipe' }).toString().trim()
+    if (hasChanges) {
+      execSync('git stash pop', { cwd: process.cwd(), stdio: 'pipe' })
+    }
     if (result !== 'Already up to date.') {
       printSystem(`Git: ${result.split('\n').pop()}`)
     }

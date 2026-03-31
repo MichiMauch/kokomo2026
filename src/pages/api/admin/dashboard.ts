@@ -1,10 +1,31 @@
 import type { APIRoute } from 'astro'
 import { createSign } from 'node:crypto'
-import { getAllSubscribers, getNewsletterSendsWithStats } from '../../../lib/newsletter'
 import { getAllComments } from '../../../lib/turso'
 import { isAuthenticated } from '../../../lib/admin-auth'
 
 export const prerender = false
+
+// Fetch newsletter stats from the standalone newsletter-app
+async function fetchNewsletterStats(): Promise<{
+  subscribers: { status: string; created_at: string }[]
+  sends: { post_title: string; sent_at: string; recipient_count: number; opened_count: number; clicked_count: number }[]
+} | null> {
+  const newsletterAppUrl = import.meta.env.PUBLIC_NEWSLETTER_APP_URL || 'https://newsletter.kokomo.house'
+  const cronSecret = import.meta.env.CRON_SECRET
+
+  try {
+    const res = await fetch(`${newsletterAppUrl}/api/admin/newsletter?stats=1`, {
+      headers: {
+        Cookie: `admin_session=${cronSecret || ''}`,
+      },
+    })
+    if (!res.ok) return null
+    const data = await res.json()
+    return { subscribers: data.subscribers || [], sends: data.sends || [] }
+  } catch {
+    return null
+  }
+}
 
 interface TopPost {
   label: string
@@ -46,7 +67,6 @@ async function fetchMatomoTopPosts(): Promise<TopPost[] | null> {
       fetchPages(prevRange),
     ])
 
-    // Filter to blog post pages only (/tiny-house/slug pattern, not index or pagination)
     const isPostUrl = (url: string) => {
       const match = url.match(/^\/tiny-house\/([^/]+)\/?$/)
       return match && match[1] !== 'page'
@@ -139,7 +159,6 @@ async function fetchSearchConsoleTopQueries(): Promise<SearchQuery[] | null> {
   if (!keyRaw) return null
 
   try {
-    // Support both raw JSON and base64-encoded JSON
     let keyJson: string
     if (keyRaw.trimStart().startsWith('{')) {
       keyJson = keyRaw
@@ -166,7 +185,6 @@ async function fetchSearchConsoleTopQueries(): Promise<SearchQuery[] | null> {
     const signature = sign.sign(key.private_key, 'base64url')
     const jwt = `${signInput}.${signature}`
 
-    // Exchange JWT for access token
     const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -177,7 +195,6 @@ async function fetchSearchConsoleTopQueries(): Promise<SearchQuery[] | null> {
     const accessToken = tokenData.access_token
     if (!accessToken) return null
 
-    // Query Search Console API (last 28 days)
     const endDate = new Date()
     const startDate = new Date(endDate.getTime() - 28 * 24 * 60 * 60 * 1000)
     const fmt = (d: Date) => d.toISOString().slice(0, 10)
@@ -247,31 +264,33 @@ export const GET: APIRoute = async ({ request }) => {
   }
 
   try {
-    const [subscribersResult, commentsResult, sendsResult, visitorsResult, topPostsResult, topPostsAllTimeResult, searchQueriesResult] = await Promise.allSettled([
-      getAllSubscribers(),
+    const [newsletterResult, commentsResult, visitorsResult, topPostsResult, topPostsAllTimeResult, searchQueriesResult] = await Promise.allSettled([
+      fetchNewsletterStats(),
       getAllComments(),
-      getNewsletterSendsWithStats(),
       fetchMatomoVisitors(),
       fetchMatomoTopPosts(),
       fetchMatomoTopPostsAllTime(),
       fetchSearchConsoleTopQueries(),
     ])
 
-    // Subscribers (existing logic)
-    const subscribers = subscribersResult.status === 'fulfilled' ? subscribersResult.value : []
+    // Newsletter stats from newsletter-app
+    const newsletterData = newsletterResult.status === 'fulfilled' ? newsletterResult.value : null
+    const subscribers = newsletterData?.subscribers || []
+    const sends = newsletterData?.sends || []
+
     const now = new Date()
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
     const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000)
 
-    const confirmed = subscribers.filter((s) => s.status === 'confirmed')
+    const confirmed = subscribers.filter((s: any) => s.status === 'confirmed')
     const total_confirmed = confirmed.length
 
     const new_last_7_days = confirmed.filter(
-      (s) => new Date(s.created_at) >= sevenDaysAgo,
+      (s: any) => new Date(s.created_at) >= sevenDaysAgo,
     ).length
 
     const new_prev_7_days = confirmed.filter(
-      (s) => {
+      (s: any) => {
         const d = new Date(s.created_at)
         return d >= fourteenDaysAgo && d < sevenDaysAgo
       },
@@ -284,7 +303,6 @@ export const GET: APIRoute = async ({ request }) => {
     const pending_comments = comments.filter((c) => c.approved === 0).length
 
     // Last newsletter send
-    const sends = sendsResult.status === 'fulfilled' ? sendsResult.value : []
     const lastSend = sends[0] || null
     const last_send = lastSend
       ? {
@@ -296,10 +314,7 @@ export const GET: APIRoute = async ({ request }) => {
         }
       : null
 
-    // Visitors
     const visitors = visitorsResult.status === 'fulfilled' ? visitorsResult.value : null
-
-    // Top posts
     const top_posts = topPostsResult.status === 'fulfilled' ? topPostsResult.value : null
     const top_posts_all_time = topPostsAllTimeResult.status === 'fulfilled' ? topPostsAllTimeResult.value : null
     const search_queries = searchQueriesResult.status === 'fulfilled' ? searchQueriesResult.value : null

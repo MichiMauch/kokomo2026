@@ -214,7 +214,8 @@
       "Bash(hcloud image:*)",
       "Bash(ssh:*)",
       "Bash(scp:*)",
-      "Read(//Users/michaelmauch/**)"
+      "Read(//Users/michaelmauch/**)",
+      "Bash(git stash:*)"
     ]
   }
 }

@@ -1,23 +1,8 @@
 ---
 export const prerender = false
-import { unsubscribeByToken, getSubscriberByToken } from '../lib/newsletter'
-import { cancelEnrollments } from '../lib/automation'
 
+// Redirect to newsletter-app which handles unsubscribe logic
 const token = Astro.url.searchParams.get('token')
-if (!token) {
-  return Astro.redirect('/')
-}
-
-// Cancel automation enrollments before unsubscribing
-const subscriber = await getSubscriberByToken(token)
-if (subscriber) {
-  try {
-    await cancelEnrollments(subscriber.email)
-  } catch (err) {
-    console.error('[unsubscribe] Cancel enrollments failed:', err)
-  }
-}
-
-await unsubscribeByToken(token)
-return Astro.redirect('/newsletter/abgemeldet')
+const newsletterApp = import.meta.env.PUBLIC_NEWSLETTER_APP_URL || 'https://newsletter.kokomo.house'
+return Astro.redirect(`${newsletterApp}/unsubscribe?token=${token || ''}`)
 ---

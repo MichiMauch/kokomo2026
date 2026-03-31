@@ -1,44 +1,7 @@
 ---
 export const prerender = false
-import BaseLayout from '../../layouts/BaseLayout.astro'
-import AdminNewsletter from '../../components/islands/AdminNewsletter'
----
 
-<BaseLayout title="Newsletter-Verwaltung" noIndex>
-  <div class="py-12">
-    <div class="mb-8 flex items-center gap-4">
-      <h1 class="text-2xl font-bold text-[var(--text)]">Newsletter-Verwaltung</h1>
-      <a
-        href="/admin"
-        class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
-      >
-        Dashboard
-      </a>
-      <a
-        href="/admin/comments"
-        class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
-      >
-        Kommentare
-      </a>
-      <a
-        href="/admin/agent"
-        class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
-      >
-        Content Agent
-      </a>
-      <a
-        href="/admin/glossar"
-        class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
-      >
-        Glossar
-      </a>
-      <a
-        href="/admin/posts"
-        class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
-      >
-        Posts
-      </a>
-    </div>
-    <AdminNewsletter client:load />
-  </div>
-</BaseLayout>
+// Newsletter admin is now at the standalone newsletter-app
+const newsletterApp = import.meta.env.PUBLIC_NEWSLETTER_APP_URL || 'https://newsletter.kokomo.house'
+return Astro.redirect(`${newsletterApp}/admin/newsletter`)
+---

@@ -148,10 +148,11 @@ export default function NewsletterForm() {
     setShowToast(false)
 
     try {
-      const res = await fetch('/api/newsletter', {
+      const apiUrl = import.meta.env.PUBLIC_NEWSLETTER_API_URL || '/api/newsletter'
+      const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, siteId: 'kokomo' }),
       })
 
       const data = await res.json()
