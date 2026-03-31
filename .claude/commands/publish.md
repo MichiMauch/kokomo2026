@@ -44,11 +44,6 @@ Generiere folgendes:
 - Mit H2 Zwischenüberschriften
 - Kein ß, immer "ss"
 
-### 5. Bild-Prompt
-- Prompt für photorealistisches Titelbild
-- Lies Style-Vorgaben aus `content-config/image-style.yaml`
-- Auf Englisch (für Gemini)
-
 ---
 
 ## Workflow
@@ -56,30 +51,23 @@ Generiere folgendes:
 ### Schritt 1: Review zeigen
 
 Zeige dem User den kompletten Post übersichtlich:
-- Titel, Summary, Tags, Blogpost-Text, Bild-Prompt
+- Titel, Summary, Tags, Blogpost-Text
 
 Frage: **"Passt der Post so? Möchtest du etwas ändern?"**
 
 ### Schritt 2: Titelbild
 
-Frage: **"Soll ich das Titelbild mit Gemini generieren, oder hast du ein eigenes?"**
+Frage: **"Hast du schon ein Titelbild? Wenn ja, gib mir den Dateipfad."**
 
-**Option A — Gemini generieren:**
-1. Generiere den Slug aus dem Titel (Umlaute → ae/oe/ue, alles lowercase, Sonderzeichen → Bindestrich)
-2. Führe aus:
-```bash
-npx tsx pipeline/generate-images.ts "<bild-prompt>" header <slug>
-```
-3. Verwende die zurückgegebene URL für `images`
-
-**Option B — Eigenes Bild:**
+**Option A — Eigenes Bild:**
 1. User gibt Dateipfad an
-2. Lade hoch mit:
+2. Generiere den Slug aus dem Titel (Umlaute → ae/oe/ue, alles lowercase, Sonderzeichen → Bindestrich)
+3. Lade hoch mit:
 ```bash
 npx tsx pipeline/upload-to-r2.ts <bildpfad> <slug>-titelbild.webp
 ```
 
-**Option C — Kein Bild:**
+**Option B — Kein Bild:**
 Setze `images` auf leer, Hinweis dass es später ergänzt werden kann.
 
 ### Schritt 3: Post-Datei erstellen
