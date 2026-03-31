@@ -48,6 +48,14 @@ Generiere folgendes:
 
 ## Workflow
 
+### Schritt 0: Repository aktualisieren
+
+Bevor du irgendetwas anderes tust, führe immer zuerst aus:
+```bash
+git pull
+```
+Falls das fehlschlägt, informiere den User und stoppe den Workflow.
+
 ### Schritt 1: Review zeigen
 
 Zeige dem User den kompletten Post übersichtlich:
