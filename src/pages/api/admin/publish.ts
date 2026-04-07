@@ -125,6 +125,14 @@ export const POST: APIRoute = async ({ request }) => {
             const rawUrl = await uploadBufferToR2(optimized, filename)
             imageUrl = `${rawUrl}?v=${Date.now()}`
             console.log('[admin/publish] Enhanced photo uploaded:', imageUrl)
+
+            // Generate thumbnail for homepage cards
+            const thumb = await sharp(optimized)
+              .resize(600, undefined, { withoutEnlargement: true })
+              .webp({ quality: 60 })
+              .toBuffer()
+            await uploadBufferToR2(thumb, `${slug}-titelbild-thumb.webp`)
+            console.log('[admin/publish] Thumbnail uploaded')
           } else if (body.image_prompt) {
             // ── Text-to-Image Mode (existing logic) ──
             const mood = imageStyle.lighting_moods?.length
@@ -174,6 +182,14 @@ export const POST: APIRoute = async ({ request }) => {
               const filename = `${slug}-titelbild.webp`
               imageUrl = await uploadBufferToR2(optimized, filename)
               console.log('[admin/publish] Image uploaded:', imageUrl)
+
+              // Generate thumbnail for homepage cards
+              const thumb = await sharp(optimized)
+                .resize(600, undefined, { withoutEnlargement: true })
+                .webp({ quality: 60 })
+                .toBuffer()
+              await uploadBufferToR2(thumb, `${slug}-titelbild-thumb.webp`)
+              console.log('[admin/publish] Thumbnail uploaded')
             }
           }
         }

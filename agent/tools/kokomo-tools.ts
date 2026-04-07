@@ -76,6 +76,55 @@ export const listRecentPostsTool = tool(
   }
 )
 
+// --- find_relevant_posts ---
+export const findRelevantPostsTool = tool(
+  'find_relevant_posts',
+  'Search for thematically relevant posts in the entire archive based on a query. Returns the top matches with their slugs, titles, and summaries.',
+  {
+    query: z.string().describe('Keywords or topic to search for'),
+    limit: z.number().default(10).describe('Maximum number of results to return')
+  },
+  async ({ query, limit }) => {
+    const postsDir = resolve(ROOT, 'src/content/posts')
+    const files = readdirSync(postsDir).filter(f => f.endsWith('.md'))
+    const queryLower = query.toLowerCase()
+
+    const results = files.map(file => {
+      const raw = readFileSync(resolve(postsDir, file), 'utf-8')
+      const { data } = matter(raw)
+      const slug = file.replace('.md', '')
+      const title = data.title || ''
+      const summary = data.summary || ''
+      const tags = data.tags || []
+
+      let score = 0
+      if (title.toLowerCase().includes(queryLower)) score += 10
+      if (summary.toLowerCase().includes(queryLower)) score += 5
+      tags.forEach(tag => {
+        if (tag.toLowerCase().includes(queryLower)) score += 5
+      })
+
+      return { slug, title, summary, score }
+    })
+    .filter(p => p.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+
+    if (results.length === 0) {
+      return { content: [{ type: 'text' as const, text: 'No highly relevant posts found in the archive.' }] }
+    }
+
+    return {
+      content: [{
+        type: 'text' as const,
+        text: results.map(p =>
+          `- **${p.title}** (Score: ${p.score})\n  Summary: ${p.summary}\n  Slug: ${p.slug}`
+        ).join('\n\n')
+      }]
+    }
+  }
+)
+
 // --- read_post ---
 export const readPostTool = tool(
   'read_post',
@@ -246,6 +295,16 @@ export const uploadPhotoTool = tool(
       ? `${slug}-titelbild.webp`
       : `${slug}-${Date.now()}.webp`
     const url = await uploadBufferToR2(buffer, filename)
+
+    // Generate thumbnail for header images (used on homepage cards)
+    if (type === 'header') {
+      const thumb = await sharp(buffer)
+        .resize(600, undefined, { withoutEnlargement: true })
+        .webp({ quality: 60 })
+        .toBuffer()
+      await uploadBufferToR2(thumb, `${slug}-titelbild-thumb.webp`)
+    }
+
     const markdown = alt ? `![${alt}](${url})` : `![](${url})`
 
     return {
@@ -257,6 +316,7 @@ export const uploadPhotoTool = tool(
 export const allTools = [
   readStyleConfigTool,
   listRecentPostsTool,
+  findRelevantPostsTool,
   readPostTool,
   generateImageTool,
   createPostFileTool,

@@ -29,6 +29,7 @@ import {
   printDivider,
   formatMarkdownLine,
 } from './cli-utils.js'
+import { previewFromAgentOutput } from './preview.js'
 import type { SDKMessage, Query } from '@anthropic-ai/claude-agent-sdk'
 
 // Load env
@@ -49,7 +50,7 @@ function ask(prompt: string): Promise<string> {
 // Track active query for interrupt support
 let activeQuery: Query | null = null
 
-async function processQuery(prompt: string, sessionId?: string) {
+async function processQuery(prompt: string, sessionId?: string): Promise<{ sessionId?: string; fullText: string }> {
   const abortController = new AbortController()
   const queryInstance = queryBlogAgent(prompt, {
     resume: sessionId,
@@ -61,6 +62,7 @@ async function processQuery(prompt: string, sessionId?: string) {
   let resultSessionId: string | undefined
   let isStreaming = false
   let lineBuffer = ''
+  let fullText = ''
   const activeTools = new Map<string, string>()
 
   for await (const message of queryInstance) {
@@ -78,6 +80,7 @@ async function processQuery(prompt: string, sessionId?: string) {
         }
       } else if (event.type === 'content_block_delta') {
         if (event.delta.type === 'text_delta') {
+          fullText += event.delta.text
           lineBuffer += event.delta.text
           while (lineBuffer.includes('\n')) {
             const idx = lineBuffer.indexOf('\n')
@@ -140,7 +143,7 @@ async function processQuery(prompt: string, sessionId?: string) {
   }
 
   activeQuery = null
-  return resultSessionId
+  return { sessionId: resultSessionId, fullText }
 }
 
 async function main() {
@@ -191,13 +194,33 @@ async function main() {
     }
   }
 
+  // Post-Typ auswählen
+  console.log(`
+\x1b[36m\x1b[1mWas für ein Post soll es werden?\x1b[0m
+  \x1b[33m1\x1b[0m  Erzählung — Persönliche Geschichte mit rotem Faden
+  \x1b[33m2\x1b[0m  Listenpost — Nummerierte Tipps oder Aufzählung
+  \x1b[33m3\x1b[0m  Anleitung — Schritt-für-Schritt-Guide
+  \x1b[33m4\x1b[0m  Erfahrungsbericht — Reflexion, Rückblick oder Vergleich
+`)
+  const postTypeInput = await ask('\x1b[36mPost-Typ (1-4, Enter für Erzählung): \x1b[0m')
+  const postTypeMap: Record<string, { key: string; label: string }> = {
+    '1': { key: 'erzaehlung', label: 'Erzählung' },
+    '2': { key: 'listenpost', label: 'Listenpost' },
+    '3': { key: 'anleitung', label: 'Anleitung' },
+    '4': { key: 'erfahrungsbericht', label: 'Erfahrungsbericht' },
+  }
+  const selectedType = postTypeMap[postTypeInput] || postTypeMap['1']
+  printSystem(`Post-Typ: ${selectedType.label}`)
+
   printUser(topic)
   printDivider()
 
-  // First query
-  let sessionId = await processQuery(
-    `Schreibe einen Blogpost zum Thema: ${topic}\n\nStarte mit Phase 1 (Outline). Lies zuerst die Style-Config und die letzten Posts.`,
+  // First query — mit Post-Typ-Anweisung
+  let lastResult = await processQuery(
+    `Schreibe einen Blogpost zum Thema: ${topic}\n\nPost-Typ: ${selectedType.label} (key: ${selectedType.key})\n\nStarte mit Phase 1 (Outline). Die Style-Config und letzten Posts sind im System-Prompt — nutze sie direkt. Verwende den passenden Post-Typ-Prompt aus der Style-Config für Struktur und Stil.`,
   )
+  let sessionId = lastResult.sessionId
+  let lastAgentText = lastResult.fullText
 
   // Feedback loop
   while (true) {
@@ -212,12 +235,25 @@ async function main() {
       break
     }
 
+    if (input === '/preview') {
+      const result = previewFromAgentOutput(lastAgentText)
+      if (result) {
+        printSystem(`Vorschau geöffnet (${result.wordCount} Wörter, ~${result.readingMinutes} Min.)`)
+        printSystem(`Datei: ${result.filePath}`)
+      } else {
+        printError('Kein Draft gefunden. Der Agent muss zuerst einen Draft schreiben (Phase 2).')
+      }
+      continue
+    }
+
     if (input === '/publish') {
       printSystem('Starte Publishing...')
-      sessionId = await processQuery(
+      lastResult = await processQuery(
         'Der User möchte jetzt publizieren. Führe Phase 4 aus: Frage zuerst, ob der User ein eigenes Foto als Titelbild verwenden möchte (Dateipfad) oder ob ein AI-Bild generiert werden soll. Dann erstelle die Post-Datei und publiziere via git. Danach automatisch weiter mit Phase 5 (Social Media).',
         sessionId,
       )
+      sessionId = lastResult.sessionId
+      lastAgentText = lastResult.fullText
       continue
     }
 
@@ -227,12 +263,16 @@ async function main() {
       const socialPrompt = slug
         ? `Führe Phase 5 (Social Media) aus für den bestehenden Post mit Slug "${slug}". Lies zuerst den Post mit read_post, dann delegiere an den social-writer Subagent und speichere die Texte.`
         : 'Führe Phase 5 (Social Media) aus für den aktuellen Post. Delegiere an den social-writer Subagent und speichere die Texte.'
-      sessionId = await processQuery(socialPrompt, sessionId)
+      lastResult = await processQuery(socialPrompt, sessionId)
+      sessionId = lastResult.sessionId
+      lastAgentText = lastResult.fullText
       continue
     }
 
     printDivider()
-    sessionId = await processQuery(input, sessionId)
+    lastResult = await processQuery(input, sessionId)
+    sessionId = lastResult.sessionId
+    lastAgentText = lastResult.fullText
   }
 
   rl.close()

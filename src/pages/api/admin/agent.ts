@@ -226,6 +226,15 @@ async function handleTool(name: string, input: any, env: any): Promise<string> {
       const filename = `${input.slug}-${suffix}.webp`
       const url = await uploadBufferToR2(optimized, filename)
 
+      // Generate thumbnail for header images (used on homepage cards)
+      if (type === 'header') {
+        const thumb = await sharp(optimized)
+          .resize(600, undefined, { withoutEnlargement: true })
+          .webp({ quality: 60 })
+          .toBuffer()
+        await uploadBufferToR2(thumb, `${input.slug}-titelbild-thumb.webp`)
+      }
+
       return `Image uploaded: ${url}`
     }
 
