@@ -214,7 +214,7 @@ export default function NewsletterPopup() {
                 <button
                   type="submit"
                   disabled={status === 'loading'}
-                  className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-primary-700px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md disabled:opacity-50 dark:bg-primary-600 dark:hover:bg-primary-500"
+                  className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-primary-700 px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md disabled:opacity-50 dark:bg-primary-600 dark:hover:bg-primary-500"
                 >
                   {status === 'loading' ? (
                     <>
