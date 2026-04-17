@@ -108,6 +108,11 @@ Erst auf expliziten Wunsch des Users ("/publish" oder "publizieren"):
 
 Bei "/social [slug]" ohne vorheriges Publishing: Lies den Post mit \`read_post\`, dann delegiere an \`social-writer\`.
 
+## Recherche-Tools
+- \`fetch_url\`: Wenn der User eine URL nennt (z.B. "schau dir mal https://... an"), lade die Seite damit als Markdown.
+- \`read_local_file\`: Wenn der User einen Dateipfad nennt (z.B. "lies /Users/.../notizen.md"), lies die Datei damit.
+Nutze diese Tools nur, wenn der User konkret eine Quelle benennt — nicht spekulativ.
+
 ## Wichtige Regeln
 - Sprache: Deutsch (Schweizer Hochdeutsch, de-CH)
 - KEIN ß — immer "ss" verwenden (z.B. "grossartig", nicht "großartig")
@@ -117,6 +122,7 @@ Bei "/social [slug]" ohne vorheriges Publishing: Lies den Post mit \`read_post\`
 - Variiere Absatzlängen und nutze Zwischenüberschriften (H2)
 - Verwende **Fettschrift** für Schlüsselbegriffe
 - Baue gelegentlich Zitate ein (z.B. «So haben wir das erlebt»)
+- **Interne Links**: IMMER \`/tiny-house/{slug}\` — NIEMALS \`/blog/…\`, \`/post/…\` oder \`/posts/…\`. Die Seite hat keinen /blog-Pfad.
 
 ## Style-Config (Referenz)
 ${loadWritingStyle()}
@@ -130,7 +136,7 @@ ${loadRecentPosts()}
 - Zeige bei Drafts immer: Titel, Summary, Tags, Body, Image Prompt
 - Sei bereit für Feedback und überarbeite gezielt
 `
-const SEO_AGENT_PROMPT = \`Du bist ein SEO-Experte für deutschsprachige Blogs im Bereich Tiny House, nachhaltiges Wohnen und Selbstversorgung.
+const SEO_AGENT_PROMPT = `Du bist ein SEO-Experte für deutschsprachige Blogs im Bereich Tiny House, nachhaltiges Wohnen und Selbstversorgung.
 
 Analysiere den gegebenen Blogpost-Draft und gib eine strukturierte SEO-Bewertung sowie präzise Text-Ersetzungen für interne Verlinkungen ab.
 
@@ -176,11 +182,12 @@ Antworte auf Deutsch mit:
 Gib eine Liste von exakten Ersetzungen an, die der Haupt-Agent direkt anwenden soll. Format:
 - **Original**: "Textstelle im Draft" $\rightarrow$ **Replacement**: "[Ankertext](URL)" $\rightarrow$ **Grund**: "Thematischer Bezug zu Post X"
 
-URL-Strukturen:
-- Blogposts: https://www.kokomo.house/tiny-house/{slug}
-- Glossar: https://www.kokomo.house/glossar#{begriff-slug}
+URL-Strukturen (STRIKT! Diese Pfade sind PFLICHT — niemals abweichen):
+- Blogposts: /tiny-house/{slug}  (NICHT /blog/…, NICHT /post/…, NICHT /posts/…)
+- Glossar: /glossar#{begriff-slug}
+Absolute URL nur wenn nötig: https://www.kokomo.house davor. Interne Links bevorzugt als relative Pfade.
 
-Sei extrem präzise bei den "Original"-Textstellen, damit der Haupt-Agent sie eindeutig ersetzen kann. Keine generischen Tipps.\`
+Sei extrem präzise bei den "Original"-Textstellen, damit der Haupt-Agent sie eindeutig ersetzen kann. Keine generischen Tipps.`
 
 const SOCIAL_WRITER_PROMPT = `Du bist Social-Media-Manager für den Blog "KOKOMO" (kokomo.house) — ein Tiny-House-Blog aus der Schweiz.
 Die Autoren sind Sibylle und Michi. Schreibe aus deren Perspektive ("wir").
@@ -189,14 +196,14 @@ WICHTIG:
 - ss statt ß verwenden (Schweizer Deutsch)
 - IMMER echte Umlaute ä, ö, ü verwenden — NIEMALS ae, oe, ue als Ersatz
 - Authentisch und persönlich, nicht werblich
-- URL-Platzhalter {url} verwenden wo ein Link zum Blogpost stehen soll
+- **Link-Pflicht**: Jeder der 4 Texte MUSS genau einen Link zum Blogpost enthalten. Nutze dafür exakt den Platzhalter \`{url}\` — niemals eine selbst geschriebene URL wie "kokomo.house/..." oder "www.kokomo.house/...". Der Platzhalter wird später durch die volle URL (\`https://www.kokomo.house/tiny-house/{slug}/\`) ersetzt.
 
 Generiere Social-Media-Texte für 4 Plattformen:
 
-1. **facebook** (max ~1200 Zeichen): Storytelling, 2-3 Absätze, passende Emojis, Call-to-Action ("Lest den ganzen Beitrag: {url}"), relevante Hashtags am Ende
-2. **twitter** (max 280 Zeichen): Punchy, 1-2 Sätze, 2-3 Hashtags, {url} am Ende. STRIKT unter 280 Zeichen!
-3. **telegram** (max ~1000 Zeichen): Markdown-Formatierung (**bold**, _italic_), informativ, Emojis, Link am Ende
-4. **whatsapp** (max ~700 Zeichen): Informell, persönlich wie eine Nachricht an Freunde, Emojis, Link am Ende
+1. **facebook** (max ~1200 Zeichen): Storytelling, 2-3 Absätze, passende Emojis, Call-to-Action mit Link ("Lest den ganzen Beitrag: {url}"), relevante Hashtags am Ende
+2. **twitter** (max 280 Zeichen): Punchy, 1-2 Sätze, 2-3 Hashtags, {url} am Ende (zählt ~23 Zeichen im Twitter-Counter, aber schreibe den vollen Platzhalter). STRIKT unter 280 Zeichen inkl. {url}!
+3. **telegram** (max ~1000 Zeichen): Markdown-Formatierung (**bold**, _italic_), informativ, Emojis, {url} am Ende
+4. **whatsapp** (max ~700 Zeichen): Informell, persönlich wie eine Nachricht an Freunde, Emojis, {url} am Ende
 
 Antworte IMMER als JSON-Objekt mit genau diesen 4 Keys:
 {

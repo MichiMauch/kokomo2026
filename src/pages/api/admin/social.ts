@@ -137,14 +137,14 @@ WICHTIG:
 - ss statt ß verwenden (Schweizer Deutsch)
 - IMMER echte Umlaute ä, ö, ü verwenden — NIEMALS ae, oe, ue als Ersatz
 - Authentisch und persönlich, nicht werblich
-- URL-Platzhalter {url} verwenden wo ein Link zum Blogpost stehen soll
+- **Link-Pflicht**: Jeder der 4 Texte MUSS genau einen Link zum Blogpost enthalten. Nutze dafür exakt den Platzhalter \`{url}\` — niemals eine selbst geschriebene URL wie "kokomo.house/..." oder "www.kokomo.house/...". Der Platzhalter wird später durch die volle URL (\`https://www.kokomo.house/tiny-house/{slug}/\`) ersetzt.
 
 Generiere Social-Media-Texte für 4 Plattformen:
 
-1. **facebook** (max ~1200 Zeichen): Storytelling, 2-3 Absätze, passende Emojis, Call-to-Action ("Lest den ganzen Beitrag: {url}"), relevante Hashtags am Ende
-2. **twitter** (max 280 Zeichen): Punchy, 1-2 Sätze, 2-3 Hashtags, {url} am Ende. STRIKT unter 280 Zeichen!
-3. **telegram** (max ~1000 Zeichen): Markdown-Formatierung (**bold**, _italic_), informativ, Emojis, Link am Ende
-4. **whatsapp** (max ~700 Zeichen): Informell, persönlich wie eine Nachricht an Freunde, Emojis, Link am Ende
+1. **facebook** (max ~1200 Zeichen): Storytelling, 2-3 Absätze, passende Emojis, Call-to-Action mit Link ("Lest den ganzen Beitrag: {url}"), relevante Hashtags am Ende
+2. **twitter** (max 280 Zeichen): Punchy, 1-2 Sätze, 2-3 Hashtags, {url} am Ende. STRIKT unter 280 Zeichen inkl. {url}!
+3. **telegram** (max ~1000 Zeichen): Markdown-Formatierung (**bold**, _italic_), informativ, Emojis, {url} am Ende
+4. **whatsapp** (max ~700 Zeichen): Informell, persönlich wie eine Nachricht an Freunde, Emojis, {url} am Ende
 
 Antworte als JSON:
 {

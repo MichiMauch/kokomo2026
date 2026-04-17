@@ -4,8 +4,10 @@
 
 import { tool } from '@anthropic-ai/claude-agent-sdk'
 import { z } from 'zod/v4'
-import { readFileSync, readdirSync, existsSync } from 'fs'
+import { readFileSync, readdirSync, existsSync, statSync } from 'fs'
 import { resolve } from 'path'
+import { JSDOM } from 'jsdom'
+import TurndownService from 'turndown'
 import sharp from 'sharp'
 import { uploadBufferToR2 } from '../../pipeline/upload-to-r2.js'
 import matter from 'gray-matter'
@@ -313,6 +315,94 @@ export const uploadPhotoTool = tool(
   }
 )
 
+// --- fetch_url ---
+export const fetchUrlTool = tool(
+  'fetch_url',
+  'Fetch a web page and return its main content as Markdown. Useful for researching articles, extracting inspiration, or reading references the user points to. Follows redirects, strips scripts/nav/footer.',
+  {
+    url: z.string().url(),
+    max_chars: z.number().default(20000).describe('Truncate output to this many characters (default 20000).'),
+  },
+  async ({ url, max_chars }) => {
+    const res = await fetch(url, {
+      redirect: 'follow',
+      headers: { 'User-Agent': 'Mozilla/5.0 (KOKOMO Blog-Agent)' },
+    })
+    if (!res.ok) {
+      return { content: [{ type: 'text' as const, text: `HTTP ${res.status} ${res.statusText} for ${url}` }] }
+    }
+    const html = await res.text()
+    const dom = new JSDOM(html, { url })
+    const doc = dom.window.document
+
+    doc.querySelectorAll('script, style, noscript, nav, footer, header, aside, iframe, form').forEach(el => el.remove())
+
+    const main =
+      doc.querySelector('main') ||
+      doc.querySelector('article') ||
+      doc.querySelector('[role="main"]') ||
+      doc.body
+
+    const title = doc.querySelector('title')?.textContent?.trim() || ''
+    const turndown = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' })
+    let md = turndown.turndown(main.innerHTML)
+    md = md.replace(/\n{3,}/g, '\n\n').trim()
+
+    let truncated = false
+    if (md.length > max_chars) {
+      md = md.slice(0, max_chars)
+      truncated = true
+    }
+
+    const header = `# ${title}\n\nSource: ${url}\n\n---\n\n`
+    const footer = truncated ? `\n\n---\n(truncated to ${max_chars} chars)` : ''
+
+    return { content: [{ type: 'text' as const, text: header + md + footer }] }
+  }
+)
+
+// --- read_local_file ---
+export const readLocalFileTool = tool(
+  'read_local_file',
+  'Read any local file by absolute or relative path that the user points to (e.g. a PDF research note, a Markdown draft, a JSON config). Returns raw text. Refuses binary files and files > 5 MB.',
+  {
+    path: z.string().describe('Absolute or relative path to the file.'),
+    max_chars: z.number().default(50000).describe('Truncate output to this many characters (default 50000).'),
+  },
+  async ({ path, max_chars }) => {
+    const abs = resolve(ROOT, path)
+    if (!existsSync(abs)) {
+      return { content: [{ type: 'text' as const, text: `File not found: ${abs}` }] }
+    }
+    const stat = statSync(abs)
+    if (stat.isDirectory()) {
+      return { content: [{ type: 'text' as const, text: `Path is a directory, not a file: ${abs}` }] }
+    }
+    const MAX_BYTES = 5 * 1024 * 1024
+    if (stat.size > MAX_BYTES) {
+      return { content: [{ type: 'text' as const, text: `File too large (${stat.size} bytes, limit ${MAX_BYTES}): ${abs}` }] }
+    }
+
+    const buf = readFileSync(abs)
+    // Binary sniff: null byte in first 8 KB → binary
+    const sniff = buf.subarray(0, Math.min(buf.length, 8192))
+    if (sniff.includes(0)) {
+      return { content: [{ type: 'text' as const, text: `Binary file detected, refusing to read: ${abs}` }] }
+    }
+
+    let text = buf.toString('utf-8')
+    let truncated = false
+    if (text.length > max_chars) {
+      text = text.slice(0, max_chars)
+      truncated = true
+    }
+
+    const header = `=== ${abs} (${stat.size} bytes) ===\n\n`
+    const footer = truncated ? `\n\n--- (truncated to ${max_chars} chars) ---` : ''
+    return { content: [{ type: 'text' as const, text: header + text + footer }] }
+  }
+)
+
 export const allTools = [
   readStyleConfigTool,
   listRecentPostsTool,
@@ -323,4 +413,6 @@ export const allTools = [
   gitPublishTool,
   saveSocialTextsTool,
   uploadPhotoTool,
+  fetchUrlTool,
+  readLocalFileTool,
 ]

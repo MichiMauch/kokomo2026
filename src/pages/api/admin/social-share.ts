@@ -26,7 +26,12 @@ export const POST: APIRoute = async ({ request }) => {
     // Replace {url} placeholder with actual URL
     const cleanSlug = slug
     const postUrl = `https://www.kokomo.house/tiny-house/${cleanSlug}/`
-    const finalText = text.replace(/\{url\}/g, postUrl)
+    let finalText = text.replace(/\{url\}/g, postUrl)
+    // Safety net: if the writer forgot the {url} and there is no https:// link at all,
+    // append the full post URL so social posts are never published without the link.
+    if (!/https?:\/\//i.test(finalText)) {
+      finalText = `${finalText.trimEnd()}\n\n${postUrl}`
+    }
 
     // ─── X/Twitter (manual — intent URL) ───
     if (platform === 'twitter') {

@@ -12,7 +12,7 @@ Es war ein grauer Dezemberabend, als ich den Browser öffnete und die Meldung sa
 
 Unser Haus heisst KOKOMO. Es ist ein Wohnwagon. Und der Hersteller dieses Hauses befand sich plötzlich in einem Sanierungsverfahren.
 
-[Wir haben damals darüber geschrieben](/blog/wohnwagon-in-der-sanierung-was-bedeutet-das-f-r-uns-als-tiny-house-bewohner) — sachlich, einordnend, mit dem Versuch, Panik zu vermeiden. Weder bei uns selbst noch bei anderen Tiny-House-Begeisterten. Denn nüchtern betrachtet: Ein gebautes Haus bleibt ein gebautes Haus, egal was mit dem Hersteller passiert. Aber nüchtern betrachtet ist eben nicht dasselbe wie innerlich ruhig.
+[Wir haben damals darüber geschrieben](/tiny-house/wohnwagon-in-der-sanierung-was-bedeutet-das-f-r-uns-als-tiny-house-bewohner) — sachlich, einordnend, mit dem Versuch, Panik zu vermeiden. Weder bei uns selbst noch bei anderen Tiny-House-Begeisterten. Denn nüchtern betrachtet: Ein gebautes Haus bleibt ein gebautes Haus, egal was mit dem Hersteller passiert. Aber nüchtern betrachtet ist eben nicht dasselbe wie innerlich ruhig.
 
 ## Der Moment, als die Meldung kam
 

@@ -215,7 +215,9 @@
       "Bash(ssh:*)",
       "Bash(scp:*)",
       "Read(//Users/michaelmauch/**)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(dig:*)",
+      "Bash(npx *)"
     ]
   }
 }
