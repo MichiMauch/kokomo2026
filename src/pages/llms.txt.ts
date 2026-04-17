@@ -25,7 +25,7 @@ export const GET: APIRoute = async () => {
     '',
     ...sorted.map(
       (post) =>
-        `- [${post.data.title}](${siteConfig.siteUrl}/tiny-house/${post.slug}/): ${post.data.summary || ''}`
+        `- [${post.data.title}](${siteConfig.siteUrl}/tiny-house/${post.id}/): ${post.data.summary || ''}`
     ),
     '',
     '## Weitere Seiten',

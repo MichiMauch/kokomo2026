@@ -110,7 +110,7 @@ const daysSinceMoveIn = Math.floor((Date.now() - moveInDate.getTime()) / 8640000
           <div data-post-index={i} class={i >= 9 ? 'hidden' : ''}>
             <PostCard
               title={post.data.title}
-              slug={post.slug}
+              slug={post.id}
               date={post.data.date}
               summary={post.data.summary}
               tags={post.data.tags}

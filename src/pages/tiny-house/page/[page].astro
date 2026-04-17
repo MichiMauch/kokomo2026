@@ -57,7 +57,7 @@ const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1])
           {posts.map((post) => (
             <PostCard
               title={post.data.title}
-              slug={post.slug}
+              slug={post.id}
               date={post.data.date}
               summary={post.data.summary}
               tags={post.data.tags}

@@ -18,7 +18,7 @@ const currentPath = Astro.url.pathname
 const allPosts = await getCollection('posts', ({ data }) => !data.draft)
 const searchData = allPosts.map((post) => ({
   title: post.data.title,
-  slug: post.slug,
+  slug: post.id,
   summary: post.data.summary || '',
   tags: post.data.tags,
   date: post.data.date.toISOString().split('T')[0],

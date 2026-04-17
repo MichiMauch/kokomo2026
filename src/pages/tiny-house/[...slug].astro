@@ -1,24 +1,24 @@
 ---
 export const prerender = true
-import { getCollection } from 'astro:content'
+import { getCollection, render } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import PostLayout from '../../layouts/PostLayout.astro'
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts')
   return posts.map((post) => ({
-    params: { slug: post.slug },
+    params: { slug: post.id },
     props: { post },
   }))
 }
 
 const { post } = Astro.props
-const { Content, headings } = await post.render()
+const { Content, headings } = await render(post)
 
 // Get prev/next posts
 const allPosts = await getCollection('posts', ({ data }) => !data.draft)
 const sortedPosts = [...allPosts].sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-const currentIndex = sortedPosts.findIndex((p) => p.slug === post.slug)
+const currentIndex = sortedPosts.findIndex((p) => p.id === post.id)
 const prevPost = currentIndex < sortedPosts.length - 1 ? sortedPosts[currentIndex + 1] : null
 const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null
 ---

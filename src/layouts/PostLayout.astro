@@ -20,7 +20,7 @@ const imageUrl = getPostImage(images)
 const prevImage = prevPost ? getPostImage(prevPost.data.images) : null
 const nextImage = nextPost ? getPostImage(nextPost.data.images) : null
 const readingTime = getReadingTime(post.body || '')
-const postUrl = `${siteConfig.siteUrl}/tiny-house/${post.slug}/`
+const postUrl = `${siteConfig.siteUrl}/tiny-house/${post.id}/`
 
 // JSON-LD: BlogPosting
 const jsonLd = {
@@ -205,7 +205,7 @@ const glossaryData = getGlossaryTerms().map((t) => ({
 
           {prevPost && (
             <a
-              href={`/tiny-house/${prevPost.slug}/`}
+              href={`/tiny-house/${prevPost.id}/`}
               data-nav="prev"
               class="group block rounded-lg p-2 transition-colors hover:bg-white/50 dark:hover:bg-slate-800/50"
             >
@@ -216,7 +216,7 @@ const glossaryData = getGlossaryTerms().map((t) => ({
 
           {nextPost && (
             <a
-              href={`/tiny-house/${nextPost.slug}/`}
+              href={`/tiny-house/${nextPost.id}/`}
               data-nav="next"
               class="group block rounded-lg p-2 transition-colors hover:bg-white/50 dark:hover:bg-slate-800/50"
             >
@@ -313,7 +313,7 @@ const glossaryData = getGlossaryTerms().map((t) => ({
 
         <!-- Kommentare -->
         <div class="mx-auto mt-12 max-w-3xl">
-          <CommentSection client:visible slug={post.slug} />
+          <CommentSection client:visible slug={post.id} />
         </div>
 
         <!-- Navigation (unterhalb des Contents) -->
@@ -322,7 +322,7 @@ const glossaryData = getGlossaryTerms().map((t) => ({
           <div class="flex flex-col gap-3 sm:flex-row sm:justify-between">
             {prevPost ? (
               <a
-                href={`/tiny-house/${prevPost.slug}/`}
+                href={`/tiny-house/${prevPost.id}/`}
                 class="glass-card group flex-1 overflow-hidden rounded-xl p-3 transition-all hover:shadow-lg hover:shadow-primary-500/10"
               >
                 <div class="flex items-center gap-3">
@@ -344,7 +344,7 @@ const glossaryData = getGlossaryTerms().map((t) => ({
             )}
             {nextPost ? (
               <a
-                href={`/tiny-house/${nextPost.slug}/`}
+                href={`/tiny-house/${nextPost.id}/`}
                 class="glass-card group flex-1 overflow-hidden rounded-xl p-3 text-right transition-all hover:shadow-lg hover:shadow-primary-500/10"
               >
                 <div class="flex items-center gap-3">

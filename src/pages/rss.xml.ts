@@ -15,7 +15,7 @@ export async function GET(context: APIContext) {
       title: post.data.title,
       pubDate: post.data.date,
       description: post.data.summary ?? '',
-      link: `/tiny-house/${post.slug}/`,
+      link: `/tiny-house/${post.id}/`,
     })),
     customData: `<language>${siteConfig.language}</language>`,
   })

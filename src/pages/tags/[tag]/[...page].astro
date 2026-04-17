@@ -88,7 +88,7 @@ const { tag, posts, currentPage, totalPages, totalPosts } = Astro.props
       {posts.map((post) => (
         <PostCard
           title={post.data.title}
-          slug={post.slug}
+          slug={post.id}
           date={post.data.date}
           summary={post.data.summary}
           tags={post.data.tags}

@@ -36,7 +36,7 @@ export const GET: APIRoute = async () => {
 
   const postSections = sorted.map((post) => {
     const { title, date, tags, summary } = post.data
-    const url = `${siteConfig.siteUrl}/tiny-house/${post.slug}/`
+    const url = `${siteConfig.siteUrl}/tiny-house/${post.id}/`
     const body = stripImages(post.body || '')
 
     return [
