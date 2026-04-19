@@ -7,8 +7,6 @@ authors: ['default']
 draft: false
 images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/wenn-die-birke-alles-in-gelb-taucht-titelbild.webp'
 ---
-
-
 ## Es hat wieder angefangen
 
 Wir öffnen morgens die Türe, und da sind sie wieder. Kleine, braune Würstchen überall. Auf der Terrasse, auf dem Gartentisch, in den Schuhen, die wir gestern Abend draussen stehen gelassen haben. Die männlichen Blütenkätzchen unserer Birke haben sich über Nacht verabschiedet — und zwar auf allem.
@@ -44,6 +42,8 @@ In den zwei bis drei Wochen der Birkenblüte ist es… intensiv.
 ![Birken-Kätzchen auf der Terrasse des Tiny House KOKOMO](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/wenn-die-birke-alles-in-gelb-taucht-1776595623324.webp)
 
 ![Gelber Birken-Pollen auf dem Terrassentisch vor dem KOKOMO Tiny House](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/wenn-die-birke-alles-in-gelb-taucht-1776595624304.webp)
+
+![Birken-Kätzchen und Pollen im Frühling rund ums KOKOMO Tiny House](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/wenn-die-birke-alles-in-gelb-taucht-1776595790967.webp)
 
 **Jeden Morgen** liegt eine neue Schicht Kätzchen auf der Terrasse. Wir kehren, und am Nachmittag sieht es wieder gleich aus. Das Auto hat eine gelbliche Patina bekommen, die sich beim ersten Regen in klebrige Streifen verwandelt. Wer ein Fenster offen lässt, putzt danach die Fensterbank.
 
