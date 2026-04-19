@@ -11,7 +11,7 @@ images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/wenn-die-birke-alle
 
 Wir öffnen morgens die Türe, und da sind sie wieder. Kleine, braune Würstchen überall. Auf der Terrasse, auf dem Gartentisch, in den Schuhen, die wir gestern Abend draussen stehen gelassen haben. Die männlichen Blütenkätzchen unserer Birke haben sich über Nacht verabschiedet — und zwar auf allem.
 
-Der Boden rund ums KOKOMO sieht aus wie nach einem Konfettiregen in Braun. Und dann ist da noch der Pollen. Ein gelblicher Film liegt auf allem: auf dem Autodach, auf der Fensterbank, auf dem Kaffeebecher, den Michi kurz draussen abgestellt hat. «Es sieht aus wie gelber Schnee», sagt Sibylle, als sie ihn wieder reinholt.
+Der Boden rund ums KOKOMO sieht aus wie nach einem Konfettiregen in Braun. Und dann ist da noch der Pollen. Ein gelblicher Film liegt auf allem: auf dem Autodach, auf der Fensterbank, auf dem Tisch einfach überall. «Es sieht aus wie gelber Schnee», sagt Sibylle.
 
 Willkommen im Birken-Frühling.
 
@@ -35,9 +35,9 @@ Für Birken-Allergiker ist es das genaue Gegenteil davon.
 
 ## Was wir dabei täglich erleben
 
-Wir wohnen auf 35 m² direkt neben einer stattlichen Birke. Die Natur ist bei uns nicht etwas, das man am Wochenende besucht — sie ist einfach da, immer. Meistens ist das wunderschön.
+Wir wohnen auf 36 m² direkt neben zwei stattlichen Birke. Die Natur ist bei uns nicht etwas, das man am Wochenende besucht — sie ist einfach da, immer. Meistens ist das wunderschön.
 
-In den zwei bis drei Wochen der Birkenblüte ist es… intensiv.
+In den zwei bis drei Wochen der Birkenblüte ist es...intensiv.
 
 ![Birken-Kätzchen auf der Terrasse des Tiny House KOKOMO](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/wenn-die-birke-alles-in-gelb-taucht-1776595623324.webp)
 
@@ -45,7 +45,7 @@ In den zwei bis drei Wochen der Birkenblüte ist es… intensiv.
 
 ![Birken-Kätzchen und Pollen im Frühling rund ums KOKOMO Tiny House](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/wenn-die-birke-alles-in-gelb-taucht-1776595790967.webp)
 
-**Jeden Morgen** liegt eine neue Schicht Kätzchen auf der Terrasse. Wir kehren, und am Nachmittag sieht es wieder gleich aus. Das Auto hat eine gelbliche Patina bekommen, die sich beim ersten Regen in klebrige Streifen verwandelt. Wer ein Fenster offen lässt, putzt danach die Fensterbank.
+**Jeden Morgen** liegt eine neue Schicht Kätzchen auf der Terrasse. Wir wischen, und Minuten Später sieht es wieder gleich aus. Das Auto hat eine gelbliche Patina bekommen, die sich beim ersten Regen in klebrige Streifen verwandelt. Wer ein Fenster offen lässt, putzt danach die Fensterbank.
 
 Michi hat begonnen, den Pollen auf dem Terrassentisch zu beobachten. An ruhigen Tagen liegt er in kleinen Häufchen. An windigen Tagen sieht man förmlich, wie er sich in der Luft verteilt — feine gelbe Wolken, die aus der Baumkrone aufsteigen. Faszinierend und absurd gleichzeitig.
 
@@ -54,7 +54,7 @@ Wir persönlich sind keine starken Birken-Allergiker — aber wir kennen genug M
 Ein paar Dinge, die uns das Leben in dieser Zeit leichter machen:
 
 - **Früh am Morgen lüften** — vor allem an windarmen Tagen, wenn der Pollenflug noch gering ist
-- **Wischen statt blasen**: Den Kätzchen-Teppich mit einem feuchten Besen aufnehmen, nicht mit dem Laubbläser verteilen
+- **Wischen statt blasen**: Den Kätzchen-Teppich mit einem feuchten Besen aufnehmen, nicht mit dem Laubbläser (haben wir eh keinen) verteilen
 - **Geduld** — nach einem guten Regen ist der Spuk grösstenteils vorbei
 
 ## Wenn es vorbei ist
