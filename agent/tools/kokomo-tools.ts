@@ -6,7 +6,7 @@ import { tool } from '@anthropic-ai/claude-agent-sdk'
 import { z } from 'zod/v4'
 import { readFileSync, readdirSync, existsSync, statSync } from 'fs'
 import { resolve } from 'path'
-import { JSDOM } from 'jsdom'
+import { parseHTML } from 'linkedom'
 import TurndownService from 'turndown'
 import sharp from 'sharp'
 import { uploadBufferToR2 } from '../../pipeline/upload-to-r2.js'
@@ -332,10 +332,9 @@ export const fetchUrlTool = tool(
       return { content: [{ type: 'text' as const, text: `HTTP ${res.status} ${res.statusText} for ${url}` }] }
     }
     const html = await res.text()
-    const dom = new JSDOM(html, { url })
-    const doc = dom.window.document
+    const { document: doc } = parseHTML(html)
 
-    doc.querySelectorAll('script, style, noscript, nav, footer, header, aside, iframe, form').forEach(el => el.remove())
+    doc.querySelectorAll('script, style, noscript, nav, footer, header, aside, iframe, form').forEach((el: any) => el.remove())
 
     const main =
       doc.querySelector('main') ||

@@ -21,7 +21,7 @@ ${CYAN}${BOLD} _  __  ___  _  __  ___  __  __  ___        ____ _     ___
 |_|\\_\\ \\___/|_|\\_\\ \\___/|_|  |_|\\___/      \\____|_____|___|${RESET}
 
 ${CYAN}  B l o g - A g e n t${RESET}  ${DIM}made with love by Michi${RESET}
-${DIM}Befehle: /preview  /publish  /social [slug]  /quit${RESET}
+${DIM}Befehle: /preview  /publish  /social [slug]  /editor  /quit${RESET}
 `)
 }
 

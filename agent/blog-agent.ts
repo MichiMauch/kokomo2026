@@ -15,8 +15,8 @@
 
 import { config } from 'dotenv'
 import { resolve } from 'path'
-import { createInterface } from 'readline'
 import { execSync } from 'child_process'
+import { input, select, editor } from '@inquirer/prompts'
 import { queryBlogAgent } from './core.js'
 import {
   agentHeader,
@@ -36,15 +36,35 @@ import type { SDKMessage, Query } from '@anthropic-ai/claude-agent-sdk'
 config({ path: resolve(process.cwd(), '.env.local') })
 config({ path: resolve(process.cwd(), '.env') })
 
-const rl = createInterface({
-  input: process.stdin,
-  output: process.stdout,
-})
+async function ask(message: string): Promise<string> {
+  try {
+    const answer = await input({ message })
+    return answer.trim()
+  } catch (err: any) {
+    if (err?.name === 'ExitPromptError') {
+      printSystem('Tschüss!')
+      process.exit(0)
+    }
+    throw err
+  }
+}
 
-function ask(prompt: string): Promise<string> {
-  return new Promise(resolve => {
-    rl.question(prompt, answer => resolve(answer.trim()))
-  })
+/** Opens $EDITOR so the user can paste/write multi-line content safely. */
+async function askMultiline(message: string): Promise<string> {
+  try {
+    const answer = await editor({
+      message,
+      postfix: '.md',
+      waitForUserInput: false,
+    })
+    return answer.trim()
+  } catch (err: any) {
+    if (err?.name === 'ExitPromptError') {
+      printSystem('Tschüss!')
+      process.exit(0)
+    }
+    throw err
+  }
 }
 
 // Track active query for interrupt support
@@ -167,7 +187,9 @@ async function main() {
     printError(`Git pull fehlgeschlagen: ${err.message.split('\n')[0]}`)
   }
 
-  // Ctrl+C: aktive Query sauber unterbrechen
+  // Ctrl+C: aktive Query sauber unterbrechen.
+  // Während eines @inquirer/prompts-Aufrufs wird SIGINT dort gefangen
+  // und wirft ExitPromptError — siehe ask().
   process.on('SIGINT', async () => {
     if (activeQuery) {
       printSystem('\nUnterbreche Agent...')
@@ -177,39 +199,40 @@ async function main() {
         activeQuery.close()
       }
       activeQuery = null
-    } else {
-      printSystem('\nTschüss!')
-      rl.close()
-      process.exit(0)
     }
   })
 
-  // Get initial topic from args or ask
+  // Get initial topic from args or ask.
+  // Öffnet $EDITOR, damit auch multi-line Paste sauber funktioniert.
   let topic = process.argv.slice(2).join(' ')
   if (!topic) {
-    topic = await ask('Thema oder Stichworte: ')
+    printSystem('Dein Editor öffnet sich — schreib/paste das Thema rein, speichern & schliessen zum bestätigen.')
+    topic = await askMultiline('Thema oder Stichworte')
     if (!topic) {
       printError('Kein Thema angegeben.')
       process.exit(1)
     }
   }
 
-  // Post-Typ auswählen
-  console.log(`
-\x1b[36m\x1b[1mWas für ein Post soll es werden?\x1b[0m
-  \x1b[33m1\x1b[0m  Erzählung — Persönliche Geschichte mit rotem Faden
-  \x1b[33m2\x1b[0m  Listenpost — Nummerierte Tipps oder Aufzählung
-  \x1b[33m3\x1b[0m  Anleitung — Schritt-für-Schritt-Guide
-  \x1b[33m4\x1b[0m  Erfahrungsbericht — Reflexion, Rückblick oder Vergleich
-`)
-  const postTypeInput = await ask('\x1b[36mPost-Typ (1-4, Enter für Erzählung): \x1b[0m')
-  const postTypeMap: Record<string, { key: string; label: string }> = {
-    '1': { key: 'erzaehlung', label: 'Erzählung' },
-    '2': { key: 'listenpost', label: 'Listenpost' },
-    '3': { key: 'anleitung', label: 'Anleitung' },
-    '4': { key: 'erfahrungsbericht', label: 'Erfahrungsbericht' },
+  // Post-Typ auswählen (Pfeiltasten + Enter)
+  let selectedType: { key: string; label: string }
+  try {
+    selectedType = await select({
+      message: 'Was für ein Post soll es werden?',
+      choices: [
+        { name: 'Erzählung — Persönliche Geschichte mit rotem Faden', value: { key: 'erzaehlung', label: 'Erzählung' } },
+        { name: 'Listenpost — Nummerierte Tipps oder Aufzählung', value: { key: 'listenpost', label: 'Listenpost' } },
+        { name: 'Anleitung — Schritt-für-Schritt-Guide', value: { key: 'anleitung', label: 'Anleitung' } },
+        { name: 'Erfahrungsbericht — Reflexion, Rückblick oder Vergleich', value: { key: 'erfahrungsbericht', label: 'Erfahrungsbericht' } },
+      ],
+    })
+  } catch (err: any) {
+    if (err?.name === 'ExitPromptError') {
+      printSystem('Tschüss!')
+      process.exit(0)
+    }
+    throw err
   }
-  const selectedType = postTypeMap[postTypeInput] || postTypeMap['1']
   printSystem(`Post-Typ: ${selectedType.label}`)
 
   printUser(topic)
@@ -225,17 +248,23 @@ async function main() {
   // Feedback loop
   while (true) {
     console.log()
-    const input = await ask('\x1b[36m\x1b[1mDu:\x1b[0m ')
+    let userInput = await ask('Du')
 
-    if (!input) continue
+    if (!userInput) continue
+
+    // Für lange / multi-line Nachrichten: /editor öffnet $EDITOR
+    if (userInput === '/editor') {
+      userInput = await askMultiline('Deine Nachricht')
+      if (!userInput) continue
+    }
 
     // Commands
-    if (input === '/quit' || input === '/exit') {
+    if (userInput === '/quit' || userInput === '/exit') {
       printSystem('Tschüss!')
       break
     }
 
-    if (input === '/preview') {
+    if (userInput === '/preview') {
       const result = previewFromAgentOutput(lastAgentText)
       if (result) {
         printSystem(`Vorschau geöffnet (${result.wordCount} Wörter, ~${result.readingMinutes} Min.)`)
@@ -246,7 +275,7 @@ async function main() {
       continue
     }
 
-    if (input === '/publish') {
+    if (userInput === '/publish') {
       printSystem('Starte Publishing...')
       lastResult = await processQuery(
         'Der User möchte jetzt publizieren. Führe Phase 4 aus: Frage zuerst, ob der User ein eigenes Foto als Titelbild verwenden möchte (Dateipfad) oder ob ein AI-Bild generiert werden soll. Dann erstelle die Post-Datei und publiziere via git. Danach automatisch weiter mit Phase 5 (Social Media).',
@@ -257,8 +286,8 @@ async function main() {
       continue
     }
 
-    if (input.startsWith('/social')) {
-      const slug = input.replace('/social', '').trim()
+    if (userInput.startsWith('/social')) {
+      const slug = userInput.replace('/social', '').trim()
       printSystem('Generiere Social-Media-Texte...')
       const socialPrompt = slug
         ? `Führe Phase 5 (Social Media) aus für den bestehenden Post mit Slug "${slug}". Lies zuerst den Post mit read_post, dann delegiere an den social-writer Subagent und speichere die Texte.`
@@ -270,12 +299,11 @@ async function main() {
     }
 
     printDivider()
-    lastResult = await processQuery(input, sessionId)
+    lastResult = await processQuery(userInput, sessionId)
     sessionId = lastResult.sessionId
     lastAgentText = lastResult.fullText
   }
 
-  rl.close()
   process.exit(0)
 }
 

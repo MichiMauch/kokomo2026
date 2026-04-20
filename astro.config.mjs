@@ -10,6 +10,10 @@ export default defineConfig({
   site: 'https://www.kokomo.house',
   output: 'server',
 
+  redirects: {
+    '/sitemap.xml': '/sitemap-index.xml',
+  },
+
   vite: {
     plugins: [tailwindcss()],
   },
