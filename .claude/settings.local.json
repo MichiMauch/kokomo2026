@@ -217,7 +217,9 @@
       "Read(//Users/michaelmauch/**)",
       "Bash(git stash:*)",
       "Bash(dig:*)",
-      "Bash(npx *)"
+      "Bash(npx *)",
+      "Bash(git rebase *)",
+      "Bash(GIT_EDITOR=true git rebase --continue)"
     ]
   }
 }
