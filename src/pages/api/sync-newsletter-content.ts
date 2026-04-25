@@ -37,6 +37,7 @@ export const POST: APIRoute = async ({ request }) => {
         summary: p.data.summary ?? '',
         image: getFirstImage(p.data.images),
         date: p.data.date?.toISOString().split('T')[0] ?? '',
+        tags: Array.isArray(p.data.tags) ? p.data.tags : [],
         published: !p.data.draft,
       }))
 
