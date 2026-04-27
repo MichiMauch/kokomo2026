@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "kokomo2026",
+  "project_id": "cc4f07b8-19a9-4d68-86a4-e4d3ed5b35ac"
+}
