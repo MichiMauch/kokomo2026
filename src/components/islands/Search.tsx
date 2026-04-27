@@ -112,7 +112,7 @@ export default function Search({ posts }: Props) {
     return (
       <button
         onClick={open}
-        className="flex items-center gap-2 rounded-full bg-primary-700px-4 py-1.5 text-sm font-medium text-white transition-all hover:bg-primary-800 hover:shadow-lg hover:shadow-primary-500/20"
+        className="flex items-center gap-2 rounded-full bg-primary-700 px-4 py-1.5 text-sm font-medium text-white transition-all hover:bg-primary-800 hover:shadow-lg hover:shadow-primary-500/20"
         aria-label="Suche öffnen"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

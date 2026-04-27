@@ -12,72 +12,114 @@ function Toast({
   const [visible, setVisible] = useState(false)
   const [exiting, setExiting] = useState(false)
 
+  const handleClose = () => {
+    setExiting(true)
+    setTimeout(onClose, 300)
+  }
+
   useEffect(() => {
-    // Slide in
     requestAnimationFrame(() => setVisible(true))
 
-    // Auto-dismiss after 6s
-    const timer = setTimeout(() => {
-      setExiting(true)
-      setTimeout(onClose, 400)
-    }, 6000)
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose()
+    }
+    document.addEventListener('keydown', handleKey)
 
-    return () => clearTimeout(timer)
-  }, [onClose])
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.removeEventListener('keydown', handleKey)
+      document.body.style.overflow = prevOverflow
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const isSuccess = type === 'success'
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="newsletter-toast-title"
+      onClick={handleClose}
       style={{
         position: 'fixed',
-        top: '24px',
-        right: '24px',
+        inset: 0,
         zIndex: 300,
-        transform: visible && !exiting ? 'translateX(0)' : 'translateX(calc(100% + 32px))',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px',
+        background: 'rgba(15, 23, 42, 0.6)',
+        backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)',
         opacity: visible && !exiting ? 1 : 0,
-        transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease',
-        maxWidth: '420px',
-        width: '100%',
-        pointerEvents: 'auto',
+        transition: 'opacity 0.3s ease',
       }}
     >
       <div
+        onClick={(e) => e.stopPropagation()}
         style={{
           background: 'white',
-          borderRadius: '16px',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.15), 0 4px 16px rgba(0,0,0,0.08)',
+          borderRadius: '20px',
+          boxShadow: '0 30px 80px rgba(0,0,0,0.25), 0 8px 24px rgba(0,0,0,0.12)',
           overflow: 'hidden',
           border: '1px solid rgba(229,231,235,0.8)',
+          maxWidth: '460px',
+          width: '100%',
+          transform: visible && !exiting ? 'scale(1)' : 'scale(0.95)',
+          transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
-        {/* Green/red accent bar at top */}
         <div
           style={{
-            height: '4px',
+            height: '6px',
             background: isSuccess
               ? 'linear-gradient(90deg, #05DE66, #01ABE7)'
               : 'linear-gradient(90deg, #ef4444, #f97316)',
           }}
         />
-        <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
-          {/* Icon */}
+        <div style={{ padding: '32px 28px 28px', textAlign: 'center', position: 'relative' }}>
+          <button
+            onClick={handleClose}
+            style={{
+              position: 'absolute',
+              top: '14px',
+              right: '14px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '6px',
+              color: '#9ca3af',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            aria-label="Schliessen"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
           <div
             style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '12px',
+              width: '72px',
+              height: '72px',
+              borderRadius: '50%',
               background: isSuccess ? '#ecfdf5' : '#fef2f2',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              flexShrink: 0,
+              margin: '0 auto 20px',
             }}
           >
             {isSuccess ? (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
                 <path
-                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                   stroke="#05DE66"
                   strokeWidth="2"
                   strokeLinecap="round"
@@ -85,7 +127,7 @@ function Toast({
                 />
               </svg>
             ) : (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
                 <path
                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.999L13.732 4.001c-.77-1.333-2.694-1.333-3.464 0L3.34 16.001C2.57 17.334 3.532 19 5.072 19z"
                   stroke="#ef4444"
@@ -97,35 +139,32 @@ function Toast({
             )}
           </div>
 
-          {/* Text */}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ margin: 0, fontWeight: 600, fontSize: '15px', color: '#111827' }}>
-              {isSuccess ? 'Fast geschafft! 🎉' : 'Hoppla!'}
-            </p>
-            <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#6b7280', lineHeight: 1.5 }}>
-              {message}
-            </p>
-          </div>
-
-          {/* Close button */}
-          <button
-            onClick={() => {
-              setExiting(true)
-              setTimeout(onClose, 400)
-            }}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '4px',
-              color: '#9ca3af',
-              flexShrink: 0,
-            }}
-            aria-label="Schliessen"
+          <h2
+            id="newsletter-toast-title"
+            style={{ margin: 0, fontWeight: 700, fontSize: '22px', color: '#111827', lineHeight: 1.3 }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            {isSuccess ? 'Bitte E-Mail-Postfach prüfen' : 'Hoppla!'}
+          </h2>
+          <p style={{ margin: '12px 0 0', fontSize: '16px', color: '#4b5563', lineHeight: 1.6 }}>
+            {message}
+          </p>
+
+          <button
+            onClick={handleClose}
+            style={{
+              marginTop: '24px',
+              background: isSuccess ? '#03B352' : '#ef4444',
+              color: 'white',
+              border: 'none',
+              borderRadius: '999px',
+              padding: '12px 28px',
+              fontSize: '15px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+            }}
+          >
+            Verstanden
           </button>
         </div>
       </div>
@@ -159,7 +198,7 @@ export default function NewsletterForm() {
 
       if (res.ok) {
         setStatus('success')
-        setMessage('Bitte bestätige deine Anmeldung per E-Mail.')
+        setMessage('Wir haben dir gerade einen Bestätigungslink gesendet. Bitte schau in dein E-Mail-Postfach (auch im Spam-Ordner) und klicke auf den Link, um deine Anmeldung abzuschliessen.')
         setEmail('')
         setShowToast(true)
       } else {
