@@ -4,7 +4,9 @@ const STORAGE_KEY = 'newsletter-popup-dismissed'
 const DISMISS_DAYS = 2
 const SHOW_DELAY_MS = 30_000
 
-export default function NewsletterPopup() {
+export default function NewsletterPopup({
+  listSlug = 'hauptnewsletter',
+}: { listSlug?: string } = {}) {
   const [visible, setVisible] = useState(false)
   const [animateIn, setAnimateIn] = useState(false)
   const [email, setEmail] = useState('')
@@ -46,7 +48,7 @@ export default function NewsletterPopup() {
       const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, siteId: 'kokomo' }),
+        body: JSON.stringify({ email, siteId: 'kokomo', listSlug }),
       })
 
       const data = await res.json()

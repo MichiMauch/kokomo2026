@@ -172,7 +172,9 @@ function Toast({
   )
 }
 
-export default function NewsletterForm() {
+export default function NewsletterForm({
+  listSlug = 'hauptnewsletter',
+}: { listSlug?: string } = {}) {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState('')
@@ -191,7 +193,7 @@ export default function NewsletterForm() {
       const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, siteId: 'kokomo' }),
+        body: JSON.stringify({ email, siteId: 'kokomo', listSlug }),
       })
 
       const data = await res.json()
