@@ -3,6 +3,10 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import TinyHouseQuiz from '../components/islands/TinyHouseQuiz'
 export const prerender = true
 ---
-<BaseLayout title="Tiny-House-Test" description="Finde heraus, wie Tiny-House-tauglich du bist — 10 Fragen, 3 Ergebnisse: Dein persönliches Tiny-House-Profil.">
-  <TinyHouseQuiz client:visible />
+<BaseLayout title="Tiny-House-Test: Bist du bereit?" description="Bist du bereit fürs Tiny-House-Leben? 12 ehrliche Fragen zu Konsum, Platz, Handwerk, Stellplatz, Finanzen und Alltag — mit persönlicher Auswertung und Tipps.">
+  <div class="mx-auto my-8 max-w-3xl">
+    <div class="glass-card rounded-2xl p-5 md:p-10">
+      <TinyHouseQuiz client:visible />
+    </div>
+  </div>
 </BaseLayout>

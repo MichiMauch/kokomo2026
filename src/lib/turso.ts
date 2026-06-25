@@ -268,3 +268,112 @@ export async function setGlossaryBoost(term: string, boost: number): Promise<voi
     args: [term, boost, boost],
   })
 }
+
+// ─── Quiz Results (Tiny-House-Readiness-Test) ───────────────────────────
+
+export type QuizDimension = 'minimalismus' | 'platz' | 'handwerk' | 'stellplatz' | 'finanzen' | 'autarkie'
+
+const QUIZ_DIMENSIONS: QuizDimension[] = ['minimalismus', 'platz', 'handwerk', 'stellplatz', 'finanzen', 'autarkie']
+
+export interface QuizResultInput {
+  overall: number
+  verdict: string
+  dimensions: Record<QuizDimension, number>
+}
+
+let quizTableReady = false
+
+async function ensureQuizTable(db: Client): Promise<void> {
+  if (quizTableReady) return
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS quiz_results (
+      id            INTEGER PRIMARY KEY AUTOINCREMENT,
+      overall       INTEGER NOT NULL,
+      verdict       TEXT NOT NULL,
+      minimalismus  INTEGER NOT NULL,
+      platz         INTEGER NOT NULL,
+      handwerk      INTEGER NOT NULL,
+      stellplatz    INTEGER NOT NULL,
+      finanzen      INTEGER NOT NULL,
+      autarkie      INTEGER NOT NULL,
+      created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+    )
+  `)
+  await db.execute(`CREATE INDEX IF NOT EXISTS idx_quiz_results_created_at ON quiz_results (created_at)`)
+  quizTableReady = true
+}
+
+export async function saveQuizResult(data: QuizResultInput): Promise<void> {
+  const db = getClient()
+  await ensureQuizTable(db)
+  await db.execute({
+    sql: `INSERT INTO quiz_results (overall, verdict, minimalismus, platz, handwerk, stellplatz, finanzen, autarkie)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [
+      data.overall,
+      data.verdict,
+      data.dimensions.minimalismus,
+      data.dimensions.platz,
+      data.dimensions.handwerk,
+      data.dimensions.stellplatz,
+      data.dimensions.finanzen,
+      data.dimensions.autarkie,
+    ],
+  })
+}
+
+export interface QuizStats {
+  total: number
+  last7Days: number
+  last30Days: number
+  avgOverall: number
+  verdictCounts: Record<string, number>
+  avgDimensions: Record<QuizDimension, number>
+  daily: { day: string; count: number }[]
+}
+
+export async function getQuizStats(): Promise<QuizStats> {
+  const db = getClient()
+  await ensureQuizTable(db)
+
+  const dimAvgSql = QUIZ_DIMENSIONS.map((d) => `AVG(${d}) AS ${d}`).join(', ')
+  const summary = await db.execute(`
+    SELECT
+      COUNT(*) AS total,
+      AVG(overall) AS avg_overall,
+      ${dimAvgSql},
+      SUM(CASE WHEN created_at >= datetime('now', '-7 days') THEN 1 ELSE 0 END) AS last7,
+      SUM(CASE WHEN created_at >= datetime('now', '-30 days') THEN 1 ELSE 0 END) AS last30
+    FROM quiz_results
+  `)
+  const row = summary.rows[0]
+  const total = Number(row.total) || 0
+
+  const verdicts = await db.execute(`SELECT verdict, COUNT(*) AS c FROM quiz_results GROUP BY verdict`)
+  const verdictCounts: Record<string, number> = {}
+  for (const v of verdicts.rows) verdictCounts[v.verdict as string] = Number(v.c)
+
+  const dailyRes = await db.execute(`
+    SELECT date(created_at) AS day, COUNT(*) AS c
+    FROM quiz_results
+    WHERE created_at >= datetime('now', '-30 days')
+    GROUP BY day
+    ORDER BY day ASC
+  `)
+  const daily = dailyRes.rows.map((r) => ({ day: r.day as string, count: Number(r.c) }))
+
+  const avgDimensions = {} as Record<QuizDimension, number>
+  for (const d of QUIZ_DIMENSIONS) {
+    avgDimensions[d] = total > 0 ? Math.round(Number(row[d])) : 0
+  }
+
+  return {
+    total,
+    last7Days: Number(row.last7) || 0,
+    last30Days: Number(row.last30) || 0,
+    avgOverall: total > 0 ? Math.round(Number(row.avg_overall)) : 0,
+    verdictCounts,
+    avgDimensions,
+    daily,
+  }
+}
