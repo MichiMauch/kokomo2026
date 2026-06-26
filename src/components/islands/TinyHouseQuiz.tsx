@@ -288,16 +288,27 @@ export default function TinyHouseQuiz() {
     const next = [...answers]
     next[questionIndex] = answer
     setAnswers(next)
+
+    // Auto-advance, sobald die letzte fehlende Antwort des Blocks gewählt wurde
+    const indices = blocks[currentBlock].indices
+    const wasComplete = indices.every((i) => answers[i] !== null)
+    const nowComplete = indices.every((i) => next[i] !== null)
+    if (!wasComplete && nowComplete) {
+      setTimeout(() => goNext(currentBlock), 320)
+    }
+  }
+
+  function goNext(fromBlock: number) {
+    if (fromBlock < blocks.length - 1) {
+      setCurrentBlock(fromBlock + 1)
+    } else {
+      setPhase('result')
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   function handleNext() {
-    if (currentBlock < blocks.length - 1) {
-      setCurrentBlock(currentBlock + 1)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    } else {
-      setPhase('result')
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    }
+    goNext(currentBlock)
   }
 
   function handleBack() {
