@@ -10,11 +10,9 @@
     "upload": "npx tsx pipeline/upload-to-r2.ts",
     "generate-image": "npx tsx pipeline/generate-images.ts",
     "publish-post": "npx tsx pipeline/publish.ts",
-    "import-comments": "npx tsx pipeline/import-comments.ts",
-    "blog-agent": "npx tsx agent/blog-agent.ts"
+    "import-comments": "npx tsx pipeline/import-comments.ts"
   },
   "dependencies": {
-    "@anthropic-ai/claude-agent-sdk": "^0.2.80",
     "@anthropic-ai/sdk": "^0.80.0",
     "@astrojs/mdx": "^5.0.3",
     "@astrojs/react": "^5.0.3",
@@ -26,7 +24,6 @@
     "@fontsource/roboto": "^5.2.10",
     "@google/genai": "^1.43.0",
     "@headlessui/react": "^2.2.9",
-    "@inquirer/prompts": "^8.4.1",
     "@libsql/client": "^0.17.0",
     "@tailwindcss/vite": "^4.2.1",
     "@types/react": "^19.2.14",
@@ -37,7 +34,6 @@
     "framer-motion": "^12.34.4",
     "github-slugger": "^2.0.0",
     "gray-matter": "^4.0.3",
-    "linkedom": "^0.18.12",
     "openai": "^6.25.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -46,13 +42,11 @@
     "sharp": "^0.34.5",
     "svix": "^1.87.0",
     "tailwindcss": "^4.2.1",
-    "turndown": "^7.2.4",
     "twitter-api-v2": "^1.29.0",
     "yaml": "^2.8.2"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.19",
-    "@types/turndown": "^5.0.6",
     "prettier": "^3.8.1",
     "prettier-plugin-astro": "^0.14.1",
     "prettier-plugin-tailwindcss": "^0.6.14",
