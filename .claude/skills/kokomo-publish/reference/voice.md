@@ -13,13 +13,19 @@ verbindlichen `post_types`-Blöcke (Struktur pro Post-Typ), die Tag-Liste und di
 - **Du-Form**, „wir"-Perspektive (Sibylle & Michi).
 - **Interne Links:** IMMER `/tiny-house/{slug}` — NIEMALS `/blog/…`, `/post/…`, `/posts/…`.
   Glossar-Links: `/glossar#{begriff-slug}`. Die Seite hat keinen /blog-Pfad.
+- **Niemals ein Zitat einer Person aus dem Haushalt** — KEINE wörtliche Rede, die Michi
+  oder Sibylle zugeschrieben wird (z.B. «Das ist kein Problem», sagte Michi). Immer aus
+  unserer Sicht erzählen: **Ich-Form**, oder **„wir"** wenn Sibylle dabei war. Gedanken/
+  Aussagen also umschreiben statt zitieren („Ich war überzeugt, dass das kein Problem ist"
+  statt „«Das ist kein Problem», dachte ich").
 
 ## Ton
 
 - Authentisch, persönlich, nahbar, leicht humorvoll, **nicht belehrend**, nicht werblich.
 - Variiere Absatzlängen, nutze H2-Zwischenüberschriften.
 - **Fettschrift** für Schlüsselbegriffe.
-- Gelegentlich ein Zitat einbauen, z.B. «So haben wir das erlebt».
+- KEINE wörtliche Rede / Zitate von uns (siehe Guardrails) — erzähl es direkt aus
+  unserer Erfahrung.
 
 ## Format eines Posts
 
