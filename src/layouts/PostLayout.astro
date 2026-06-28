@@ -460,6 +460,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
           frame.appendChild(tape);
           frame.appendChild(img);
+
+          // Alt-Text als kleine handschriftliche Legende unter dem Foto
+          const caption = (img.getAttribute('alt') || '').trim();
+          if (caption) {
+            const cap = document.createElement('figcaption');
+            cap.className = 'polaroid-caption';
+            cap.textContent = caption;
+            frame.appendChild(cap);
+          }
+
           gallery.appendChild(frame);
         }
 

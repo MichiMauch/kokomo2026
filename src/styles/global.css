@@ -284,6 +284,21 @@ body {
   object-fit: cover;
 }
 
+/* Kleine handschriftliche Legende unter dem Polaroid */
+.polaroid-caption {
+  margin-top: 6px;
+  padding: 0 2px;
+  text-align: center;
+  font-family: 'Caveat', 'Segoe Print', cursive;
+  font-size: 0.95rem;
+  line-height: 1.15;
+  color: #6b7280;
+}
+
+.dark .polaroid-caption {
+  color: #cbd5e1;
+}
+
 /* Responsive: smaller frames on mobile */
 @media (max-width: 640px) {
   .polaroid-frame {

@@ -34,6 +34,20 @@ Ein Tee, der nicht nur wunderschön aussah, sondern auch herrlich fein nach Erdb
 
 Und das Schönste: Diese «Abfälle» wären sonst einfach im Kompost gelandet. Stattdessen wurden sie zu unserem Lieblingsgetränk dieser Saison.
 
+![Es geht los – das Grün im Messbecher](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/20260619_113256.webp)
+
+![Beim Rüsten: Fruchtfleisch hier, Strünke dort](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/20260619_113307.webp)
+
+![Die Strünke und ein paar Erdbeerstücke wandern in den Krug](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/20260619_113326.webp)
+
+![Heisses Wasser drüber](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/20260619_113358.webp)
+
+![Jetzt heisst es warten](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/20260619_113411.webp)
+
+![Ein guter Spritzer frische Zitrone](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/20260619_120043.webp)
+
+![Fertig: das rosa Wunder im Glas](https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/20260619_120113.webp)
+
 ## Der Eistee der Landfrauen – auf unsere Art
 
 An einem heissen Nachmittag wollten wir etwas Kaltes – aber bitte keinen Fertigeistee aus der Flasche. Ein Rezept vom Schweizer Bäuerinnen- und Landfrauenverband auf [Swissmilk](https://www.swissmilk.ch/de/rezepte-kochideen/rezepte/KO2020_SBLV_48/gespritztes-apfel-minze-getraenk/) überzeugte uns: gespritztes Apfel-Minze-Getränk, ganz ohne Zucker. Frische Minze hatten wir griffbereit. Also los.
