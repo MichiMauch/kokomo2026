@@ -121,6 +121,13 @@ Postet nichts automatisch — Review unter `/admin/posts/<slug>#social`.
 1. **Lokal prüfen:** `npm run dev`, Post unter `http://localhost:4321/tiny-house/<slug>/`
    öffnen. Checken: Fotowand mit Legenden + Lightbox, Video-Embed, Titelbild, bei Anleitung
    `HowTo`-JSON-LD im Quelltext.
+   - **WICHTIG — Dev-Server nach `createPostFile` neu starten:** Neue Content-Collection-
+     Einträge werden von einem bereits laufenden `astro dev` NICHT zuverlässig hot-reloaded
+     → die neue URL liefert sonst 404. Laufenden Server stoppen (`pkill -f "astro dev"`) und
+     `npm run dev` neu starten, dann die URL prüfen.
+   - **Draft-Sichtbarkeit:** `draft: true`-Posts sind nur **lokal (DEV)** erreichbar; in der
+     Produktion liefern sie 404 (Filter in `src/pages/tiny-house/[...slug].astro`). Zum
+     Live-Schalten `draft: false` setzen.
 2. **Build-Gate:** `npm run build` (fängt Frontmatter-/Schema-Fehler ab, z.B. Summary > 300).
 3. Erst nach **„publizieren"** des Users: `draft: false` per `Edit` setzen, dann
    (CLAUDE.md-Protokoll):

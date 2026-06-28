@@ -5,7 +5,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import PostLayout from '../../layouts/PostLayout.astro'
 
 export async function getStaticPaths() {
-  const posts = await getCollection('posts')
+  // Drafts sind lokal (DEV) sichtbar zum Vorschau-Lesen, werden aber in der
+  // Produktion NICHT generiert → die Detail-URL liefert dort 404.
+  const posts = await getCollection('posts', ({ data }) => import.meta.env.DEV || !data.draft)
   return posts.map((post) => ({
     params: { slug: post.id },
     props: { post },
