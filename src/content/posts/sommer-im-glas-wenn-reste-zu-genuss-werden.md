@@ -1,6 +1,6 @@
 ---
 title: 'Sommer im Glas: Wenn Reste zu Genuss werden'
-date: '2026-06-28'
+date: '2026-06-20'
 summary: 'Erdbeertee aus Strünken, Minz-Eistee ohne Zucker, frischer Orangenmost – drei Sommergetränke, die zeigen: Mit wenig entsteht viel Genuss.'
 tags: ['nachhaltigkeit', 'Tiny House Alltag', 'minimalismus', 'Jahreszeiten', 'tiny house']
 authors: ['default']
