@@ -111,6 +111,10 @@ npx tsx -e "import {createPostFile} from './pipeline/create-post-file.ts'; creat
 Tipp: Bei langem Body ggf. Body in eine Temp-Datei schreiben und im `-e`-Snippet
 `readFileSync` nutzen, um Shell-Escaping zu vermeiden. **`draft: true` zwingend.**
 
+**Datum:** Hat die bd-Idee ein `Geplant: YYYY-MM-DD`, setze `date` auf dieses geplante
+Publikationsdatum (via `createPostFile({date})`). Nicht das heutige Datum und bei Ausbauten
+nicht das alte Datum behalten — sonst sortiert/findet der Redaktionsplan den Post falsch.
+
 ## Phase 6 — Social-Media-Texte
 
 `reference/social.md` lesen. 4 Plattform-Texte generieren (Link immer als `{url}`-Platzhalter),
