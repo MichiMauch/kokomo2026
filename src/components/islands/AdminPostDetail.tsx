@@ -4,7 +4,7 @@ import { compressImage } from '../../lib/compress-image'
 // ─── Types ──────────────────────────────────────────────────
 
 type Phase = 'checking' | 'login' | 'ready'
-type Tab = 'inhalt' | 'titelbild' | 'social'
+type Tab = 'inhalt' | 'titelbild' | 'social' | 'repurpose'
 type Platform = 'facebook_page' | 'facebook_group' | 'twitter' | 'telegram' | 'whatsapp'
 
 interface PostDetail {
@@ -761,6 +761,215 @@ function TabSocial({
   )
 }
 
+// ─── Tab: Repurpose ─────────────────────────────────────────
+
+function CopyChip({ text, label = 'Kopieren' }: { text: string; label?: string }) {
+  const [copied, setCopied] = useState(false)
+  return (
+    <button
+      type="button"
+      onClick={async () => {
+        try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1500) } catch { /* noop */ }
+      }}
+      className="cursor-pointer rounded-full border border-slate-300 px-3 py-1 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
+    >
+      {copied ? 'Kopiert!' : label}
+    </button>
+  )
+}
+
+function RepurposeBlock({ title, value }: { title: string; value: string }) {
+  if (!value) return null
+  return (
+    <div className="rounded-xl border border-slate-200/60 bg-white/50 p-3 dark:border-slate-700/50 dark:bg-slate-800/30">
+      <div className="mb-1 flex items-center justify-between gap-2">
+        <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">{title}</span>
+        <CopyChip text={value} />
+      </div>
+      <p className="whitespace-pre-wrap text-sm text-[var(--text)]">{value}</p>
+    </div>
+  )
+}
+
+function TabRepurpose({ slug }: { slug: string }) {
+  const [loading, setLoading] = useState(true)
+  const [generating, setGenerating] = useState(false)
+  const [assets, setAssets] = useState<any | null>(null)
+  const [error, setError] = useState('')
+  const [warning, setWarning] = useState('')
+  const [busy, setBusy] = useState('')
+
+  // Gespeicherte Assets laden (falls vorhanden)
+  useEffect(() => {
+    fetch(`/api/admin/repurpose?slug=${slug}`)
+      .then((r) => (r.ok ? r.json() : { assets: [] }))
+      .then((d) => {
+        const merged: any = {}
+        for (const a of d.assets || []) merged[a.kind] = a.payload
+        if (Object.keys(merged).length) setAssets(merged)
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [slug])
+
+  async function generate() {
+    setGenerating(true); setError(''); setWarning('')
+    try {
+      const res = await fetch('/api/admin/repurpose', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'generate', slug }),
+      })
+      if (res.status === 401) { window.location.reload(); return }
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Generierung fehlgeschlagen')
+      setAssets(data.assets)
+      if (data.warning) setWarning(data.warning)
+    } catch (e: any) { setError(e.message) } finally { setGenerating(false) }
+  }
+
+  async function render(action: 'render-slides' | 'render-thumbnail', payload: any, label: string) {
+    setBusy(label); setError('')
+    try {
+      const res = await fetch('/api/admin/repurpose', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, slug, ...payload }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Rendern fehlgeschlagen')
+      setAssets((prev: any) => {
+        const next = { ...prev }
+        if (action === 'render-thumbnail') next._thumbnailUrl = data.url
+        if (action === 'render-slides') next._slideUrls = data.urls
+        return next
+      })
+    } catch (e: any) { setError(e.message) } finally { setBusy('') }
+  }
+
+  function downloadSrt(srt: string) {
+    const blob = new Blob([srt], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = `${slug}.srt`; a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  if (loading) return <div className="py-6 text-center text-sm text-[var(--text-secondary)]">Wird geladen…</div>
+
+  const se = assets?.social_extra || {}
+  const c = assets?.carousel
+  const v = assets?.video_script
+  const nl = assets?.newsletter_blurb
+
+  return (
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          onClick={generate}
+          disabled={generating}
+          className="cursor-pointer rounded-full bg-primary-700 px-5 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 disabled:opacity-50 dark:bg-primary-600 dark:hover:bg-primary-500"
+        >
+          {generating ? 'Erzeuge Assets…' : assets ? 'Neu generieren' : 'Assets generieren'}
+        </button>
+        <span className="text-xs text-[var(--text-secondary)]">
+          Ein Post → Social-Texte, Karussell, Video-Skript &amp; Newsletter-Häppchen.
+        </span>
+      </div>
+
+      {error && <div className="rounded-xl border border-red-200/50 bg-red-50/60 px-4 py-3 text-sm text-red-700 dark:border-red-800/50 dark:bg-red-900/20 dark:text-red-300">{error}</div>}
+      {warning && <div className="rounded-xl border border-amber-200/50 bg-amber-50/60 px-4 py-3 text-sm text-amber-800 dark:border-amber-800/50 dark:bg-amber-900/20 dark:text-amber-300">{warning}</div>}
+
+      {!assets && !generating && (
+        <div className="py-8 text-center text-sm text-[var(--text-secondary)]">Noch keine Assets — auf „Assets generieren" klicken.</div>
+      )}
+
+      {se && (se.instagram || se.linkedin || se.mastodon) && (
+        <section className="space-y-2">
+          <h3 className="text-sm font-bold text-[var(--text)]">Social</h3>
+          <RepurposeBlock title="Instagram" value={se.instagram} />
+          <RepurposeBlock title="LinkedIn" value={se.linkedin} />
+          <RepurposeBlock title="Mastodon" value={se.mastodon} />
+        </section>
+      )}
+
+      {c && (
+        <section className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[var(--text)]">Karussell ({c.slides?.length || 0} Slides)</h3>
+            <button
+              onClick={() => render('render-slides', { prompts: (c.slides || []).map((s: any) => `Documentary tiny house lifestyle photo for an Instagram slide about: ${s.title}. ${s.body}`) }, 'slides')}
+              disabled={busy === 'slides'}
+              className="cursor-pointer rounded-full border border-slate-300 px-3 py-1 text-xs font-medium text-[var(--text-secondary)] hover:bg-slate-100 disabled:opacity-50 dark:border-slate-600 dark:hover:bg-slate-800"
+            >
+              {busy === 'slides' ? 'Rendere…' : 'Slide-Bilder rendern'}
+            </button>
+          </div>
+          <ol className="space-y-1">
+            {(c.slides || []).map((s: any, i: number) => (
+              <li key={i} className="rounded-lg border border-slate-200/60 bg-white/50 px-3 py-2 text-sm dark:border-slate-700/50 dark:bg-slate-800/30">
+                <span className="font-semibold text-[var(--text)]">{i + 1}. {s.title}</span>
+                <span className="block text-[var(--text-secondary)]">{s.body}</span>
+              </li>
+            ))}
+          </ol>
+          {c.caption && <RepurposeBlock title="Caption" value={c.caption} />}
+          {c.hashtags?.length > 0 && <RepurposeBlock title="Hashtags" value={c.hashtags.join(' ')} />}
+          {assets._slideUrls?.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {assets._slideUrls.map((u: string, i: number) => (
+                <a key={i} href={u} target="_blank" rel="noreferrer"><img src={u} alt={`Slide ${i + 1}`} className="h-24 w-24 rounded-lg object-cover" /></a>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      {v && (
+        <section className="space-y-2">
+          <h3 className="text-sm font-bold text-[var(--text)]">Vertical-Video-Skript</h3>
+          <RepurposeBlock title="Hook" value={v.hook} />
+          {v.beats?.length > 0 && (
+            <div className="rounded-xl border border-slate-200/60 bg-white/50 p-3 dark:border-slate-700/50 dark:bg-slate-800/30">
+              <div className="mb-1 flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">Sprechtext (Beats)</span>
+                <div className="flex gap-2">
+                  <CopyChip text={(v.beats || []).map((b: any) => b.text).join('\n')} label="Text kopieren" />
+                  {v.srt && <button onClick={() => downloadSrt(v.srt)} className="cursor-pointer rounded-full border border-slate-300 px-3 py-1 text-xs font-medium text-[var(--text-secondary)] hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800">.srt laden</button>}
+                </div>
+              </div>
+              <ol className="space-y-1 text-sm">
+                {v.beats.map((b: any, i: number) => (
+                  <li key={i} className="text-[var(--text)]"><span className="font-mono text-xs text-[var(--text-secondary)]">{b.seconds}s</span> · {b.text}</li>
+                ))}
+              </ol>
+            </div>
+          )}
+          {v.shotlist?.length > 0 && <RepurposeBlock title="Shotlist" value={v.shotlist.map((s: string, i: number) => `${i + 1}. ${s}`).join('\n')} />}
+          <RepurposeBlock title="Titel" value={v.title} />
+          <RepurposeBlock title="Beschreibung" value={v.description} />
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => render('render-thumbnail', { prompt: v.thumbnail_prompt }, 'thumb')}
+              disabled={busy === 'thumb'}
+              className="cursor-pointer rounded-full border border-slate-300 px-3 py-1 text-xs font-medium text-[var(--text-secondary)] hover:bg-slate-100 disabled:opacity-50 dark:border-slate-600 dark:hover:bg-slate-800"
+            >
+              {busy === 'thumb' ? 'Rendere…' : 'Thumbnail rendern'}
+            </button>
+            {assets._thumbnailUrl && <a href={assets._thumbnailUrl} target="_blank" rel="noreferrer"><img src={assets._thumbnailUrl} alt="Thumbnail" className="h-16 rounded-lg object-cover" /></a>}
+          </div>
+        </section>
+      )}
+
+      {nl && (
+        <section className="space-y-2">
+          <h3 className="text-sm font-bold text-[var(--text)]">Newsletter</h3>
+          <RepurposeBlock title="Teaser" value={nl.teaser} />
+          <RepurposeBlock title="Call-to-Action" value={nl.cta} />
+        </section>
+      )}
+    </div>
+  )
+}
+
 // ─── Main Component ─────────────────────────────────────────
 
 export default function AdminPostDetail({ slug }: { slug: string }) {
@@ -929,6 +1138,7 @@ export default function AdminPostDetail({ slug }: { slug: string }) {
     { key: 'inhalt', label: 'Inhalt' },
     { key: 'titelbild', label: 'Titelbild' },
     { key: 'social', label: 'Social Media' },
+    { key: 'repurpose', label: 'Repurpose' },
   ]
 
   return (
@@ -1000,6 +1210,7 @@ export default function AdminPostDetail({ slug }: { slug: string }) {
         {activeTab === 'social' && (
           <TabSocial slug={post.slug} texts={socialTexts} shares={socialShares} />
         )}
+        {activeTab === 'repurpose' && <TabRepurpose slug={post.slug} />}
       </div>
     </div>
   )
