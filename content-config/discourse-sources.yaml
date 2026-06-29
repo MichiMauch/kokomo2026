@@ -9,15 +9,20 @@
 # Zeitfenster für „aktuell" (Tage). Ältere Treffer werden ignoriert.
 recency_days: 60
 
-# RSS/Atom-Feeds — werden direkt gelesen (falls vorhanden). URL der echten Feed-
-# Adresse eintragen; wenn unbekannt, leer lassen und die Seite unter `sites` führen.
-feeds: []
-  # - https://www.kleinwohnformen.ch/feed/
+# Scrape-Prefix: JS-lastige Seiten ohne Feed sauber als Markdown holen, indem man die
+# URL voranstellt (Jina AI Reader). Beispiel:
+#   https://r.jina.ai/https://kleinwohnformen.ch/news-stories/beitraege/
+# Liefert Titel, echte Artikel-URLs (/news/<slug>/), Datum und Teaser. Leer lassen = aus.
+scrape_prefix: "https://r.jina.ai/"
 
-# Webseiten ohne (bekannten) Feed → Startseite/News/Blog scannen.
+# RSS/Atom-Feeds — werden direkt gelesen (falls vorhanden). Sonst leer lassen und die
+# Listen-/Blog-Seite unter `sites` führen (wird via scrape_prefix gescrapt).
+feeds: []
+
+# Listen-/Blog-Seiten ohne Feed → via scrape_prefix scrapen, jüngste Artikel herausziehen.
 sites:
-  - https://www.kleinwohnformen.ch        # Verein Kleinwohnformen Schweiz
-  # - https://www.tinyhouse-...              # weitere Plattformen/Blogs ergänzen
+  - https://kleinwohnformen.ch/news-stories/beitraege/   # Verein Kleinwohnformen CH — Beiträge
+  # - https://www.tinyhouse-...                            # weitere Plattformen/Blogs ergänzen
 
 # Live-WebSearch-Queries (decken News, Foren, Plattformen UND öffentliche Social-Posts ab).
 # In KOKOMOs Sprach-/Länderfokus halten (Schweiz, de-CH).

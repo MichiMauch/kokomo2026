@@ -88,15 +88,21 @@ KOKOMO eine **gelebte Stellungnahme** beitragen kann (bestätigen, widersprechen
 einordnen). Quelle der Wahrheit: `content-config/discourse-sources.yaml` (`Read` zu Beginn).
 
 **Sammeln (voller Lauf):**
-1. **Feeds/Seiten:** Jede URL aus `feeds` und `sites` mit `WebFetch` holen; die jüngsten
-   Beiträge/Artikel innerhalb `recency_days` herausziehen (Titel, URL, Datum, Kernaussage).
-2. **Live-Suche:** Für jede `searches`-Query `WebSearch` (auf de-CH/Schweiz-Fokus achten);
+1. **Feeds:** Jede `feeds`-URL direkt mit `WebFetch` holen.
+2. **Seiten (`sites`):** meist JS-lastige WordPress-Listen ohne Feed → über den
+   `scrape_prefix` als sauberes Markdown holen, d.h. `WebFetch` (oder `curl`) auf
+   `<scrape_prefix><site-url>`. Beispiel kleinwohnformen.ch: die Beiträge-Seite liefert so
+   eine Liste mit Titel, echter Artikel-URL (`/news/<slug>/`), Datum und Teaser. Die jüngsten
+   Artikel innerhalb `recency_days` herausziehen; bei Bedarf einen einzelnen Artikel ebenfalls
+   über den `scrape_prefix` vertiefen.
+3. **Live-Suche:** Für jede `searches`-Query `WebSearch` (auf de-CH/Schweiz-Fokus achten);
    ebenso die `social`-Hinweise (Reddit/Hashtags) via `WebSearch`/`WebFetch` anstreuen.
-3. Sammle konkrete **Diskussions-Items**: was wird behauptet/gefragt/kritisiert? Nur Items
+4. Sammle konkrete **Diskussions-Items**: was wird behauptet/gefragt/kritisiert? Nur Items
    behalten, die aktuell (innerhalb `recency_days`) und thematisch zu KOKOMO passen.
 
 **Ad-hoc (Argument = URL/Thema):**
-- URL → `WebFetch`; Thema/Stichwort → 1–2 `WebSearch`, dann relevanteste Quelle `WebFetch`.
+- URL → `WebFetch`; wenn die Seite mager/JS-lastig zurückkommt, über `<scrape_prefix><url>`
+  erneut holen. Thema/Stichwort → 1–2 `WebSearch`, dann relevanteste Quelle so holen.
 - Kernaussage in 1–2 Sätzen festhalten + Quelle merken.
 
 **Zu Ideen formen:** Pro Diskurs-Item einen KOKOMO-**Reaktionswinkel** bilden — immer aus
