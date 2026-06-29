@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro'
+import { getCollection } from 'astro:content'
 import { isAuthenticated } from '../../../lib/admin-auth'
-import { listPostFiles, getFileContent, updateFile } from '../../../lib/github'
+import { getFileContent, updateFile } from '../../../lib/github'
 import { uploadBufferToR2 } from '../../../lib/r2'
 import sharp from 'sharp'
 import { parse as parseYaml } from 'yaml'
@@ -10,21 +11,17 @@ export const prerender = false
 
 const headers = { 'Content-Type': 'application/json' }
 
-/**
- * Parse frontmatter from markdown content
- */
-function parseFrontmatter(content: string): Record<string, any> {
-  const match = content.match(/^---\n([\s\S]*?)\n---/)
-  if (!match) return {}
-  try {
-    return parseYaml(match[1]) || {}
-  } catch {
-    return {}
-  }
+function postDate(date: unknown): string {
+  if (date instanceof Date) return date.toISOString().slice(0, 10)
+  return date ? String(date).slice(0, 10) : ''
 }
 
 /**
- * GET: List all posts with slug, title, current image URL
+ * GET: List all posts with slug, title, current image URL.
+ *
+ * Liest aus der gebundelten Content-Collection (1 In-Memory-Zugriff) statt pro
+ * Datei einen GitHub-API-Call zu machen — das skaliert auf Produktion (sonst
+ * 85 parallele GitHub-Requests → Funktions-Timeout / Rate-Limit → Endlos-Spinner).
  */
 export const GET: APIRoute = async ({ request }) => {
   if (!(await isAuthenticated(request))) {
@@ -32,27 +29,19 @@ export const GET: APIRoute = async ({ request }) => {
   }
 
   try {
-    const files = await listPostFiles()
-
-    const posts = await Promise.all(
-      files.map(async (filename) => {
-        const slug = filename.replace(/\.md$/, '')
-        try {
-          const content = await getFileContent(`src/content/posts/${filename}`)
-          const fm = parseFrontmatter(content)
-          return {
-            slug,
-            title: fm.title || slug,
-            date: fm.date || '',
-            imageUrl: fm.images || null,
-            draft: fm.draft ?? false,
-            tags: fm.tags || [],
-          }
-        } catch {
-          return { slug, title: slug, date: '', imageUrl: null, draft: false, tags: [] as string[] }
-        }
-      })
-    )
+    const entries = await getCollection('posts')
+    const posts = entries.map((p) => {
+      const images = p.data.images as string | string[] | undefined
+      const imageUrl = typeof images === 'string' ? images : (images?.[0] ?? null)
+      return {
+        slug: p.id,
+        title: p.data.title || p.id,
+        date: postDate(p.data.date),
+        imageUrl,
+        draft: p.data.draft ?? false,
+        tags: p.data.tags ?? [],
+      }
+    })
 
     // Sort by date descending (newest first)
     posts.sort((a, b) => b.date.localeCompare(a.date))

@@ -817,30 +817,32 @@ export default function AdminPostDetail({ slug }: { slug: string }) {
     setLoading(true)
     setError('')
     try {
-      const [postRes, socialRes] = await Promise.all([
-        fetch(`/api/admin/posts?slug=${slug}`),
-        fetch(`/api/admin/social?slug=${slug}`),
-      ])
-
-      if (postRes.status === 401 || socialRes.status === 401) {
+      const postRes = await fetch(`/api/admin/posts?slug=${slug}`)
+      if (postRes.status === 401) {
         setPhase('login')
         return
       }
-
       if (!postRes.ok) throw new Error('Post konnte nicht geladen werden')
 
       const postData: PostDetail = await postRes.json()
       setPost(postData)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
 
+    // Social-Texte separat laden — dürfen das Öffnen des Posts NICHT blockieren
+    // (z. B. wenn Turso gerade nicht erreichbar ist → sonst Endlos-Spinner).
+    try {
+      const socialRes = await fetch(`/api/admin/social?slug=${slug}`)
       if (socialRes.ok) {
         const socialData = await socialRes.json()
         setSocialTexts(socialData.texts || [])
         setSocialShares(socialData.shares || [])
       }
-    } catch (err: any) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
+    } catch {
+      /* Social optional — Fehler ignorieren */
     }
   }
 

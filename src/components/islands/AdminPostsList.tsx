@@ -235,26 +235,28 @@ export default function AdminPostsList() {
     setLoading(true)
     setError('')
     try {
-      const [postsRes, socialRes] = await Promise.all([
-        fetch('/api/admin/images'),
-        fetch('/api/admin/social'),
-      ])
-
+      const postsRes = await fetch('/api/admin/images')
       if (postsRes.status === 401) { setPhase('login'); return }
       if (!postsRes.ok) throw new Error('Posts konnten nicht geladen werden')
 
       const postsData = await postsRes.json()
       setPosts(postsData.posts || [])
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
 
+    // Social-Status separat — darf die Liste NICHT blockieren (z. B. Turso down).
+    try {
+      const socialRes = await fetch('/api/admin/social')
       if (socialRes.ok) {
         const socialData = await socialRes.json()
         setSlugsWithTexts(new Set(socialData.slugsWithTexts || []))
         setShareOverview(socialData.shareOverview || {})
       }
-    } catch (err: any) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
+    } catch {
+      /* Social-Status optional */
     }
   }
 
