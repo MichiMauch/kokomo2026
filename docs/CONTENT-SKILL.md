@@ -1,6 +1,6 @@
-# KOKOMO Content erstellen — die `kokomo-publish` Skill
+# KOKOMO Content erstellen — die `kokomo-creator` Skill
 
-Blogposts für kokomo.house werden mit der Claude-Code-Skill **`kokomo-publish`**
+Blogposts für kokomo.house werden mit der Claude-Code-Skill **`kokomo-creator`**
 geschrieben und publiziert — direkt im Dialog mit Claude Code. Kein separates CLI-Tool
 mehr (der frühere `agent/`-Blog-Agent wurde durch diese Skill ersetzt).
 
@@ -41,11 +41,11 @@ Die Skill orchestriert nur — die eigentliche Arbeit steckt in den `pipeline/`-
 | `pipeline/create-post-file.ts` | Post-Markdown + Frontmatter (Umlaut-Fix) |
 | `pipeline/save-social-texts.ts` | Social-Texte → Turso |
 
-Skill-Definition: `.claude/skills/kokomo-publish/SKILL.md` (+ `reference/` für Stimme,
+Skill-Definition: `.claude/skills/kokomo-creator/SKILL.md` (+ `reference/` für Stimme,
 SEO, Social und die Render-Regeln für Galerie/Video).
 
 Render-Regeln (Galerie = aufeinanderfolgende Bild-Absätze, Video = `{% youtube ID %}`):
-siehe `.claude/skills/kokomo-publish/reference/rendering.md` und
+siehe `.claude/skills/kokomo-creator/reference/rendering.md` und
 `src/layouts/PostLayout.astro`.
 
 ## Warum Skill statt CLI-Agent?

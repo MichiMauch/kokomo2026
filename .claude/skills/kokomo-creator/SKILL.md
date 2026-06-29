@@ -1,5 +1,5 @@
 ---
-name: kokomo-publish
+name: kokomo-creator
 description: >
   Kompletter Content-Workflow für das Tiny-House-Blog kokomo.house — von der Themenidee
   über Schreiben (mit SEO-Check), Medien (Fotos → Galerie, AI-Titelbild, YouTube-Video)
@@ -8,7 +8,7 @@ description: >
   "blog-ideen", "bilder/galerie/video zum post hinzufügen".
 ---
 
-# KOKOMO Publish — Blog-Content erstellen & publizieren
+# KOKOMO Creator — Blog-Content erstellen & publizieren
 
 Führt den ganzen Weg von der Idee bis zum publizierten Post auf **kokomo.house**.
 Nutzt die `pipeline/`-Skripte als „Hände" und deine nativen Fähigkeiten (Fotos ansehen,
@@ -33,16 +33,13 @@ Lade die übrigen Referenzdateien erst, wenn die jeweilige Phase dran ist:
 
 ---
 
-## Phase 0 — Themen vorschlagen (optional)
+## Phase 0 — Themen finden → eigener Skill
 
-Nur wenn der User Ideen will ("thema vorschlagen", "blog-ideen"):
+Themenfindung läuft jetzt über den dedizierten **`/kokomo-ideen`** Skill (zieht Leserkommentare,
+GSC Quick-Wins, Matomo, Saison und fällige Daten-Serien zusammen und legt Ideen als `bd`-Issues ab).
 
-1. `Glob src/content/posts/*.md` + `Read` der Frontmatter → abgedeckte Themen,
-   Tag-Häufigkeit, letztes Publikationsdatum, saisonale Lücken (heutiges Datum kennst du).
-2. `writing-style.yaml` → `topics` + `existing_tags`.
-3. 5 Vorschläge, je mit: Arbeitstitel, 1–2 Sätze Beschreibung, 5 Tags, saisonale Relevanz,
-   SEO-Potenzial (Keyword-Cluster), 3–4 Stichpunkte.
-4. Bei Auswahl → weiter mit Phase 1.
+- User will Ideen ("thema vorschlagen", "blog-ideen") → **`/kokomo-ideen`** ausführen.
+- User hat schon eine Idee (auch aus `bd ready` / `bd list -l idee`) → direkt mit **Phase 1** starten.
 
 ## Phase 1 — Outline
 

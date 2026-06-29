@@ -16,13 +16,13 @@ was KOKOMO wertvoll macht: was Leser:innen fragen, was Leute suchen, was gerade 
 welche eurer Daten-Serien fällig ist — gegen die 85 bestehenden Posts gefiltert.
 Sprache mit dem User: **Deutsch**.
 
-> Output sind **Ideen, kein fertiger Text.** Geschrieben wird später mit `/kokomo-publish`.
+> Output sind **Ideen, kein fertiger Text.** Geschrieben wird später mit `/kokomo-creator`.
 > Ideen sind ein **Menü zum Auswählen** — nie automatisch zu Posts machen.
 
 ## Vor dem Start — immer lesen
 
 1. `content-config/writing-style.yaml` → `topics`, `existing_tags`, Kontext (Bewohner, Hersteller).
-2. `.claude/skills/kokomo-publish/reference/voice.md` → Guardrails (ss statt ß, echte Umlaute,
+2. `.claude/skills/kokomo-creator/reference/voice.md` → Guardrails (ss statt ß, echte Umlaute,
    du-Form, **wir sind keine Minimalisten**, nicht reisserisch). Ideen, die gegen den Ton
    verstossen (Marketing-Sprech, „lebensverändernd", Minimalismus-Label), gar nicht erst vorschlagen.
 
@@ -109,12 +109,12 @@ Session-Completion-Protokoll in `CLAUDE.md`, und nur wenn der User es will.
 
 ## Übergang zum Schreiben
 
-Will der User eine Idee umsetzen → `/kokomo-publish` ab **Phase 1 (Outline)** mit Titel + Stichpunkten
+Will der User eine Idee umsetzen → `/kokomo-creator` ab **Phase 1 (Outline)** mit Titel + Stichpunkten
 aus dem Issue. (Dieser Skill ersetzt die alte, dünne „Phase 0 — Themen vorschlagen" dort.)
 
 ## Was dieser Skill NICHT tut
 
-- Keine fertigen Posts schreiben oder publizieren (das ist `/kokomo-publish`).
+- Keine fertigen Posts schreiben oder publizieren (das ist `/kokomo-creator`).
 - Keine reinen Keyword-Vorschläge ohne Bezug zum echten Leben — KOKOMO ist ein Diary, kein Traffic-Business.
 - Keine Themen vorschlagen, die schon ein Post abdeckt (Phase 1 ist Pflicht).
 - Nicht automatisch laufen — Ideenfindung ist on-demand, kein Feed.

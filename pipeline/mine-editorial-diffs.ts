@@ -8,7 +8,7 @@
  * immer wieder wegstreicht oder ergänzt, ist ein Hinweis auf eine Stil-Regel.
  *
  * EINSCHRÄNKUNG: In-Chat-Korrekturen am Draft, die VOR dem ersten Commit passieren
- * (der Normalfall im kokomo-publish-Workflow), stehen NICHT im Git und werden hier
+ * (der Normalfall im kokomo-creator-Workflow), stehen NICHT im Git und werden hier
  * nicht erfasst. Das Mining sieht nur Edits NACH der ersten Veröffentlichung — der
  * Nutzen wächst also mit der Zeit und mit nachträglichen Korrekturen.
  *
