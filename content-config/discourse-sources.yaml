@@ -1,0 +1,35 @@
+# Beobachtete Quellen für die Diskurs-Ideenquelle von kokomo-ideen (Phase 3b).
+# Frei editierbar. Der Skill liest Feeds/Seiten via WebFetch und ergänzt sie mit
+# Live-WebSearch zu den `searches`-Keywords. Social Media wird pragmatisch über
+# WebSearch abgedeckt (keine API-Keys nötig).
+#
+# Ziel: Themen finden, die GERADE diskutiert werden / über die geschrieben wurde,
+# zu denen KOKOMO eine gelebte Stellungnahme beitragen kann.
+
+# Zeitfenster für „aktuell" (Tage). Ältere Treffer werden ignoriert.
+recency_days: 60
+
+# RSS/Atom-Feeds — werden direkt gelesen (falls vorhanden). URL der echten Feed-
+# Adresse eintragen; wenn unbekannt, leer lassen und die Seite unter `sites` führen.
+feeds: []
+  # - https://www.kleinwohnformen.ch/feed/
+
+# Webseiten ohne (bekannten) Feed → Startseite/News/Blog scannen.
+sites:
+  - https://www.kleinwohnformen.ch        # Verein Kleinwohnformen Schweiz
+  # - https://www.tinyhouse-...              # weitere Plattformen/Blogs ergänzen
+
+# Live-WebSearch-Queries (decken News, Foren, Plattformen UND öffentliche Social-Posts ab).
+# In KOKOMOs Sprach-/Länderfokus halten (Schweiz, de-CH).
+searches:
+  - "Kleinwohnformen Schweiz"
+  - "Tiny House Schweiz"
+  - "Tiny House Baurecht Schweiz"
+  - "Mikrohaus / Mobilheim wohnen Schweiz"
+  - "Tiny House Kritik Nachteile"
+
+# Social-Media-Hinweise (werden via WebSearch/WebFetch angesteuert, keine API).
+social:
+  - reddit.com/r/TinyHouses
+  - "#tinyhouseschweiz"
+  - "#kleinwohnformen"

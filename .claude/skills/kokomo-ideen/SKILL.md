@@ -2,11 +2,14 @@
 name: kokomo-ideen
 description: >
   Findet Blog-Themen für kokomo.house aus echten Signalen — statt aus dem Nichts. Zieht
-  Leserkommentare, Google-Search-Console-Quick-Wins, Matomo-Top-Seiten, saisonale Anlässe
-  und fällige Daten-Serien zusammen, entfernt schon abgedeckte Themen, rankt 8–10 Ideen und
-  legt die ausgewählten als beads-Issues (`bd`) ins Backlog. Aktivieren bei: "/kokomo-ideen",
-  "blog-ideen", "ideen für kokomo", "worüber soll ich schreiben", "ich hab keine themen",
-  "themen vorschlagen", "ideen-backlog".
+  Leserkommentare, Google-Search-Console-Quick-Wins, Matomo-Top-Seiten, saisonale Anlässe,
+  fällige Daten-Serien UND den aktuellen Diskurs (kleinwohnformen.ch & andere Websites/
+  Plattformen/Social Media) zusammen, entfernt schon abgedeckte Themen, rankt 8–10 Ideen und
+  legt die ausgewählten als beads-Issues (`bd`) ins Backlog. Kann auch ad hoc zu einem
+  konkreten Artikel/Thema (URL oder Stichwort) eine KOKOMO-Stellungnahme vorschlagen.
+  Aktivieren bei: "/kokomo-ideen", "blog-ideen", "ideen für kokomo", "worüber soll ich
+  schreiben", "ich hab keine themen", "themen vorschlagen", "ideen-backlog", "stellung nehmen
+  zu", "was wird gerade diskutiert", "reaktion auf <artikel/url>".
 ---
 
 # KOKOMO Ideen — Themenfindung aus echten Signalen
@@ -18,6 +21,14 @@ Sprache mit dem User: **Deutsch**.
 
 > Output sind **Ideen, kein fertiger Text.** Geschrieben wird später mit `/kokomo-creator`.
 > Ideen sind ein **Menü zum Auswählen** — nie automatisch zu Posts machen.
+
+## Zwei Modi
+
+- **Voller Lauf** (kein Argument): Phasen 1–5 — alle Signale inkl. Diskurs.
+- **Ad-hoc Stellungnahme** (Argument ist eine **URL** oder ein **konkretes Thema/Stichwort**):
+  Überspringe Phase 2/3 der Signal-Sammlung und geh direkt in **Phase 3b → Ad-hoc**: die
+  Quelle lesen, Kernaussage zusammenfassen, KOKOMO-Reaktionswinkel vorschlagen, gegen
+  bestehende Posts deduplizieren (Phase 1) und als eine Idee ranken/ablegen (Phase 4–5).
 
 ## Vor dem Start — immer lesen
 
@@ -70,15 +81,50 @@ schlecht rankt (`pageQuickWins`) = **Ausbau-Idee**.
   | Winter-Report | `*winter*`, `*frieren*`, `*holzofen*` | jährlich (Frühling) |
   | Hitze / Dämmung | `*hitze*`, `*daemmung*`, `*grad*` | jährlich (Spätsommer) |
 
+## Phase 3b — Diskurs & Stellungnahme (externe Quellen)
+
+Themen finden, die **gerade diskutiert werden** oder über die geschrieben wurde — und zu denen
+KOKOMO eine **gelebte Stellungnahme** beitragen kann (bestätigen, widersprechen, ergänzen,
+einordnen). Quelle der Wahrheit: `content-config/discourse-sources.yaml` (`Read` zu Beginn).
+
+**Sammeln (voller Lauf):**
+1. **Feeds/Seiten:** Jede URL aus `feeds` und `sites` mit `WebFetch` holen; die jüngsten
+   Beiträge/Artikel innerhalb `recency_days` herausziehen (Titel, URL, Datum, Kernaussage).
+2. **Live-Suche:** Für jede `searches`-Query `WebSearch` (auf de-CH/Schweiz-Fokus achten);
+   ebenso die `social`-Hinweise (Reddit/Hashtags) via `WebSearch`/`WebFetch` anstreuen.
+3. Sammle konkrete **Diskussions-Items**: was wird behauptet/gefragt/kritisiert? Nur Items
+   behalten, die aktuell (innerhalb `recency_days`) und thematisch zu KOKOMO passen.
+
+**Ad-hoc (Argument = URL/Thema):**
+- URL → `WebFetch`; Thema/Stichwort → 1–2 `WebSearch`, dann relevanteste Quelle `WebFetch`.
+- Kernaussage in 1–2 Sätzen festhalten + Quelle merken.
+
+**Zu Ideen formen:** Pro Diskurs-Item einen KOKOMO-**Reaktionswinkel** bilden — immer aus
+gelebter Erfahrung, nie blosses Nacherzählen:
+- *Bestätigen/illustrieren* („Stimmt — bei uns sieht das so aus …")
+- *Differenzieren/widersprechen* („In der Theorie ja, in unserem Alltag aber …")
+- *Einordnen für die Schweiz* (Recht, Stellplatz, Klima — unsere konkrete Lage)
+
+**Wichtig:**
+- **Dedup gegen Phase 1** — kein Reaktionspost, wenn wir das Thema schon abgedeckt haben
+  (höchstens Ausbau).
+- Ton-Guardrails (Phase „Vor dem Start") gelten: **nicht reisserisch, keine Empörung als
+  Selbstzweck, kein „Hot Take"**. Stellungnahme ja, Clickbait nein.
+- Quelle ist **Pflicht**: jede Diskurs-Idee trägt die `URL` mit (geht später in die Issue-Notes).
+- Faktenstand nur aus der Quelle übernehmen, nicht erfinden; bei Unsicherheit zweite Quelle prüfen.
+
 ## Phase 4 — Ideen ranken
 
 Bilde **8–10 Ideen**. Jede Idee bündelt möglichst **mehrere Signale** (eine Leserfrage, die auch
 ein Quick-Win-Query ist, und Saison hat → Top-Idee). Pro Idee:
 
 - **Arbeitstitel** (≤60 Zeichen, im KOKOMO-Ton)
-- **Quelle(n):** z.B. „Leserfrage + GSC Quick-Win (Pos 6,8) + Saison"
+- **Quelle(n):** z.B. „Leserfrage + GSC Quick-Win (Pos 6,8) + Saison" oder „Diskurs: Artikel
+  kleinwohnformen.ch + Saison"
+- **Diskurs-Link:** bei Diskurs-/Stellungnahme-Ideen die Quell-URL (sonst weglassen)
 - **Warum jetzt:** 1 Satz
-- **Score:** `A` = ≥3 Signale oder starke Leserfrage · `B` = 2 Signale · `C` = 1 Signal
+- **Score:** `A` = ≥3 Signale, starke Leserfrage **oder breit diskutiertes, hochaktuelles
+  Diskurs-Thema mit klarem KOKOMO-Winkel** · `B` = 2 Signale · `C` = 1 Signal
 - **Typ:** Erzählung / Listenpost / Anleitung / Erfahrungsbericht (steuert später `post_types`)
 - **Neu oder Ausbau:** bei Ausbau den bestehenden Slug nennen
 - **3–4 Stichpunkte** Inhalt · **5 Tags** (bevorzugt aus `existing_tags`, Tag „minimalismus" meiden)
@@ -100,6 +146,8 @@ bd create "<Arbeitstitel>" \
 - …"
 ```
 
+- Bei **Diskurs-Ideen**: in die Notes `Quelle-URL: <link>` aufnehmen (damit beim Schreiben die
+  Originalquelle griffbereit ist).
 - Bei **Ausbau** statt neu: in die Notes `Ausbau von: src/content/posts/<slug>.md` schreiben.
 - Mehrere Ideen → mehrere `bd create` Aufrufe (oder Batch via `bd create -f <markdown>`).
 - Nach dem Anlegen: `bd list -l idee` zeigen, damit der User das frische Backlog sieht.
