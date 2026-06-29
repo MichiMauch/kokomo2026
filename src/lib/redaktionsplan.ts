@@ -111,6 +111,30 @@ function daysBetween(aISO: string, bISO: string): number {
 
 const SCORE_ORDER: Record<string, number> = { A: 0, B: 1, C: 2 }
 
+/** Slug aus einem Titel (gleiche Regel wie pipeline/create-post-file.ts). */
+function slugifyTitle(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/ä/g, 'ae')
+    .replace(/ö/g, 'oe')
+    .replace(/ü/g, 'ue')
+    .replace(/ß/g, 'ss')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80)
+}
+
+/** Mögliche Post-Slugs, die eine Idee erzeugt haben könnte (Ausbau-Pfad + Titel-Slug). */
+function ideaSlugs(idea: PlanIdea): string[] {
+  const out: string[] = []
+  if (idea.ausbauVon) {
+    const base = idea.ausbauVon.split('/').pop()?.replace(/\.md$/, '')
+    if (base) out.push(base)
+  }
+  out.push(slugifyTitle(idea.title))
+  return out
+}
+
 /** Baut den vollständigen Plan inkl. Rhythmus-Check (Ziel ~2 Posts/Monat). */
 export function buildPlan(
   ideas: PlanIdea[],
@@ -124,7 +148,13 @@ export function buildPlan(
   const backlog = ideas
     .filter((i) => i.stage === 'backlog')
     .sort((a, b) => (SCORE_ORDER[a.score || 'C'] ?? 3) - (SCORE_ORDER[b.score || 'C'] ?? 3))
-  const inArbeit = ideas.filter((i) => i.stage === 'in_arbeit')
+  // Sobald für eine Idee schon ein Draft-Post existiert, gilt sie nicht mehr als
+  // „In Arbeit" — sie ist in die Spalte „Bereit für Publish" gewandert (der Draft
+  // repräsentiert sie dort). Sonst stünde derselbe Post doppelt im Board.
+  const draftSlugs = new Set(drafts.map((d) => d.slug))
+  const inArbeit = ideas
+    .filter((i) => i.stage === 'in_arbeit')
+    .filter((i) => !ideaSlugs(i).some((s) => draftSlugs.has(s)))
 
   const pub = [...published].sort((a, b) => b.date.localeCompare(a.date))
   const lastPublished = pub[0]?.date
