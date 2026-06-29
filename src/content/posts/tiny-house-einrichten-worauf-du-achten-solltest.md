@@ -1,6 +1,6 @@
 ---
 title: 'Tiny House einrichten: was sich auf 36 m² bewährt hat'
-date: '2025-04-14'
+date: '2026-07-10'
 summary: 'Nach Jahren auf 36 m² wissen wir, welche Einrichtung im Tiny House wirklich funktioniert: fix statt faltbar, Höhe statt Fläche und nur die Möbel, die den Alltag tragen.'
 tags: ['einrichtung', 'platz', 'wohnideen', 'möbel', 'tiny house']
 authors: ['default']
