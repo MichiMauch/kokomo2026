@@ -140,6 +140,32 @@ Postet nichts automatisch — Review unter `/admin/posts/<slug>#social`.
    Vercel deployt automatisch. **Blast-Radius = eine Datei** (Rollback: `draft:true` + push
    oder `git revert`).
 
+## Phase 8 — Selbst-Lernen (nach jedem Post, Pflicht)
+
+Bevor du den Post als abgeschlossen meldest, reflektiere die **Korrekturen dieser Session**
+und mache die Skill daraus besser. Ziel: Was der User einmal korrigiert, soll er nie
+wieder korrigieren müssen.
+
+1. **Sammeln:** Geh die Session durch und liste jede inhaltliche/stilistische Korrektur,
+   die der User an Draft, Titel, Summary, Tags, Bildern oder am Vorgehen gemacht hat
+   (inkl. „mach das auch in den Skill"-Hinweise). Ignoriere reine Tippfehler-Fixes.
+2. **Filtern:** Behalte nur **verallgemeinerbare** Punkte (gelten für künftige Posts), nicht
+   Post-spezifische Einzelfälle. Beispiele für verallgemeinerbar: neue Stilregel, verbotene
+   Floskel, Ton-Präferenz, Workflow-Schritt, Medien-Handling.
+3. **Vorschlagen:** Formuliere pro Punkt eine konkrete Ergänzung und das Ziel-File:
+   - Stil/Ton/Floskeln/Voice → `reference/voice.md`
+   - allgemeine Stilregeln, die auch ohne Skill gelten → zusätzlich `content-config/writing-style.yaml`
+   - SEO/Social/Render → die jeweilige `reference/*.md`
+   - Workflow/Medien-Skripte → SKILL.md bzw. `pipeline/*`
+   Zeig dem User die vorgeschlagenen Diffs **kompakt** und frag, ob du sie übernehmen sollst.
+4. **Anwenden:** Nur nach Bestätigung per `Edit` einpflegen. Doppelungen/Widersprüche mit
+   bestehenden Regeln vorher prüfen und zusammenführen statt anhäufen.
+5. **Mitcommitten:** Bestätigte Skill-Änderungen gehören in denselben oder einen direkt
+   folgenden Commit — nicht liegen lassen.
+
+Wenn es in einer Session **keine** verallgemeinerbaren Korrekturen gab: kurz „keine
+Skill-Anpassungen nötig" vermerken und fertig. Nicht künstlich Regeln erfinden.
+
 ---
 
 ## Wichtige Skripte (reuse)
