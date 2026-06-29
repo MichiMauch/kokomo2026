@@ -2,11 +2,10 @@ import type { APIRoute } from 'astro'
 import { isAuthenticated } from '../../../lib/admin-auth'
 import { fileExists, createFile, getFileContent } from '../../../lib/github'
 import { uploadBufferToR2 } from '../../../lib/r2'
-import { GoogleGenAI, Modality } from '@google/genai'
 import { parse as parseYaml } from 'yaml'
-import sharp from 'sharp'
 import { fixUmlauts, hasUmlautIssues } from '../../../lib/fix-umlauts'
-import { enhancePhoto } from '../../../lib/image-enhance'
+// @google/genai, sharp und enhancePhoto werden im POST dynamisch geladen —
+// sie sollen den Funktions-Kaltstart aller anderen Routen nicht belasten.
 
 export const prerender = false
 
@@ -73,6 +72,13 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   try {
+    // Schwere Bild-/AI-Module erst hier laden (nicht beim Kaltstart der Funktion).
+    const [{ GoogleGenAI, Modality }, { default: sharp }, { enhancePhoto }] = await Promise.all([
+      import('@google/genai'),
+      import('sharp'),
+      import('../../../lib/image-enhance'),
+    ])
+
     const body: PublishRequest = await request.json()
 
     // Validate

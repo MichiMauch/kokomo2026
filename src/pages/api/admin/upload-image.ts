@@ -1,8 +1,8 @@
 import type { APIRoute } from 'astro'
 import { isAuthenticated } from '../../../lib/admin-auth'
 import { uploadBufferToR2 } from '../../../lib/r2'
-import { enhancePhoto } from '../../../lib/image-enhance'
 import { getFileContent } from '../../../lib/github'
+// enhancePhoto (zieht sharp nach) wird im POST dynamisch geladen — nicht beim Kaltstart.
 import { parse as parseYaml } from 'yaml'
 
 export const prerender = false
@@ -51,6 +51,7 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(JSON.stringify({ error: 'Gemini API Key nicht konfiguriert' }), { status: 500, headers })
     }
 
+    const { enhancePhoto } = await import('../../../lib/image-enhance')
     console.log(`[admin/upload-image] Enhancing inline image for ${slug}…`)
     const optimized = await enhancePhoto({
       photo_base64: image_base64,

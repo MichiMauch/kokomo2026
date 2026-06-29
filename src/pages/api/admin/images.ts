@@ -3,9 +3,9 @@ import { getCollection } from 'astro:content'
 import { isAuthenticated } from '../../../lib/admin-auth'
 import { getFileContent, updateFile } from '../../../lib/github'
 import { uploadBufferToR2 } from '../../../lib/r2'
-import sharp from 'sharp'
 import { parse as parseYaml } from 'yaml'
-import { enhancePhoto } from '../../../lib/image-enhance'
+// sharp + enhancePhoto werden NUR im POST (Bild-Upload) dynamisch geladen —
+// sonst zöge das native sharp-Modul jeden Funktions-Kaltstart in die Länge.
 
 export const prerender = false
 
@@ -95,6 +95,7 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(JSON.stringify({ error: 'Gemini API Key nicht konfiguriert' }), { status: 500, headers })
     }
 
+    const { enhancePhoto } = await import('../../../lib/image-enhance')
     console.log(`[admin/images POST] Enhancing photo for ${slug}…`)
     const optimized = await enhancePhoto({
       photo_base64,
@@ -110,6 +111,7 @@ export const POST: APIRoute = async ({ request }) => {
     console.log(`[admin/images POST] Image uploaded: ${imageUrl}`)
 
     // Generate and upload thumbnail
+    const { default: sharp } = await import('sharp')
     const thumb = await sharp(optimized)
       .resize(600, undefined, { withoutEnlargement: true })
       .webp({ quality: 60 })
