@@ -178,10 +178,45 @@ ${bodyText}`,
         whatsapp: generated.whatsapp,
       }
 
-      await upsertSocialTexts(slug, textsToSave)
+      // Speichern darf das Ergebnis nicht verschlucken: Wenn Turso gerade nicht
+      // erreichbar ist, geben wir die erzeugten Texte trotzdem zurück, damit sie
+      // im Dashboard sichtbar/kopierbar sind (Speichern klappt später wieder).
+      let saved = true
+      try {
+        await upsertSocialTexts(slug, textsToSave)
+      } catch (saveErr: any) {
+        saved = false
+        console.error('[admin/social generate] Speichern fehlgeschlagen:', saveErr?.message)
+      }
 
-      const texts = await getSocialTexts(slug)
-      return new Response(JSON.stringify({ ok: true, texts }), { status: 200, headers })
+      let texts
+      if (saved) {
+        texts = await getSocialTexts(slug)
+      } else {
+        const now = new Date().toISOString()
+        texts = (Object.entries(textsToSave) as [Platform, string][])
+          .filter(([, t]) => t)
+          .map(([platform, text], i) => ({
+            id: -(i + 1),
+            post_slug: slug,
+            platform,
+            text,
+            generated_at: now,
+            updated_at: now,
+          }))
+      }
+
+      return new Response(
+        JSON.stringify({
+          ok: true,
+          saved,
+          texts,
+          warning: saved
+            ? undefined
+            : 'Texte erzeugt, aber NICHT gespeichert — Datenbank (Turso) nicht erreichbar. Du kannst sie jetzt kopieren; erneut generieren speichert sie, sobald die DB wieder läuft.',
+        }),
+        { status: 200, headers },
+      )
     }
 
     // ─── Update single text ───

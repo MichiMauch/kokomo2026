@@ -698,6 +698,8 @@ function TabSocial({
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Generierung fehlgeschlagen')
       setTexts(data.texts || [])
+      // Texte wurden evtl. erzeugt, aber nicht gespeichert (DB down) → Hinweis zeigen.
+      if (data.warning) setGenError(data.warning)
     } catch (err: any) {
       setGenError(err.message)
     } finally {
