@@ -1,20 +1,13 @@
 ---
 export const prerender = false
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import AdminNav from '../../components/AdminNav.astro'
 import AdminRedaktionsplan from '../../components/islands/AdminRedaktionsplan'
-
-const pill =
-  'rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800'
 ---
 
 <BaseLayout title="Redaktionsplan" noIndex>
   <div class="py-12">
-    <div class="mb-8 flex flex-wrap items-center gap-4">
-      <h1 class="text-2xl font-bold text-[var(--text)]">Redaktionsplan</h1>
-      <a href="/admin" class={pill}>Dashboard</a>
-      <a href="/admin/posts" class={pill}>Posts</a>
-      <a href="/admin/comments" class={pill}>Kommentare</a>
-    </div>
+    <AdminNav title="Redaktionsplan" />
     <AdminRedaktionsplan client:load />
   </div>
 </BaseLayout>

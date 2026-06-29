@@ -1,32 +1,13 @@
 ---
 export const prerender = false
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import AdminNav from '../../components/AdminNav.astro'
 import AdminQuiz from '../../components/islands/AdminQuiz'
 ---
 
 <BaseLayout title="Quiz-Statistiken" noIndex>
   <div class="py-12">
-    <div class="mb-8 flex flex-wrap items-center gap-4">
-      <h1 class="text-2xl font-bold text-[var(--text)]">Quiz-Statistiken</h1>
-      <a
-        href="/admin"
-        class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
-      >
-        Dashboard
-      </a>
-      <a
-        href="/admin/comments"
-        class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
-      >
-        Kommentare
-      </a>
-      <a
-        href="/admin/glossar"
-        class="rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
-      >
-        Glossar
-      </a>
-    </div>
+    <AdminNav title="Quiz-Statistiken" />
     <AdminQuiz client:load />
   </div>
 </BaseLayout>

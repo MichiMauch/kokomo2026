@@ -1,0 +1,49 @@
+---
+/**
+ * Einheitliche Admin-Navigation. Eine Quelle für alle Admin-Seiten — kein
+ * copy-paste der Pill-Reihen mehr. Die aktive Seite wird automatisch markiert
+ * (anhand Astro.url.pathname).
+ */
+interface Props {
+  title: string
+}
+const { title } = Astro.props
+
+const links = [
+  { href: '/admin', label: 'Dashboard' },
+  { href: '/admin/redaktionsplan', label: 'Redaktionsplan' },
+  { href: '/admin/posts', label: 'Posts' },
+  { href: '/admin/agent', label: 'Content Agent' },
+  { href: '/admin/comments', label: 'Kommentare' },
+  { href: '/admin/newsletter', label: 'Newsletter' },
+  { href: '/admin/glossar', label: 'Glossar' },
+  { href: '/admin/quiz', label: 'Quiz' },
+]
+
+const current = Astro.url.pathname.replace(/\/+$/, '') || '/admin'
+function isActive(href: string): boolean {
+  if (href === '/admin') return current === '/admin'
+  return current === href || current.startsWith(href + '/')
+}
+
+const base = 'rounded-full border px-4 py-1.5 text-xs font-medium transition-colors'
+const inactive =
+  'border-slate-300 text-[var(--text-secondary)] hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800'
+const active =
+  'border-primary-500 bg-primary-50 text-primary-700 dark:border-primary-500 dark:bg-primary-900/30 dark:text-primary-300'
+---
+
+<div class="mb-8 flex flex-wrap items-center gap-3">
+  <h1 class="mr-2 text-2xl font-bold text-[var(--text)]">{title}</h1>
+  {
+    links.map((l) => (
+      <a
+        href={l.href}
+        class={`${base} ${isActive(l.href) ? active : inactive}`}
+        aria-current={isActive(l.href) ? 'page' : undefined}
+      >
+        {l.label}
+      </a>
+    ))
+  }
+</div>
