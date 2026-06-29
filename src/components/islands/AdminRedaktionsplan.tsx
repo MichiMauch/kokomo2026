@@ -82,6 +82,34 @@ function CopyButton({ idea }: { idea: PlanIdea }) {
   )
 }
 
+/** Beschrifteter Button, der einen beliebigen Command in die Zwischenablage legt. */
+function CopyCommandButton({ text, label, title }: { text: string; label: string; title?: string }) {
+  const [copied, setCopied] = useState(false)
+  return (
+    <button
+      type="button"
+      title={title || 'Command kopieren → in Claude Code einfügen'}
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(text)
+          setCopied(true)
+          setTimeout(() => setCopied(false), 1500)
+        } catch {
+          window.prompt('Command kopieren:', text)
+        }
+      }}
+      className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 px-4 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
+    >
+      {copied ? (
+        <svg className="h-4 w-4 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+      ) : (
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h10" /></svg>
+      )}
+      {copied ? 'Kopiert!' : label}
+    </button>
+  )
+}
+
 function LoginForm({ onLogin }: { onLogin: () => void }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -210,6 +238,18 @@ export default function AdminRedaktionsplan() {
 
   return (
     <div className="space-y-8">
+      {/* Toolbar: Ideen-Skill starten */}
+      <div className="flex flex-wrap items-center gap-3">
+        <CopyCommandButton
+          text="/kokomo-ideen"
+          label="Neue Ideen finden"
+          title="Kopiert /kokomo-ideen → in Claude Code einfügen, füllt das Backlog mit Themen-Ideen"
+        />
+        <span className="text-xs text-[var(--text-secondary)]">
+          Command kopieren und in Claude Code einfügen → der Ideen-Skill schlägt neue Themen vor.
+        </span>
+      </div>
+
       {/* Rhythmus-Check */}
       <div
         className={`rounded-2xl border px-5 py-4 ${
