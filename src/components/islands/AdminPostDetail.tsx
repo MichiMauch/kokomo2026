@@ -799,9 +799,10 @@ export default function AdminPostDetail({ slug }: { slug: string }) {
     window.history.replaceState(null, '', tab === 'inhalt' ? window.location.pathname : `#${tab}`)
   }
 
-  // Auth check + data load
+  // Auth check + data load — DB-freier Login-Endpoint, damit der Gate nicht
+  // an Turso hängt (sonst öffnet der Post bei DB-Ausfall erst nach Timeout).
   useEffect(() => {
-    fetch('/api/admin/comments')
+    fetch('/api/admin/login')
       .then((res) => {
         if (res.status === 401) {
           setPhase('login')

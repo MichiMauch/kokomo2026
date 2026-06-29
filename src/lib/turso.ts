@@ -7,6 +7,20 @@ import { createClient, type Client } from '@libsql/client'
 
 let client: Client | null = null
 
+// Turso-Calls hart begrenzen: bei einem Ausfall (HTTP 503) retryt der libsql-
+// Client sonst ~35s, bevor er aufgibt — das blockiert die ganze Admin-UI.
+// Lieber schnell scheitern; die Endpoints fangen den Fehler ab und degradieren.
+const TURSO_TIMEOUT_MS = 6000
+
+function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    p,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`Turso timeout nach ${ms}ms`)), ms),
+    ),
+  ])
+}
+
 export function getClient(): Client {
   if (client) return client
 
@@ -17,7 +31,12 @@ export function getClient(): Client {
     throw new Error('TURSO_DB_URL and TURSO_DB_TOKEN must be set')
   }
 
-  client = createClient({ url, authToken })
+  const raw = createClient({ url, authToken })
+  // Jeden execute-Call mit einem Timeout umhüllen → max. 6s statt 35s Hänger.
+  const origExecute = raw.execute.bind(raw)
+  raw.execute = ((stmt: Parameters<Client['execute']>[0]) =>
+    withTimeout(origExecute(stmt as any), TURSO_TIMEOUT_MS)) as Client['execute']
+  client = raw
   return client
 }
 

@@ -218,8 +218,9 @@ export default function AdminPostsList() {
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
 
+  // Auth-Gate über den DB-freien Login-Endpoint (nicht Turso-abhängig).
   useEffect(() => {
-    fetch('/api/admin/comments')
+    fetch('/api/admin/login')
       .then((res) => {
         if (res.status === 401) {
           setPhase('login')

@@ -429,9 +429,10 @@ export default function AdminContent() {
     return () => { recognitionRef.current?.stop() }
   }, [])
 
-  // Check auth on mount
+  // Check auth on mount — über den DB-freien Login-Endpoint, damit der Gate
+  // nicht von Turso abhängt (sonst Hänger, wenn die DB nicht erreichbar ist).
   useEffect(() => {
-    fetch('/api/admin/comments')
+    fetch('/api/admin/login')
       .then((res) => {
         setPhase(res.status === 401 ? 'login' : 'idle')
       })
