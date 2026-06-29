@@ -1,0 +1,55 @@
+---
+// Gerenderte Artikel-Vorschau hinter dem Admin-Login — funktioniert auch für
+// Drafts (anders als /tiny-house/<slug>, das Drafts in Produktion als 404 filtert).
+// Nutzt exakt das echte PostLayout, damit die Vorschau 1:1 der späteren Live-Seite
+// entspricht (Fotowand, Video, Schema).
+export const prerender = false
+
+import { getCollection, render } from 'astro:content'
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import PostLayout from '../../../layouts/PostLayout.astro'
+import { isAuthenticated } from '../../../lib/admin-auth'
+
+// Nur eingeloggt: sonst zurück zur Posts-Übersicht (zeigt den Login).
+if (!(await isAuthenticated(Astro.request))) {
+  return Astro.redirect('/admin/posts')
+}
+
+const { slug } = Astro.params
+const posts = await getCollection('posts')
+const post = posts.find((p) => p.id === slug)
+
+if (!post) {
+  return new Response('Post nicht gefunden', { status: 404 })
+}
+
+const { Content, headings } = await render(post)
+---
+
+<BaseLayout
+  title={`Vorschau: ${post.data.title}`}
+  description={post.data.summary}
+  image={typeof post.data.images === 'string' ? post.data.images : post.data.images?.[0]}
+  article={true}
+  publishedTime={post.data.date}
+  modifiedTime={post.data.lastmod}
+  tags={post.data.tags}
+  author="Sibylle & Michi"
+  noIndex={true}
+>
+  <div class="sticky top-0 z-50 flex items-center justify-between gap-3 border-b border-amber-300 bg-amber-100 px-4 py-2 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
+    <span>
+      <strong>Vorschau</strong>{post.data.draft ? ' · Draft (nicht öffentlich)' : ''} — so sieht der Artikel live aus.
+    </span>
+    <a
+      href={`/admin/posts/${post.id}`}
+      class="shrink-0 rounded-full border border-amber-400 px-3 py-1 font-medium transition-colors hover:bg-amber-200 dark:border-amber-600 dark:hover:bg-amber-800/40"
+    >
+      ← zurück zum Editor
+    </a>
+  </div>
+
+  <PostLayout post={post} headings={headings} prevPost={null} nextPost={null}>
+    <Content />
+  </PostLayout>
+</BaseLayout>

@@ -951,14 +951,25 @@ export default function AdminPostDetail({ slug }: { slug: string }) {
             )}
           </div>
         </div>
-        <button
-          onClick={handleDelete}
-          disabled={deleting}
-          title="Post löschen"
-          className="rounded-full border border-red-200 px-3 py-1.5 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 disabled:opacity-50 dark:border-red-800/50 dark:hover:bg-red-900/20"
-        >
-          {deleting ? 'Wird gelöscht…' : 'Löschen'}
-        </button>
+        <div className="flex items-center gap-2">
+          <a
+            href={`/admin/preview/${post.slug}`}
+            target="_blank"
+            rel="noreferrer"
+            title="Gerenderte Vorschau in neuem Tab öffnen"
+            className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-slate-100 hover:text-[var(--text)] dark:border-slate-600 dark:hover:bg-slate-800"
+          >
+            Vorschau ↗
+          </a>
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            title="Post löschen"
+            className="cursor-pointer rounded-full border border-red-200 px-3 py-1.5 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 disabled:opacity-50 dark:border-red-800/50 dark:hover:bg-red-900/20"
+          >
+            {deleting ? 'Wird gelöscht…' : 'Löschen'}
+          </button>
+        </div>
       </div>
 
       {/* ─── Tabs ─── */}
