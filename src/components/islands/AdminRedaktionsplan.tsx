@@ -58,6 +58,41 @@ function buildAgentCommand(idea: PlanIdea): string {
   return `/kokomo-creator Schreibe den Blogpost aus bd-Idee ${idea.id} „${idea.title}“. Claime das Issue (bd update ${idea.id} --claim) und starte mit Phase 1 (Outline).`
 }
 
+/** Baut den Befehl, der in Claude Code den Draft-Post live schaltet. */
+function buildPublishCommand(slug: string): string {
+  return `/kokomo-publish ${slug}`
+}
+
+/** Icon-Button, der den Publish-Command für einen Draft in die Zwischenablage legt. */
+function CopyPublishButton({ slug }: { slug: string }) {
+  const [copied, setCopied] = useState(false)
+  return (
+    <button
+      type="button"
+      title="Publish-Command kopieren → in Claude Code einfügen, schaltet den Post live"
+      onClick={async (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        try {
+          await navigator.clipboard.writeText(buildPublishCommand(slug))
+          setCopied(true)
+          setTimeout(() => setCopied(false), 1500)
+        } catch {
+          window.prompt('Command kopieren:', buildPublishCommand(slug))
+        }
+      }}
+      className="shrink-0 cursor-pointer rounded-md p-1 text-amber-700 transition-colors hover:bg-amber-200/60 dark:text-amber-300 dark:hover:bg-amber-800/40"
+      aria-label="Publish-Command kopieren"
+    >
+      {copied ? (
+        <svg className="h-4 w-4 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+      ) : (
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
+      )}
+    </button>
+  )
+}
+
 function CopyButton({ idea }: { idea: PlanIdea }) {
   const [copied, setCopied] = useState(false)
   return (
@@ -332,19 +367,26 @@ export default function AdminRedaktionsplan() {
           </Column>
           <Column title={`Bereit für Publish (${plan.drafts.length})`}>
             {plan.drafts.map((d) => (
-              <a
+              <div
                 key={d.slug}
-                href={`/admin/posts/${d.slug}`}
-                className="block rounded-lg border border-amber-300/60 bg-amber-50/50 px-3 py-2 text-sm transition-colors hover:bg-amber-50 dark:border-amber-700/50 dark:bg-amber-900/20 dark:hover:bg-amber-900/30"
+                className="rounded-lg border border-amber-300/60 bg-amber-50/50 px-3 py-2 text-sm dark:border-amber-700/50 dark:bg-amber-900/20"
               >
-                <div className="flex items-center gap-2">
-                  <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
-                    Draft
-                  </span>
-                  <span className="font-mono text-xs text-[var(--text-secondary)]">{d.date}</span>
+                <div className="flex items-center justify-between gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+                      Draft
+                    </span>
+                    <span className="font-mono text-xs text-[var(--text-secondary)]">{d.date}</span>
+                  </div>
+                  <CopyPublishButton slug={d.slug} />
                 </div>
-                <div className="mt-1 text-[var(--text)]">{d.title}</div>
-              </a>
+                <a
+                  href={`/admin/posts/${d.slug}`}
+                  className="mt-1 block text-[var(--text)] hover:underline"
+                >
+                  {d.title}
+                </a>
+              </div>
             ))}
             {plan.drafts.length === 0 && <Empty />}
           </Column>
@@ -361,7 +403,9 @@ export default function AdminRedaktionsplan() {
 
       <p className="text-xs text-[var(--text-secondary)]">
         Das Kopier-Icon legt den <strong>Agent-Command</strong> in die Zwischenablage — in Claude Code einfügen,
-        und <code>kokomo-creator</code> startet für diese Idee. Planen/Verschieben läuft über den
+        und <code>kokomo-creator</code> startet für diese Idee. Bei <strong>Bereit für Publish</strong> kopiert das
+        Icon stattdessen den <code>/kokomo-publish &lt;slug&gt;</code>-Command, der den Draft live schaltet.
+        Planen/Verschieben läuft über den
         <code>/kokomo-redaktion</code>-Skill (beads bleibt die Quelle, read-only). Stand: letzter Push nach GitHub.
       </p>
     </div>
