@@ -2,7 +2,11 @@ import type { APIRoute } from 'astro'
 import { getCollection } from 'astro:content'
 import { isAuthenticated } from '../../../lib/admin-auth'
 import { getFileContent } from '../../../lib/github'
-import { parseIdeasFromJsonl, buildPlan, type PublishedPost } from '../../../lib/redaktionsplan'
+import { parseIdeasFromJsonl, buildPlan, type PublishedPost, type DraftPost } from '../../../lib/redaktionsplan'
+
+function postDate(date: unknown): string {
+  return date instanceof Date ? date.toISOString().slice(0, 10) : String(date).slice(0, 10)
+}
 
 export const prerender = false
 
@@ -24,19 +28,17 @@ export const GET: APIRoute = async ({ request }) => {
       beadsError = err?.message || String(err)
     }
 
-    // Publizierte Posts aus der Content-Collection (kein Datums-Filter nötig: nur draft=false).
-    const posts = await getCollection('posts', ({ data }) => !data.draft)
-    const published: PublishedPost[] = posts.map((p) => ({
-      slug: p.id,
-      title: p.data.title,
-      date:
-        p.data.date instanceof Date
-          ? p.data.date.toISOString().slice(0, 10)
-          : String(p.data.date).slice(0, 10),
-    }))
+    // Alle Posts laden, dann nach draft-Flag aufteilen.
+    const allPosts = await getCollection('posts')
+    const published: PublishedPost[] = allPosts
+      .filter((p) => !p.data.draft)
+      .map((p) => ({ slug: p.id, title: p.data.title, date: postDate(p.data.date) }))
+    const drafts: DraftPost[] = allPosts
+      .filter((p) => p.data.draft)
+      .map((p) => ({ slug: p.id, title: p.data.title, date: postDate(p.data.date) }))
 
     const today = new Date().toISOString().slice(0, 10)
-    const plan = buildPlan(ideas, published, today)
+    const plan = buildPlan(ideas, published, today, drafts)
 
     return new Response(JSON.stringify({ plan, beadsError }), { status: 200, headers })
   } catch (err: any) {

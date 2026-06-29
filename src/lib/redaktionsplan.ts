@@ -25,6 +25,12 @@ export interface PublishedPost {
   date: string // YYYY-MM-DD
 }
 
+export interface DraftPost {
+  slug: string
+  title: string
+  date: string // YYYY-MM-DD
+}
+
 export interface Cadence {
   lastPublished?: string
   daysSinceLast?: number
@@ -39,6 +45,7 @@ export interface Plan {
   eingeplant: PlanIdea[]
   backlog: PlanIdea[]
   inArbeit: PlanIdea[]
+  drafts: DraftPost[]
   published: PublishedPost[]
   cadence: Cadence
   today: string
@@ -105,7 +112,12 @@ function daysBetween(aISO: string, bISO: string): number {
 const SCORE_ORDER: Record<string, number> = { A: 0, B: 1, C: 2 }
 
 /** Baut den vollständigen Plan inkl. Rhythmus-Check (Ziel ~2 Posts/Monat). */
-export function buildPlan(ideas: PlanIdea[], published: PublishedPost[], today: string): Plan {
+export function buildPlan(
+  ideas: PlanIdea[],
+  published: PublishedPost[],
+  today: string,
+  drafts: DraftPost[] = [],
+): Plan {
   const eingeplant = ideas
     .filter((i) => i.stage === 'eingeplant')
     .sort((a, b) => (a.geplant || '9999').localeCompare(b.geplant || '9999'))
@@ -142,10 +154,13 @@ export function buildPlan(ideas: PlanIdea[], published: PublishedPost[], today: 
       : 'Rhythmus ok.'
   }
 
+  const draftsSorted = [...drafts].sort((a, b) => b.date.localeCompare(a.date))
+
   return {
     eingeplant,
     backlog,
     inArbeit,
+    drafts: draftsSorted,
     published: pub.slice(0, 8),
     cadence: { lastPublished, daysSinceLast, postsThisMonth, nextPlanned, daysToNext, warn, message },
     today,

@@ -15,6 +15,11 @@ interface PublishedPost {
   title: string
   date: string
 }
+interface DraftPost {
+  slug: string
+  title: string
+  date: string
+}
 interface Cadence {
   lastPublished?: string
   daysSinceLast?: number
@@ -28,6 +33,7 @@ interface Plan {
   eingeplant: PlanIdea[]
   backlog: PlanIdea[]
   inArbeit: PlanIdea[]
+  drafts: DraftPost[]
   published: PublishedPost[]
   cadence: Cadence
   today: string
@@ -305,7 +311,7 @@ export default function AdminRedaktionsplan() {
       {/* Board */}
       <section>
         <h2 className="mb-3 text-lg font-bold text-[var(--text)]">Pipeline</h2>
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <Column title={`Backlog (${plan.backlog.length})`}>
             {plan.backlog.map((i) => <IdeaRow key={i.id} idea={i} />)}
           </Column>
@@ -323,6 +329,24 @@ export default function AdminRedaktionsplan() {
           <Column title={`In Arbeit (${plan.inArbeit.length})`}>
             {plan.inArbeit.map((i) => <IdeaRow key={i.id} idea={i} />)}
             {plan.inArbeit.length === 0 && <Empty />}
+          </Column>
+          <Column title={`Bereit für Publish (${plan.drafts.length})`}>
+            {plan.drafts.map((d) => (
+              <a
+                key={d.slug}
+                href={`/admin/posts/${d.slug}`}
+                className="block rounded-lg border border-amber-300/60 bg-amber-50/50 px-3 py-2 text-sm transition-colors hover:bg-amber-50 dark:border-amber-700/50 dark:bg-amber-900/20 dark:hover:bg-amber-900/30"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+                    Draft
+                  </span>
+                  <span className="font-mono text-xs text-[var(--text-secondary)]">{d.date}</span>
+                </div>
+                <div className="mt-1 text-[var(--text)]">{d.title}</div>
+              </a>
+            ))}
+            {plan.drafts.length === 0 && <Empty />}
           </Column>
           <Column title="Kürzlich publiziert">
             {plan.published.map((p) => (
