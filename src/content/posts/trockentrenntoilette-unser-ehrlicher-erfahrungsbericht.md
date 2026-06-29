@@ -57,7 +57,7 @@ Ehrlichkeit war versprochen, also:
 Wir beantworten mal die Klassiker:
 
 **«Stinkt das nicht fürchterlich?»**
-Nein. Wirklich. Solange Urin und Feststoffe getrennt bleiben und du regelmässig Einstreu verwendest, ist der Geruch minimal.
+Nein. Wirklich. Solange Urin und Feststoffe getrennt bleiben und du regelmässig Einstreu verwendest, gibt es keine schlechten Gerüchte.
 
 **«Was mache ich, wenn ich krank bin?»**
 Funktioniert genau gleich. Kein Unterschied.
