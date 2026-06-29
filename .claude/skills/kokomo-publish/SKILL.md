@@ -166,6 +166,12 @@ wieder korrigieren müssen.
 Wenn es in einer Session **keine** verallgemeinerbaren Korrekturen gab: kurz „keine
 Skill-Anpassungen nötig" vermerken und fertig. Nicht künstlich Regeln erfinden.
 
+**Optional — Muster aus der Historie ziehen:** `npm run mine-diffs` vergleicht für alle
+Posts die erste committe Version mit der aktuellen und listet wiederkehrend
+weggestrichene/ergänzte Wörter (Regel-Kandidaten). Gut periodisch oder wenn du
+vermutest, dass sich ein Muster über mehrere Posts zieht. Heuristik → Treffer immer
+prüfen, bevor sie als Regel in `voice.md` landen.
+
 ---
 
 ## Wichtige Skripte (reuse)

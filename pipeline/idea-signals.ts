@@ -21,8 +21,9 @@ import { createSign } from 'node:crypto'
 import { config } from 'dotenv'
 import { createClient } from '@libsql/client'
 
-config({ path: resolve(process.cwd(), '.env.local') })
-config({ path: resolve(process.cwd(), '.env') })
+// quiet: dotenv-Banner würden sonst stdout verschmutzen (Vertrag: stdout = nur JSON).
+config({ path: resolve(process.cwd(), '.env.local'), quiet: true })
+config({ path: resolve(process.cwd(), '.env'), quiet: true })
 
 const SITE_URL = 'https://www.kokomo.house'
 const argDays = Number(process.argv[process.argv.indexOf('--days') + 1])

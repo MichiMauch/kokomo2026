@@ -10,7 +10,8 @@
     "upload": "npx tsx pipeline/upload-to-r2.ts",
     "generate-image": "npx tsx pipeline/generate-images.ts",
     "publish-post": "npx tsx pipeline/publish.ts",
-    "import-comments": "npx tsx pipeline/import-comments.ts"
+    "import-comments": "npx tsx pipeline/import-comments.ts",
+    "mine-diffs": "npx tsx pipeline/mine-editorial-diffs.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
