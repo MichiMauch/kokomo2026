@@ -40,13 +40,20 @@ GSC Quick-Wins, Matomo, Saison und fällige Daten-Serien zusammen und legt Ideen
 
 - User will Ideen ("thema vorschlagen", "blog-ideen") → **`/kokomo-ideen`** ausführen.
 - User hat schon eine Idee (auch aus `bd ready` / `bd list -l idee`) → direkt mit **Phase 1** starten.
+- Planung/Übersicht „was kommt wann" → **`/kokomo-redaktion`** (Redaktionsplan).
 
 ## Phase 1 — Outline
 
-1. Post-Typ klären (Erzählung / Listenpost / Anleitung / Erfahrungsbericht) → passenden
+1. **Wenn aus einer bd-Idee gestartet** (Issue-ID bekannt): Issue **claimen**, damit es im
+   Redaktionsplan als „In Arbeit" erscheint:
+   ```bash
+   bd update <id> --claim     # setzt status=in_progress (idempotent)
+   ```
+   Merke dir die `<id>` für Phase 7 (Schliessen beim Publizieren).
+2. Post-Typ klären (Erzählung / Listenpost / Anleitung / Erfahrungsbericht) → passenden
    `post_types.<typ>.prompt`-Block aus `writing-style.yaml` befolgen.
-2. Outline vorschlagen: Titel (≤60), Angle, H2-Abschnitte mit je 1–2 Sätzen.
-3. Auf Freigabe warten, bei Bedarf überarbeiten.
+3. Outline vorschlagen: Titel (≤60), Angle, H2-Abschnitte mit je 1–2 Sätzen.
+4. Auf Freigabe warten, bei Bedarf überarbeiten.
 
 ## Phase 2 — Draft
 
@@ -136,6 +143,11 @@ Postet nichts automatisch — Review unter `/admin/posts/<slug>#social`.
    ```
    Vercel deployt automatisch. **Blast-Radius = eine Datei** (Rollback: `draft:true` + push
    oder `git revert`).
+4. **bd-Issue schliessen** (falls aus einer Idee gestartet, `<id>` aus Phase 1) — schliesst
+   den Kreis im Redaktionsplan (Item wandert auf „Publiziert"):
+   ```bash
+   bd close <id> --reason "Publiziert: /tiny-house/<slug> am <YYYY-MM-DD>"
+   ```
 
 ## Phase 8 — Selbst-Lernen (nach jedem Post, Pflicht)
 

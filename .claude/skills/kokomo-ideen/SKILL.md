@@ -157,6 +157,8 @@ bd create "<Arbeitstitel>" \
 - Bei **Ausbau** statt neu: in die Notes `Ausbau von: src/content/posts/<slug>.md` schreiben.
 - Mehrere Ideen → mehrere `bd create` Aufrufe (oder Batch via `bd create -f <markdown>`).
 - Nach dem Anlegen: `bd list -l idee` zeigen, damit der User das frische Backlog sieht.
+- Neue Ideen landen im **Backlog** — Label `geplant` und ein `Geplant:`-Datum **NICHT** hier
+  setzen. Das Terminieren auf ein Zieldatum macht der Redaktionsplan (`/kokomo-redaktion`).
 
 **Kein `git push`** in diesem Skill — `bd`/Dolt-Sync und Push laufen nur über das
 Session-Completion-Protokoll in `CLAUDE.md`, und nur wenn der User es will.
@@ -165,6 +167,7 @@ Session-Completion-Protokoll in `CLAUDE.md`, und nur wenn der User es will.
 
 Will der User eine Idee umsetzen → `/kokomo-creator` ab **Phase 1 (Outline)** mit Titel + Stichpunkten
 aus dem Issue. (Dieser Skill ersetzt die alte, dünne „Phase 0 — Themen vorschlagen" dort.)
+Will der User die Ideen **planen/terminieren** (was wann erscheint) → `/kokomo-redaktion`.
 
 ## Was dieser Skill NICHT tut
 
