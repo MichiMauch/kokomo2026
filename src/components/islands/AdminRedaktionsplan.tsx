@@ -47,6 +47,41 @@ function monthLabel(ym: string): string {
   return `${MONTHS[parseInt(m, 10) - 1]} ${y}`
 }
 
+/** Baut den Befehl, den man in Claude Code einfügt, um kokomo-creator für diese Idee zu starten. */
+function buildAgentCommand(idea: PlanIdea): string {
+  return `/kokomo-creator Schreibe den Blogpost aus bd-Idee ${idea.id} „${idea.title}“. Claime das Issue (bd update ${idea.id} --claim) und starte mit Phase 1 (Outline).`
+}
+
+function CopyButton({ idea }: { idea: PlanIdea }) {
+  const [copied, setCopied] = useState(false)
+  return (
+    <button
+      type="button"
+      title="Agent-Command kopieren → in Claude Code einfügen, startet kokomo-creator"
+      onClick={async (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        try {
+          await navigator.clipboard.writeText(buildAgentCommand(idea))
+          setCopied(true)
+          setTimeout(() => setCopied(false), 1500)
+        } catch {
+          // Fallback: ältere Browser / kein Clipboard-API
+          window.prompt('Command kopieren:', buildAgentCommand(idea))
+        }
+      }}
+      className="shrink-0 cursor-pointer rounded-md p-1 text-[var(--text-secondary)] transition-colors hover:bg-slate-200/60 hover:text-[var(--text)] dark:hover:bg-slate-700/60"
+      aria-label="Agent-Command kopieren"
+    >
+      {copied ? (
+        <svg className="h-4 w-4 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+      ) : (
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h10" /></svg>
+      )}
+    </button>
+  )
+}
+
 function LoginForm({ onLogin }: { onLogin: () => void }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -108,7 +143,10 @@ function IdeaRow({ idea }: { idea: PlanIdea }) {
     <div className="rounded-lg border border-slate-200/70 bg-white/50 px-3 py-2 text-sm dark:border-slate-700/50 dark:bg-slate-800/30">
       <div className="flex items-start justify-between gap-2">
         <span className="text-[var(--text)]">{idea.title}</span>
-        <ScoreBadge score={idea.score} />
+        <div className="flex shrink-0 items-center gap-1">
+          <ScoreBadge score={idea.score} />
+          <CopyButton idea={idea} />
+        </div>
       </div>
       {idea.typ && <div className="mt-0.5 text-xs text-[var(--text-secondary)]">{idea.typ}</div>}
     </div>
@@ -214,6 +252,7 @@ export default function AdminRedaktionsplan() {
                       <span className="flex-1 text-sm text-[var(--text)]">{i.title}</span>
                       {i.typ && <span className="hidden text-xs text-[var(--text-secondary)] sm:inline">{i.typ}</span>}
                       <ScoreBadge score={i.score} />
+                      <CopyButton idea={i} />
                     </div>
                   )
                 })}
@@ -233,7 +272,10 @@ export default function AdminRedaktionsplan() {
           <Column title={`Eingeplant (${plan.eingeplant.length})`}>
             {plan.eingeplant.map((i) => (
               <div key={i.id} className="rounded-lg border border-slate-200/70 bg-white/50 px-3 py-2 text-sm dark:border-slate-700/50 dark:bg-slate-800/30">
-                <div className="font-mono text-xs text-[var(--text-secondary)]">{i.geplant ? fmtDay(i.geplant) : ''}</div>
+                <div className="flex items-center justify-between gap-1">
+                  <span className="font-mono text-xs text-[var(--text-secondary)]">{i.geplant ? fmtDay(i.geplant) : ''}</span>
+                  <CopyButton idea={i} />
+                </div>
                 <div className="text-[var(--text)]">{i.title}</div>
               </div>
             ))}
@@ -254,8 +296,9 @@ export default function AdminRedaktionsplan() {
       </section>
 
       <p className="text-xs text-[var(--text-secondary)]">
-        Read-only — Planen/Verschieben läuft über den <code>/kokomo-redaktion</code>-Skill (beads bleibt die Quelle).
-        Stand: letzter Push nach GitHub.
+        Das Kopier-Icon legt den <strong>Agent-Command</strong> in die Zwischenablage — in Claude Code einfügen,
+        und <code>kokomo-creator</code> startet für diese Idee. Planen/Verschieben läuft über den
+        <code>/kokomo-redaktion</code>-Skill (beads bleibt die Quelle, read-only). Stand: letzter Push nach GitHub.
       </p>
     </div>
   )
