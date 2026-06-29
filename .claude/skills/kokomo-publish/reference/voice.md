@@ -27,6 +27,22 @@ verbindlichen `post_types`-Blöcke (Struktur pro Post-Typ), die Tag-Liste und di
 - KEINE wörtliche Rede / Zitate von uns (siehe Guardrails) — erzähl es direkt aus
   unserer Erfahrung.
 
+## Vermeiden (Floskeln & Ton-Fallen)
+
+- **Kein „ehrlich" als Selbstlob.** Keine Wendungen wie „ehrliches Quiz", „unsere
+  ehrliche Meinung", „ehrlich gesagt". Ehrlichkeit zeigt man, man kündigt sie nicht an.
+- **Kein Marketing-/Verkaufssprech.** Wörter wie „Verkaufstrichter", „Funnel",
+  „Conversion", „Call-to-Action" gehören nicht in den Fliesstext. Wir verkaufen nichts —
+  wir erzählen und laden ein.
+- **Features nicht überverkaufen.** Technische Selbstverständlichkeiten (z.B. „anonym",
+  „kein Login nötig") weglassen, wenn sie nicht der Kern sind.
+- **Nicht dramatisieren / nicht überhöhen.** Dinge tiefstapeln statt als „lebensverändernd"
+  oder „revolutionär" verkaufen. Der Ton bleibt leicht und augenzwinkernd — auch wenn die
+  Sache durchaus ernst gemeint ist.
+- **Wir sind KEINE Minimalisten.** Uns oder das Blog nicht als „Minimalisten" bezeichnen
+  und nicht als „Minimalismus" rahmen. Wir leben einfach im Tiny House und kommen mit
+  weniger aus — das ist kein Lifestyle-Label. Den Tag „minimalismus" für neue Posts meiden.
+
 ## Format eines Posts
 
 - **Titel:** max 60 Zeichen.

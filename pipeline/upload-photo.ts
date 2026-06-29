@@ -40,7 +40,7 @@ export interface UploadPhotoOptions {
  */
 export async function uploadPhoto(
   opts: UploadPhotoOptions
-): Promise<{ url: string; markdown: string; thumbUrl?: string }> {
+): Promise<{ url: string; markdown: string; thumbUrl?: string; animated: boolean; bytes: number }> {
   const { filePath, slug, alt, type = 'inline', rotate = 'auto' } = opts
 
   const resolved = resolve(filePath.replace(/^~/, process.env.HOME || ''))
@@ -48,29 +48,40 @@ export async function uploadPhoto(
     throw new Error(`File not found: ${resolved}`)
   }
 
+  // Auto-detect animated sources (multi-frame GIF / animated WebP) → animierte
+  // WebP-Ausgabe mit allen Frames. Statische Bilder (pages <= 1) unverändert.
+  const probe = await sharp(resolved).metadata()
+  const animated = (probe.pages ?? 1) > 1
+  const sharpOpts = animated ? { animated: true } : undefined
+  // Animierte WebP brauchen mehr Kompressionsaufwand und vertragen etwas weniger
+  // Qualität, sonst werden die Dateien riesig.
+  const quality = animated ? 70 : 85
+  const effort = animated ? 5 : 4
+
   // Orientation: explicit angle overrides EXIF; otherwise auto-orient from EXIF.
-  let pipe = sharp(resolved)
+  // (GIFs haben keine EXIF-Orientierung → "auto" ist dort ein No-op.)
+  let pipe = sharp(resolved, sharpOpts)
   pipe = rotate === 'auto' ? pipe.rotate() : pipe.rotate(rotate)
 
   const buffer =
     type === 'header'
-      ? await pipe.resize(1200, 675, { fit: 'cover' }).webp({ quality: 85 }).toBuffer()
-      : await pipe.resize(1000, null, { withoutEnlargement: true }).webp({ quality: 85 }).toBuffer()
+      ? await pipe.resize(1200, 675, { fit: 'cover' }).webp({ quality, effort }).toBuffer()
+      : await pipe.resize(1000, null, { withoutEnlargement: true }).webp({ quality, effort }).toBuffer()
 
   const filename = type === 'header' ? `${slug}-titelbild.webp` : `${slug}-${Date.now()}.webp`
   const url = await uploadBufferToR2(buffer, filename)
 
   let thumbUrl: string | undefined
   if (type === 'header') {
-    const thumb = await sharp(buffer)
+    const thumb = await sharp(buffer, sharpOpts)
       .resize(600, undefined, { withoutEnlargement: true })
-      .webp({ quality: 60 })
+      .webp({ quality: animated ? 65 : 60, effort })
       .toBuffer()
     thumbUrl = await uploadBufferToR2(thumb, `${slug}-titelbild-thumb.webp`)
   }
 
   const markdown = alt ? `![${alt}](${url})` : `![](${url})`
-  return { url, markdown, thumbUrl }
+  return { url, markdown, thumbUrl, animated, bytes: buffer.length }
 }
 
 // CLI mode
@@ -89,7 +100,7 @@ if (process.argv[1]?.includes('upload-photo')) {
       rotateRaw === 'auto' ? 'auto' : (Number(rotateRaw) as 90 | 180 | 270)
 
     try {
-      const { url, markdown, thumbUrl } = await uploadPhoto({
+      const { url, markdown, thumbUrl, animated, bytes } = await uploadPhoto({
         filePath,
         slug,
         alt: alt || undefined,
@@ -98,6 +109,7 @@ if (process.argv[1]?.includes('upload-photo')) {
       })
       console.log(`✅ Uploaded: ${url}`)
       if (thumbUrl) console.log(`   Thumb:   ${thumbUrl}`)
+      console.log(`   ${animated ? 'animiert' : 'statisch'}, ${(bytes / 1024).toFixed(0)} KB`)
       console.log(`   Markdown: ${markdown}`)
     } catch (err: any) {
       console.error(`❌ Upload failed: ${err.message}`)
