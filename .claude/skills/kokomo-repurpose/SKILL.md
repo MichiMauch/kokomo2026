@@ -2,9 +2,9 @@
 name: kokomo-repurpose
 description: >
   Verwandelt einen fertigen kokomo.house-Post in alle Distributions-Assets — erweiterte
-  Social-Texte (Instagram/LinkedIn/Mastodon), ein Instagram/Reel-Karussell (Text + Slide-
-  Bilder), ein Vertical-Video-Skript (Hook, Beats, Shotlist, Untertitel/.srt, Thumbnail)
-  und ein Newsletter-Häppchen. Ziel: vorhandenen Content vervielfachen, nicht neuen
+  Social-Texte (Instagram/Mastodon), ein Facebook-Galerie-Karussell (Slides mit Titel/
+  Untertitel als Schrift aufs Bild + Zip-Download), ein Vertical-Video-Skript (Hook, Beats,
+  Shotlist, Untertitel/.srt, Thumbnail) und ein Newsletter-Häppchen. Ziel: vorhandenen Content vervielfachen, nicht neuen
   produzieren. Aktivieren bei: "/kokomo-repurpose", "post repurposen", "social aus post",
   "video-skript aus post", "karussell erstellen", "reichweite für <slug>".
 ---
