@@ -27,9 +27,11 @@ Post-Inhalt** (Schreiben = `/kokomo-creator`, Live-Schalten = `/kokomo-publish`)
 
 2. **Assets erzeugen** (du als Autor, nach diesen Formaten):
    - **social_extra:** `instagram` (~2000 Z., 3-5 Emojis, 5-10 Hashtags, „Link in Bio" + `{url}`),
-     `linkedin` (~1300 Z., sachlicher, 1-2 Hashtags, `{url}`), `mastodon` (~480 Z., locker, `{url}`).
+     `mastodon` (~480 Z., locker, `{url}`). (Kein LinkedIn.)
    - **carousel:** 6-8 Slides (`{title ≤40 Z., body ≤180 Z.}`), erster Slide = Hook, letzter =
-     Call-to-Action; dazu `caption` (mit `{url}`) und 6-10 `hashtags`.
+     Call-to-Action; dazu `caption` (mit `{url}`) und 6-10 `hashtags`. Gedacht als **Facebook-
+     Galerie**: beim Rendern werden Titel + Untertitel als **echte Schrift aufs quadratische Bild**
+     komponiert (1080×1080, KOKOMO-Wortmarke + Scrim). Im Admin gibt es „Alle herunterladen (.zip)".
    - **video_script:** `hook` (3 Sek.), `beats` (je kurzer, sprechbarer Satz + Dauer in Sek.,
      Summe 30-45 Sek.), `shotlist` (pro Beat 1 Bildidee, was gefilmt wird), `thumbnail_prompt`
      (Englisch, dokumentarisch, KEIN Text im Bild), `title` (≤70 Z.), `description` (≤500 Z., `{url}`).

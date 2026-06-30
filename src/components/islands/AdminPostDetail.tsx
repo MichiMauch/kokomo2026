@@ -853,6 +853,22 @@ function TabRepurpose({ slug }: { slug: string }) {
     URL.revokeObjectURL(url)
   }
 
+  async function downloadZip(urls: string[]) {
+    setBusy('zip'); setError('')
+    try {
+      const res = await fetch('/api/admin/repurpose', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'download-zip', slug, urls }),
+      })
+      if (!res.ok) throw new Error('Download fehlgeschlagen')
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url; a.download = `${slug}-slides.zip`; a.click()
+      URL.revokeObjectURL(url)
+    } catch (e: any) { setError(e.message) } finally { setBusy('') }
+  }
+
   if (loading) return <div className="py-6 text-center text-sm text-[var(--text-secondary)]">Wird geladen…</div>
 
   const se = assets?.social_extra || {}
@@ -882,11 +898,10 @@ function TabRepurpose({ slug }: { slug: string }) {
         <div className="py-8 text-center text-sm text-[var(--text-secondary)]">Noch keine Assets — auf „Assets generieren" klicken.</div>
       )}
 
-      {se && (se.instagram || se.linkedin || se.mastodon) && (
+      {se && (se.instagram || se.mastodon) && (
         <section className="space-y-2">
           <h3 className="text-sm font-bold text-[var(--text)]">Social</h3>
           <RepurposeBlock title="Instagram" value={se.instagram} />
-          <RepurposeBlock title="LinkedIn" value={se.linkedin} />
           <RepurposeBlock title="Mastodon" value={se.mastodon} />
         </section>
       )}
@@ -896,11 +911,11 @@ function TabRepurpose({ slug }: { slug: string }) {
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-[var(--text)]">Karussell ({c.slides?.length || 0} Slides)</h3>
             <button
-              onClick={() => render('render-slides', { prompts: (c.slides || []).map((s: any) => `Documentary tiny house lifestyle photo for an Instagram slide about: ${s.title}. ${s.body}`) }, 'slides')}
+              onClick={() => render('render-slides', { slides: (c.slides || []).map((s: any) => ({ title: s.title, body: s.body })) }, 'slides')}
               disabled={busy === 'slides'}
               className="cursor-pointer rounded-full border border-slate-300 px-3 py-1 text-xs font-medium text-[var(--text-secondary)] hover:bg-slate-100 disabled:opacity-50 dark:border-slate-600 dark:hover:bg-slate-800"
             >
-              {busy === 'slides' ? 'Rendere…' : 'Slide-Bilder rendern'}
+              {busy === 'slides' ? 'Rendere…' : 'Slide-Bilder rendern (mit Text)'}
             </button>
           </div>
           <ol className="space-y-1">
@@ -914,10 +929,19 @@ function TabRepurpose({ slug }: { slug: string }) {
           {c.caption && <RepurposeBlock title="Caption" value={c.caption} />}
           {c.hashtags?.length > 0 && <RepurposeBlock title="Hashtags" value={c.hashtags.join(' ')} />}
           {assets._slideUrls?.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {assets._slideUrls.map((u: string, i: number) => (
-                <a key={i} href={u} target="_blank" rel="noreferrer"><img src={u} alt={`Slide ${i + 1}`} className="h-24 w-24 rounded-lg object-cover" /></a>
-              ))}
+            <div className="space-y-2">
+              <button
+                onClick={() => downloadZip(assets._slideUrls)}
+                disabled={busy === 'zip'}
+                className="cursor-pointer rounded-full bg-primary-700 px-4 py-1.5 text-xs font-medium text-white hover:bg-primary-800 disabled:opacity-50 dark:bg-primary-600 dark:hover:bg-primary-500"
+              >
+                {busy === 'zip' ? 'Packe…' : `Alle ${assets._slideUrls.length} Slides herunterladen (.zip)`}
+              </button>
+              <div className="flex flex-wrap gap-2">
+                {assets._slideUrls.map((u: string, i: number) => (
+                  <a key={i} href={u} target="_blank" rel="noreferrer"><img src={u} alt={`Slide ${i + 1}`} className="h-24 w-24 rounded-lg object-cover" /></a>
+                ))}
+              </div>
             </div>
           )}
         </section>

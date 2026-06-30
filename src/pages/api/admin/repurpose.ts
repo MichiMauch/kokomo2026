@@ -45,7 +45,6 @@ Erzeuge aus dem gegebenen Blogpost ein JSON-Objekt mit GENAU diesen Feldern:
 {
   "social_extra": {
     "instagram": "Caption für einen Instagram-Feed-Post (max ~2000 Z.), 3-5 Emojis, 5-10 Hashtags am Ende, {url} im Text (Hinweis 'Link in Bio' + {url}).",
-    "linkedin": "Sachlicher, etwas professionellerer Ton für ein erwachsenes Publikum (max ~1300 Z.), 1-2 Hashtags, {url} am Ende.",
     "mastodon": "Locker, community-nah (max ~480 Z.), 2-3 Hashtags, {url} am Ende."
   },
   "carousel": {
@@ -163,16 +162,51 @@ export const POST: APIRoute = async ({ request }) => {
       )
     }
 
-    // ─── Karussell-Slides als Bilder rendern (on-demand) ───
+    // ─── Karussell-Slides als Bilder rendern (Titel/Untertitel als Schrift drauf) ───
     if (action === 'render-slides') {
-      const prompts: string[] = Array.isArray(body.prompts) ? body.prompts : []
-      if (!prompts.length) return new Response(JSON.stringify({ error: 'prompts erforderlich.' }), { status: 400, headers })
-      const { generateImageToR2 } = await import('../../../lib/generate-image')
+      const slides: { title?: string; body?: string; prompt?: string }[] = Array.isArray(body.slides) ? body.slides : []
+      if (!slides.length) return new Response(JSON.stringify({ error: 'slides erforderlich.' }), { status: 400, headers })
+      const { renderSlideToR2 } = await import('../../../lib/generate-image')
       const urls: string[] = []
-      for (let i = 0; i < prompts.length; i++) {
-        urls.push(await generateImageToR2(prompts[i], 'inline', `${slug}-slide-${i + 1}`))
+      for (let i = 0; i < slides.length; i++) {
+        const s = slides[i]
+        const prompt = s.prompt || `Documentary tiny house lifestyle photo for a Facebook gallery slide about: ${s.title || ''}. ${s.body || ''}`
+        urls.push(
+          await renderSlideToR2({
+            prompt,
+            title: s.title || '',
+            subtitle: s.body || '',
+            filename: `${slug}-slide-${i + 1}`,
+          }),
+        )
       }
       return new Response(JSON.stringify({ ok: true, urls }), { status: 200, headers })
+    }
+
+    // ─── Alle Slides (oder beliebige R2-URLs) als ZIP zum Download bündeln ───
+    if (action === 'download-zip') {
+      const urls: string[] = Array.isArray(body.urls) ? body.urls : []
+      if (!urls.length) return new Response(JSON.stringify({ error: 'urls erforderlich.' }), { status: 400, headers })
+      const JSZip = (await import('jszip')).default
+      const { downloadFromR2, r2KeyFromUrl } = await import('../../../lib/r2')
+      const zip = new JSZip()
+      for (let i = 0; i < urls.length; i++) {
+        try {
+          const buf = await downloadFromR2(r2KeyFromUrl(urls[i]))
+          const ext = (urls[i].split('.').pop() || 'webp').split('?')[0]
+          zip.file(`${slug}-slide-${String(i + 1).padStart(2, '0')}.${ext}`, buf)
+        } catch (e: any) {
+          console.error('[admin/repurpose zip] Objekt nicht ladbar:', urls[i], e?.message)
+        }
+      }
+      const zipBuf = await zip.generateAsync({ type: 'nodebuffer' })
+      return new Response(zipBuf, {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/zip',
+          'Content-Disposition': `attachment; filename="${slug}-slides.zip"`,
+        },
+      })
     }
 
     // ─── Video-Thumbnail rendern (on-demand) ───

@@ -3,9 +3,9 @@
  * Uses import.meta.env instead of process.env/dotenv
  */
 
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
 
-const R2_PUBLIC_URL = 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev'
+export const R2_PUBLIC_URL = 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev'
 
 function getContentType(filename: string): string {
   const ext = filename.split('.').pop()?.toLowerCase() || ''
@@ -58,4 +58,18 @@ export async function uploadBufferToR2(
   )
 
   return `${R2_PUBLIC_URL}/${targetFilename}`
+}
+
+/** Object-Key aus einer öffentlichen R2-URL extrahieren (für Downloads). */
+export function r2KeyFromUrl(url: string): string {
+  return url.startsWith(R2_PUBLIC_URL) ? url.slice(R2_PUBLIC_URL.length + 1).split('?')[0] : url.split('/').pop()!.split('?')[0]
+}
+
+/** Ein Objekt aus R2 als Buffer laden (S3-API, funktioniert auch ohne öffentlichen Fetch). */
+export async function downloadFromR2(key: string): Promise<Buffer> {
+  const client = getS3Client()
+  const bucket = import.meta.env.CLOUDFLARE_BUCKET_2 || import.meta.env.CLOUDFLARE_BUCKET || 'kokomo-images'
+  const res = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }))
+  const bytes = await res.Body!.transformToByteArray()
+  return Buffer.from(bytes)
 }
