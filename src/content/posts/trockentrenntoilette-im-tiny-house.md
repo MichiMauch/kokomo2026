@@ -4,11 +4,9 @@ date: '2026-07-02'
 summary: 'Nach über 3 Jahren Trockentrenntoilette im Tiny House erzählen wir, was anfangs ungewohnt war, wie der Alltag wirklich läuft und warum wir sie nicht mehr hergeben.'
 tags: ['tiny house', 'nachhaltigkeit', 'autarkie', 'Tiny House Alltag', 'wohnwagon']
 authors: ['default']
-draft: true
+draft: false
 images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/trockentrenntoilette-unser-ehrlicher-erfahrungsbericht-titelbild.webp'
-postType: 'faq'
 ---
-
 Es gibt Themen, über die spricht man nicht so gerne. Die Toilette gehört definitiv dazu. Und genau deshalb schreiben wir diesen Post.
 
 Kaum etwas rund ums Tiny House beschäftigt die Leute so sehr wie die Frage, wie wir eigentlich unsere «Geschäfte» erledigen. Gäste fragen es, Fremde im Internet fragen es, und auch unsere Eltern haben es anfangs etwas ungläubig gefragt. Seit wir [in unser Tiny House eingezogen sind](/tiny-house/wir-leben-im-tiny-house), leben wir mit einer **Trockentrenntoilette** — und es wird Zeit, dass wir darüber reden.
