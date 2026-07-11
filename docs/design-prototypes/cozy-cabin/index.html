@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KOKOMO House — Weniger Raum, mehr Leben.</title>
+<script>
+  // No-Flash Theme: localStorage > System-Präferenz
+  (function () {
+    try {
+      var t = localStorage.getItem('kokomo-theme');
+      if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Nunito+Sans:ital,opsz,wght@0,6..12,400..800;1,6..12,400..700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  /* ============ Cozy Cabin — Tokens ============ */
+  :root {
+    /* Logo-Akzente */
+    --logo-green: #05DE66;
+    --logo-blue: #01ABE7;
+    --honey: #E9BA6B;
+    --honey-deep: #C99544;
+
+    /* Light: warmes Creme + Holz + Tanne */
+    --bg: #F5EBDA;
+    --bg-raised: #FBF4E7;
+    --panel: #22392C;          /* Tannengrün-Fläche */
+    --panel-2: #1B2F24;
+    --wood: #4A3626;           /* Holzbraun */
+    --text: #33261A;
+    --text-soft: #6B5847;
+    --text-on-panel: #F2E9D6;
+    --text-on-panel-soft: #C9BC9F;
+    --border: #E0D2B8;
+    --card: #FBF4E7;
+    --card-shadow: 0 1px 2px rgba(51,38,26,.06), 0 10px 30px -12px rgba(51,38,26,.18);
+    --card-shadow-hover: 0 2px 4px rgba(51,38,26,.07), 0 18px 44px -14px rgba(51,38,26,.26);
+    --tag-bg: #EFE2C8;
+    --tag-text: #6B5432;
+    --link: #1E5A3C;
+    --glow: none;
+    --radius: 8px;
+    --radius-sm: 5px;
+  }
+  :root[data-theme="dark"] {
+    /* Dark: Abend im Tiny House mit Lichterkette */
+    --bg: #201711;
+    --bg-raised: #291E16;
+    --panel: #182720;
+    --panel-2: #13201A;
+    --wood: #E9BA6B;
+    --text: #F0E4CE;
+    --text-soft: #B7A487;
+    --text-on-panel: #F0E4CE;
+    --text-on-panel-soft: #B7A487;
+    --border: #3B2D20;
+    --card: #291E16;
+    --card-shadow: 0 1px 2px rgba(0,0,0,.35), 0 12px 32px -12px rgba(0,0,0,.55);
+    --card-shadow-hover: 0 2px 4px rgba(0,0,0,.4), 0 18px 48px -12px rgba(233,186,107,.14);
+    --tag-bg: #35281B;
+    --tag-text: #DDB877;
+    --link: #E9BA6B;
+    --glow: 0 0 22px rgba(233,186,107,.28);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+  body {
+    font-family: 'Nunito Sans', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    font-size: 1.0625rem;
+    overflow-x: hidden;
+    transition: background-color .35s ease, color .35s ease;
+  }
+
+  /* Zartes Holz-/Paper-Grain */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    pointer-events: none;
+    opacity: .05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  }
+  :root[data-theme="dark"] body::before { opacity: .07; }
+
+  img { max-width: 100%; display: block; }
+  a { color: var(--link); }
+
+  .wrap { max-width: 1140px; margin: 0 auto; padding: 0 clamp(1.1rem, 4vw, 2.5rem); }
+
+  h1, h2, h3, .serif {
+    font-family: 'Fraunces', Georgia, serif;
+    font-optical-sizing: auto;
+    font-weight: 550;
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+  }
+  .hand {
+    font-family: 'Caveat', cursive;
+    font-weight: 500;
+    letter-spacing: .01em;
+  }
+
+  /* ============ Header ============ */
+  header.site {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: .85rem clamp(1.1rem, 4vw, 2.5rem);
+    max-width: 1140px;
+    margin: 0 auto;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    text-decoration: none;
+    color: var(--text);
+    margin-right: auto;
+  }
+  .brand svg { width: 26px; height: auto; flex-shrink: 0; }
+  .brand .wordmark {
+    font-family: 'Fraunces', serif;
+    font-weight: 620;
+    font-size: 1.22rem;
+    letter-spacing: -.01em;
+    white-space: nowrap;
+  }
+  .brand .wordmark span { font-weight: 400; font-style: italic; color: var(--text-soft); }
+
+  nav.main { display: flex; gap: .25rem; align-items: center; }
+  nav.main a {
+    text-decoration: none;
+    color: var(--text-soft);
+    font-weight: 600;
+    font-size: .93rem;
+    padding: .45rem .7rem;
+    border-radius: var(--radius-sm);
+    transition: color .2s ease, background-color .2s ease;
+  }
+  nav.main a:hover, nav.main a[aria-current="page"] { color: var(--text); background: var(--tag-bg); }
+
+  .theme-toggle {
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--bg-raised);
+    color: var(--text);
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    transition: box-shadow .25s ease, border-color .25s ease, transform .2s ease;
+    flex-shrink: 0;
+  }
+  .theme-toggle:hover { border-color: var(--honey); box-shadow: var(--glow); }
+  .theme-toggle svg { width: 17px; height: 17px; }
+  .theme-toggle .moon { display: none; }
+  :root[data-theme="dark"] .theme-toggle .sun { display: none; }
+  :root[data-theme="dark"] .theme-toggle .moon { display: block; }
+
+  .menu-btn {
+    display: none;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--bg-raised);
+    color: var(--text);
+    width: 38px; height: 38px;
+    border-radius: var(--radius-sm);
+    place-items: center;
+  }
+  .menu-btn svg { width: 18px; height: 18px; }
+
+  @media (max-width: 720px) {
+    nav.main {
+      display: none;
+      position: absolute;
+      top: 100%; left: 0; right: 0;
+      flex-direction: column;
+      align-items: stretch;
+      background: var(--bg-raised);
+      border-bottom: 1px solid var(--border);
+      padding: .6rem 1.1rem 1rem;
+      gap: .1rem;
+    }
+    nav.main.open { display: flex; }
+    nav.main a { padding: .7rem .7rem; }
+    .menu-btn { display: grid; }
+  }
+
+  /* ============ Hero: dunkelgrüne Abendstube ============ */
+  .hero {
+    background:
+      radial-gradient(1200px 480px at 82% -10%, rgba(233,186,107,.20), transparent 62%),
+      linear-gradient(168deg, var(--panel) 0%, var(--panel-2) 100%);
+    color: var(--text-on-panel);
+    border-radius: 0 0 22px 22px;
+    overflow: hidden;
+    position: relative;
+  }
+  :root[data-theme="dark"] .hero {
+    background:
+      radial-gradient(1100px 460px at 82% -10%, rgba(233,186,107,.16), transparent 60%),
+      linear-gradient(168deg, #1D2C23 0%, #14211A 100%);
+  }
+  .hero-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    align-items: center;
+    padding: clamp(2.6rem, 7vw, 5.5rem) 0 clamp(2.6rem, 6vw, 5rem);
+  }
+  .hero .kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    font-size: .82rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--honey);
+    margin-bottom: 1.1rem;
+  }
+  .hero .kicker::before {
+    content: "";
+    width: 26px; height: 1px;
+    background: var(--honey);
+    display: inline-block;
+  }
+  .hero h1 {
+    font-size: clamp(2.5rem, 5.6vw, 4.1rem);
+    font-weight: 600;
+    color: var(--text-on-panel);
+  }
+  .hero h1 em {
+    font-style: italic;
+    font-weight: 480;
+    color: var(--honey);
+  }
+  .hero p.sub {
+    margin-top: 1.15rem;
+    font-size: 1.09rem;
+    color: var(--text-on-panel-soft);
+    max-width: 34ch;
+  }
+  .hero .cta-row { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 1.9rem; align-items: center; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    cursor: pointer;
+    text-decoration: none;
+    font-family: 'Nunito Sans', sans-serif;
+    font-weight: 750;
+    font-size: .96rem;
+    padding: .78rem 1.4rem;
+    border-radius: var(--radius);
+    border: none;
+    transition: transform .2s ease, box-shadow .25s ease, background-color .2s ease;
+  }
+  .btn-honey {
+    background: var(--honey);
+    color: #33261A;
+    box-shadow: 0 6px 18px -6px rgba(233,186,107,.55);
+  }
+  .btn-honey:hover { background: #F0C67E; transform: translateY(-1px); box-shadow: 0 10px 26px -8px rgba(233,186,107,.7); }
+  .btn-ghost-light {
+    background: transparent;
+    color: var(--text-on-panel);
+    border: 1px solid rgba(242,233,214,.35);
+  }
+  .btn-ghost-light:hover { border-color: var(--honey); color: var(--honey); }
+
+  .hero-figure { position: relative; }
+  .hero-figure img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--radius);
+    box-shadow: 0 24px 60px -20px rgba(0,0,0,.55);
+  }
+  .hero-figure .caption {
+    position: absolute;
+    bottom: -0.4rem;
+    right: 1.2rem;
+    transform: rotate(-2deg);
+    font-size: 1.35rem;
+    color: var(--honey);
+    text-shadow: 0 1px 8px rgba(0,0,0,.35);
+  }
+  @media (max-width: 860px) {
+    .hero-inner { grid-template-columns: 1fr; }
+    .hero-figure { order: -1; }
+    .hero-figure img { aspect-ratio: 16 / 10; }
+  }
+
+  /* ============ Post-Grid ============ */
+  .posts { padding: clamp(3rem, 7vw, 5.5rem) 0 clamp(2rem, 5vw, 3.5rem); }
+  .section-head { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+  .section-head h2 { font-size: clamp(1.7rem, 3vw, 2.3rem); font-weight: 580; }
+  .section-head .hand { font-size: 1.35rem; color: var(--honey-deep); }
+  :root[data-theme="dark"] .section-head .hand { color: var(--honey); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1.4rem;
+  }
+  .card {
+    grid-column: span 2;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    transition: transform .25s ease, box-shadow .3s ease, border-color .3s ease;
+    position: relative;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: var(--card-shadow-hover); }
+  :root[data-theme="dark"] .card:hover { border-color: rgba(233,186,107,.4); }
+  .card.feature { grid-column: span 4; grid-row: span 1; }
+  .card.wide { grid-column: span 3; }
+  .card a.cover { display: block; overflow: hidden; }
+  .card img {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    transition: transform .5s ease;
+  }
+  .card.feature img { aspect-ratio: 16 / 8.5; }
+  .card:hover img { transform: scale(1.03); }
+  .card-body { padding: 1.15rem 1.3rem 1.35rem; display: flex; flex-direction: column; gap: .55rem; flex: 1; }
+  .card .meta { font-size: .82rem; color: var(--text-soft); font-weight: 600; letter-spacing: .02em; }
+  .card h3 { font-size: 1.28rem; font-weight: 560; }
+  .card.feature h3 { font-size: clamp(1.5rem, 2.4vw, 1.9rem); }
+  .card h3 a { color: var(--text); text-decoration: none; transition: color .2s ease; }
+  .card h3 a::after { content: ""; position: absolute; inset: 0; }
+  .card:hover h3 a { color: var(--honey-deep); }
+  :root[data-theme="dark"] .card:hover h3 a { color: var(--honey); }
+  .tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: auto; padding-top: .5rem; }
+  .tag {
+    font-size: .74rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    padding: .22rem .6rem;
+    border-radius: 999px;
+    background: var(--tag-bg);
+    color: var(--tag-text);
+    text-decoration: none;
+    position: relative;
+    z-index: 2;
+    transition: background-color .2s ease;
+  }
+  .card .hand-note {
+    position: absolute;
+    top: .7rem; right: .9rem;
+    z-index: 3;
+    font-size: 1.25rem;
+    color: #FBF4E7;
+    background: rgba(34,57,44,.72);
+    padding: .05rem .7rem .15rem;
+    border-radius: 999px;
+    transform: rotate(-2deg);
+    pointer-events: none;
+  }
+  @media (max-width: 980px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+    .card, .card.feature, .card.wide { grid-column: span 1; }
+    .card.feature { grid-column: span 2; }
+  }
+  @media (max-width: 620px) {
+    .grid { grid-template-columns: 1fr; }
+    .card, .card.feature, .card.wide { grid-column: span 1; }
+  }
+
+  /* ============ Newsletter ============ */
+  .newsletter { padding: clamp(2rem, 5vw, 3.5rem) 0 clamp(3rem, 7vw, 5.5rem); }
+  .newsletter-box {
+    background:
+      radial-gradient(700px 320px at 12% 120%, rgba(233,186,107,.22), transparent 60%),
+      linear-gradient(160deg, var(--panel) 0%, var(--panel-2) 100%);
+    color: var(--text-on-panel);
+    border-radius: 14px;
+    padding: clamp(2.2rem, 5vw, 3.4rem) clamp(1.4rem, 5vw, 3.4rem);
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 2rem;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  :root[data-theme="dark"] .newsletter-box { box-shadow: var(--glow); }
+  .newsletter-box h2 { font-size: clamp(1.7rem, 3.2vw, 2.3rem); font-weight: 580; }
+  .newsletter-box h2 .hand { font-size: 1.15em; color: var(--honey); }
+  .newsletter-box p { color: var(--text-on-panel-soft); margin-top: .6rem; max-width: 42ch; }
+  .newsletter-form { display: flex; gap: .6rem; flex-wrap: wrap; }
+  .newsletter-form input[type="email"] {
+    flex: 1 1 200px;
+    min-width: 0;
+    font: inherit;
+    font-size: .98rem;
+    padding: .78rem 1rem;
+    border-radius: var(--radius);
+    border: 1px solid rgba(242,233,214,.3);
+    background: rgba(20,33,26,.5);
+    color: var(--text-on-panel);
+    outline: none;
+    transition: border-color .2s ease, box-shadow .25s ease;
+  }
+  .newsletter-form input[type="email"]::placeholder { color: rgba(201,188,159,.7); }
+  .newsletter-form input[type="email"]:focus { border-color: var(--honey); box-shadow: 0 0 0 3px rgba(233,186,107,.18); }
+  @media (max-width: 780px) { .newsletter-box { grid-template-columns: 1fr; } }
+
+  /* ============ Footer ============ */
+  footer.site {
+    background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+    color: var(--text-on-panel-soft);
+    padding: clamp(2.4rem, 5vw, 3.6rem) 0 2rem;
+    border-radius: 22px 22px 0 0;
+  }
+  .footer-inner { display: flex; flex-wrap: wrap; gap: 2rem; align-items: flex-start; justify-content: space-between; }
+  .footer-brand { display: flex; align-items: center; gap: .6rem; color: var(--text-on-panel); }
+  .footer-brand svg { width: 24px; height: auto; }
+  .footer-brand .wordmark { font-family: 'Fraunces', serif; font-weight: 620; font-size: 1.1rem; }
+  .footer-note { font-size: .9rem; margin-top: .7rem; max-width: 36ch; }
+  .footer-note .hand { font-size: 1.25rem; color: var(--honey); }
+  .footer-links { display: flex; gap: 1.4rem; flex-wrap: wrap; }
+  .footer-links a { color: var(--text-on-panel-soft); text-decoration: none; font-size: .93rem; font-weight: 600; transition: color .2s ease; }
+  .footer-links a:hover { color: var(--honey); }
+  .footer-social { display: flex; gap: .7rem; }
+  .footer-social a {
+    display: grid; place-items: center;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1px solid rgba(242,233,214,.25);
+    color: var(--text-on-panel-soft);
+    transition: color .2s ease, border-color .2s ease, box-shadow .25s ease;
+  }
+  .footer-social a:hover { color: var(--honey); border-color: var(--honey); box-shadow: var(--glow); }
+  .footer-social svg { width: 16px; height: 16px; }
+  .footer-bottom { margin-top: 2.2rem; padding-top: 1.4rem; border-top: 1px solid rgba(242,233,214,.14); font-size: .85rem; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+
+  /* ============ Scroll-Reveal (nur ohne reduced motion) ============ */
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+    .reveal:nth-child(2) { transition-delay: .08s; }
+    .reveal:nth-child(3) { transition-delay: .14s; }
+  }
+
+  ::selection { background: rgba(233,186,107,.45); color: #33261A; }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="header-inner">
+    <a class="brand" href="index.html" aria-label="KOKOMO House — Startseite">
+      <!-- Bildmarke inline -->
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16.18 20.37" role="img" aria-hidden="true">
+        <path fill="#00abe7" d="M1.37,15.25s-.53-.73-.61-2.6c0,0,2.66-2.95,7.75,.11,4.2,2.52,6.74,1.14,6.74,1.14,0,0-.18,1.42-1.03,2.41,0,0-.94,1.06-6.12-1.2-2.68-1.17-4.8-1.07-6.72,.13Z"/>
+        <path fill="#2dc7ff" d="M2.68,17.26s-.16,0-.95-1.34c0,0,2.38-2.6,6.52-.33,2.11,1.08,2.71,1.27,5.25,1.65,0,0-.81,1.01-2.49,1.78,0,0-4.98-2.94-8.33-1.76Z"/>
+        <path fill="#eaba6b" d="M3.29,17.86s2.9-.96,6.81,1.48c0,0-3.67,1.38-6.81-1.48Z"/>
+        <path fill="#05dd66" d="M10.58,4.11s.43-1.99,3.11-1.7l-3.11,1.7Z"/>
+        <path fill="#05dd66" d="M9.79,3.68s-1.24-1.96,.23-2.72l-.23,2.72Z"/>
+        <path fill="#05dd66" d="M9.3,9.3s-1.41-1.01,.28-3.15l-.28,3.15Z"/>
+        <path fill="#05dd66" d="M5.78,7.88s-.41-2.74,3.31-2.74l-3.31,2.74Z"/>
+        <path fill="currentColor" d="M8.08,20.37c-2.39,0-4.52-1.02-6-2.65-.03-.03-.06-.07-.09-.1C.8,16.25,.06,14.48,0,12.52c0-.09,.03-.18,.09-.25,.03-.03,2.93-3.37,8.69-.22,.07,.04,3.94,2.63,6.62,.92,.02-.24,.03-.47,.03-.71,0-3.35-2-6.1-5.03-6.98l-.42,4.77c-.01,.13-.09,.24-.21,.3-.12,.06-.26,.05-.37-.02-.74-.47-1.19-1.07-1.31-1.77-.12-.66,.05-1.32,.33-1.91l-2.71,2.25c-.1,.09-.24,.11-.37,.06-.13-.05-.22-.16-.24-.29-.23-1.34,.02-2.4,.74-3.14,.97-1,2.52-1.16,3.49-1.15-.43-.72-.98-1.92-.66-2.93,.22-.69,.77-1.18,1.65-1.45,.12-.04,.25-.01,.34,.07,.09,.08,.15,.2,.14,.32l-.19,2.22c.07-.07,.15-.15,.24-.22,.93-.75,2.3-.94,4.07-.57,.15,.03,.27,.16,.29,.31,.02,.15-.05,.31-.19,.38-2.05,1.12-3.28,1.79-4.03,2.17,3.14,1.1,5.17,4.04,5.17,7.57,0,.93-.16,1.83-.45,2.66-.23,.68-.54,1.3-.94,1.87,0,.01-.02,.03-.03,.04-.89,1.3-2.14,2.32-3.62,2.93-.02,.01-.05,.02-.07,.03-.93,.37-1.94,.57-3,.57Zm-4.79-2.51c1.28,1.1,2.95,1.76,4.79,1.76,.7,0,1.38-.1,2.02-.28-3.36-1.96-5.79-1.73-6.81-1.48Zm1.47-.92c1.48,0,3.62,.42,6.25,2.08,.95-.41,1.8-1.02,2.49-1.78-1.15,.03-3.11-.35-5.28-1.49-3.47-1.81-5.8-.38-6.49,.16,.32,.54,.56,.88,.75,1.11,.07,.08,.13,.15,.2,.23,.35-.13,1.06-.32,2.08-.32Zm.16-2.82c1.04,0,2.26,.25,3.64,.97,2.66,1.39,4.87,1.54,5.45,1.32,.09-.04,.16-.07,.2-.09,.33-.49,.6-1.03,.8-1.6,.09-.26,.17-.53,.23-.81-3,1.36-6.68-1.11-6.85-1.22-4.67-2.55-7.13-.54-7.64-.04,.05,.93,.26,1.8,.61,2.6,.59-.43,1.82-1.13,3.55-1.13Zm4.66-7.97c-.44,.66-.88,1.52-.74,2.28,.06,.32,.21,.61,.47,.87l.28-3.15Zm-.49-1.01c-.82,.02-2,.19-2.7,.92-.43,.44-.63,1.05-.61,1.82l3.31-2.74Zm4.22-2.74c-.82,0-1.48,.19-1.97,.58-.42,.33-.64,.77-.76,1.13,.82-.44,2.19-1.19,3.11-1.7-.13,0-.26-.01-.38-.01Zm-3.29-1.45c-.33,.19-.53,.43-.63,.73-.19,.6,.08,1.37,.4,1.99l.23-2.72Z"/>
+      </svg>
+      <span class="wordmark">KOKOMO <span>House</span></span>
+    </a>
+    <nav class="main" id="mainNav">
+      <a href="index.html" aria-current="page">Home</a>
+      <a href="#">Glossar</a>
+      <a href="#">Bereit?</a>
+      <a href="#">Über uns</a>
+      <a href="#newsletter">Newsletter</a>
+    </nav>
+    <button class="theme-toggle" id="themeToggle" aria-label="Dark Mode umschalten" title="Licht an / aus">
+      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8Z"/></svg>
+    </button>
+    <button class="menu-btn" id="menuBtn" aria-label="Menü öffnen" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <div>
+        <span class="kicker">Tiny-House-Blog aus der Schweiz</span>
+        <h1>Weniger Raum, <em>mehr Leben.</em></h1>
+        <p class="sub">Seit 2022 leben wir in unserem Tiny House KOKOMO — echte Erfahrungen von 36&nbsp;m².</p>
+        <div class="cta-row">
+          <a class="btn btn-honey" href="post.html">Neuster Beitrag lesen</a>
+          <a class="btn btn-ghost-light" href="#">Bereit fürs Tiny House?</a>
+        </div>
+      </div>
+      <figure class="hero-figure">
+        <img src="https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/wenn-die-birke-alles-in-gelb-taucht-titelbild.webp" alt="Warmes, goldenes Licht der Birke vor dem Tiny House" width="1200" height="900">
+        <figcaption class="caption hand">goldene Stunde vor der Tür</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- Post-Grid -->
+  <section class="posts">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>Aus dem Tiny House</h2>
+        <span class="hand">— ehrlich, seit 2022</span>
+      </div>
+      <div class="grid">
+
+        <article class="card feature reveal">
+          <span class="hand-note">ganz frisch!</span>
+          <a class="cover" href="#" tabindex="-1" aria-hidden="true">
+            <img src="https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/baubewilligung-fuers-tiny-house-unser-weg-zum-ja-titelbild.webp" alt="Baubewilligung fürs Tiny House" loading="lazy">
+          </a>
+          <div class="card-body">
+            <span class="meta">24. Juli 2026</span>
+            <h3><a href="#">Baubewilligung fürs Tiny House: unser Weg zum Ja</a></h3>
+            <div class="tags"><a class="tag" href="#">baubewilligung</a><a class="tag" href="#">behörden</a></div>
+          </div>
+        </article>
+
+        <article class="card reveal">
+          <a class="cover" href="post.html" tabindex="-1" aria-hidden="true">
+            <img src="https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/tiny-house-einrichten-worauf-du-achten-solltest-titelbild.webp" alt="Tiny House einrichten" loading="lazy">
+          </a>
+          <div class="card-body">
+            <span class="meta">10. Juli 2026</span>
+            <h3><a href="post.html">Tiny House einrichten: was sich auf 36&nbsp;m² bewährt hat</a></h3>
+            <div class="tags"><a class="tag" href="#">einrichtung</a><a class="tag" href="#">möbel</a></div>
+          </div>
+        </article>
+
+        <article class="card wide reveal">
+          <a class="cover" href="#" tabindex="-1" aria-hidden="true">
+            <img src="https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/trockentrenntoilette-unser-ehrlicher-erfahrungsbericht-titelbild.webp" alt="Trockentrenntoilette im Tiny House" loading="lazy">
+          </a>
+          <div class="card-body">
+            <span class="meta">2. Juli 2026</span>
+            <h3><a href="#">Trockentrenntoilette im Tiny House: 3 Jahre Erfahrung</a></h3>
+            <div class="tags"><a class="tag" href="#">sanitär</a><a class="tag" href="#">erfahrung</a></div>
+          </div>
+        </article>
+
+        <article class="card wide reveal">
+          <a class="cover" href="#" tabindex="-1" aria-hidden="true">
+            <img src="https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/38-grad-draussen-29-drinnen-daemmung-im-hitzetest-titelbild.webp" alt="Dämmung im Hitzetest" loading="lazy">
+          </a>
+          <div class="card-body">
+            <span class="meta">28. Juni 2026</span>
+            <h3><a href="#">38 Grad draussen, 29 drinnen: Dämmung im Hitzetest</a></h3>
+            <div class="tags"><a class="tag" href="#">dämmung</a><a class="tag" href="#">sommer</a></div>
+          </div>
+        </article>
+
+        <article class="card reveal">
+          <a class="cover" href="#" tabindex="-1" aria-hidden="true">
+            <img src="https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/sommer-im-glas-wenn-reste-zu-genuss-werden-titelbild.webp" alt="Eingemachtes im Glas" loading="lazy">
+          </a>
+          <div class="card-body">
+            <span class="meta">20. Juni 2026</span>
+            <h3><a href="#">Sommer im Glas: Wenn Reste zu Genuss werden</a></h3>
+            <div class="tags"><a class="tag" href="#">garten</a><a class="tag" href="#">nachhaltigkeit</a></div>
+          </div>
+        </article>
+
+        <article class="card reveal">
+          <a class="cover" href="#" tabindex="-1" aria-hidden="true">
+            <img src="https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/bist-du-bereit-fuers-tiny-house-unser-neues-quiz-titelbild.webp" alt="Tiny-House-Quiz" loading="lazy">
+          </a>
+          <div class="card-body">
+            <span class="meta">10. Juni 2026</span>
+            <h3><a href="#">Bist du bereit fürs Tiny House? Unser neues Quiz</a></h3>
+            <div class="tags"><a class="tag" href="#">quiz</a><a class="tag" href="#">planung</a></div>
+          </div>
+        </article>
+
+        <article class="card reveal">
+          <a class="cover" href="#" tabindex="-1" aria-hidden="true">
+            <img src="https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/wenn-die-birke-alles-in-gelb-taucht-titelbild.webp" alt="Birke in gelbem Licht" loading="lazy">
+          </a>
+          <div class="card-body">
+            <span class="meta">19. April 2026</span>
+            <h3><a href="#">Wenn die Birke alles in Gelb taucht</a></h3>
+            <div class="tags"><a class="tag" href="#">natur</a><a class="tag" href="#">alltag</a></div>
+          </div>
+        </article>
+
+        <article class="card reveal">
+          <a class="cover" href="#" tabindex="-1" aria-hidden="true">
+            <img src="https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/kompost-im-tiny-house-mit-wuermern-zum-gold-titelbild.webp" alt="Wurmkompost" loading="lazy">
+          </a>
+          <div class="card-body">
+            <span class="meta">5. April 2026</span>
+            <h3><a href="#">Kompost im Tiny House: Mit Würmern zum Gold</a></h3>
+            <div class="tags"><a class="tag" href="#">kompost</a><a class="tag" href="#">garten</a></div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter -->
+  <section class="newsletter" id="newsletter">
+    <div class="wrap">
+      <div class="newsletter-box reveal">
+        <div>
+          <h2>Post aus dem <span class="hand">Tiny House</span></h2>
+          <p>Etwa einmal im Monat: was auf 36&nbsp;m² gerade funktioniert — und was nicht. Kein Spam, versprochen.</p>
+        </div>
+        <form class="newsletter-form" onsubmit="return false;">
+          <input type="email" placeholder="deine@mailadresse.ch" aria-label="E-Mail-Adresse" required>
+          <button class="btn btn-honey" type="submit">Abonnieren</button>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Footer -->
+<footer class="site">
+  <div class="wrap">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16.18 20.37" role="img" aria-hidden="true">
+            <path fill="#00abe7" d="M1.37,15.25s-.53-.73-.61-2.6c0,0,2.66-2.95,7.75,.11,4.2,2.52,6.74,1.14,6.74,1.14,0,0-.18,1.42-1.03,2.41,0,0-.94,1.06-6.12-1.2-2.68-1.17-4.8-1.07-6.72,.13Z"/>
+            <path fill="#2dc7ff" d="M2.68,17.26s-.16,0-.95-1.34c0,0,2.38-2.6,6.52-.33,2.11,1.08,2.71,1.27,5.25,1.65,0,0-.81,1.01-2.49,1.78,0,0-4.98-2.94-8.33-1.76Z"/>
+            <path fill="#eaba6b" d="M3.29,17.86s2.9-.96,6.81,1.48c0,0-3.67,1.38-6.81-1.48Z"/>
+            <path fill="#05dd66" d="M10.58,4.11s.43-1.99,3.11-1.7l-3.11,1.7Z"/>
+            <path fill="#05dd66" d="M9.79,3.68s-1.24-1.96,.23-2.72l-.23,2.72Z"/>
+            <path fill="#05dd66" d="M9.3,9.3s-1.41-1.01,.28-3.15l-.28,3.15Z"/>
+            <path fill="#05dd66" d="M5.78,7.88s-.41-2.74,3.31-2.74l-3.31,2.74Z"/>
+            <path fill="currentColor" d="M8.08,20.37c-2.39,0-4.52-1.02-6-2.65-.03-.03-.06-.07-.09-.1C.8,16.25,.06,14.48,0,12.52c0-.09,.03-.18,.09-.25,.03-.03,2.93-3.37,8.69-.22,.07,.04,3.94,2.63,6.62,.92,.02-.24,.03-.47,.03-.71,0-3.35-2-6.1-5.03-6.98l-.42,4.77c-.01,.13-.09,.24-.21,.3-.12,.06-.26,.05-.37-.02-.74-.47-1.19-1.07-1.31-1.77-.12-.66,.05-1.32,.33-1.91l-2.71,2.25c-.1,.09-.24,.11-.37,.06-.13-.05-.22-.16-.24-.29-.23-1.34,.02-2.4,.74-3.14,.97-1,2.52-1.16,3.49-1.15-.43-.72-.98-1.92-.66-2.93,.22-.69,.77-1.18,1.65-1.45,.12-.04,.25-.01,.34,.07,.09,.08,.15,.2,.14,.32l-.19,2.22c.07-.07,.15-.15,.24-.22,.93-.75,2.3-.94,4.07-.57,.15,.03,.27,.16,.29,.31,.02,.15-.05,.31-.19,.38-2.05,1.12-3.28,1.79-4.03,2.17,3.14,1.1,5.17,4.04,5.17,7.57,0,.93-.16,1.83-.45,2.66-.23,.68-.54,1.3-.94,1.87,0,.01-.02,.03-.03,.04-.89,1.3-2.14,2.32-3.62,2.93-.02,.01-.05,.02-.07,.03-.93,.37-1.94,.57-3,.57Zm-4.79-2.51c1.28,1.1,2.95,1.76,4.79,1.76,.7,0,1.38-.1,2.02-.28-3.36-1.96-5.79-1.73-6.81-1.48Zm1.47-.92c1.48,0,3.62,.42,6.25,2.08,.95-.41,1.8-1.02,2.49-1.78-1.15,.03-3.11-.35-5.28-1.49-3.47-1.81-5.8-.38-6.49,.16,.32,.54,.56,.88,.75,1.11,.07,.08,.13,.15,.2,.23,.35-.13,1.06-.32,2.08-.32Zm.16-2.82c1.04,0,2.26,.25,3.64,.97,2.66,1.39,4.87,1.54,5.45,1.32,.09-.04,.16-.07,.2-.09,.33-.49,.6-1.03,.8-1.6,.09-.26,.17-.53,.23-.81-3,1.36-6.68-1.11-6.85-1.22-4.67-2.55-7.13-.54-7.64-.04,.05,.93,.26,1.8,.61,2.6,.59-.43,1.82-1.13,3.55-1.13Zm4.66-7.97c-.44,.66-.88,1.52-.74,2.28,.06,.32,.21,.61,.47,.87l.28-3.15Zm-.49-1.01c-.82,.02-2,.19-2.7,.92-.43,.44-.63,1.05-.61,1.82l3.31-2.74Zm4.22-2.74c-.82,0-1.48,.19-1.97,.58-.42,.33-.64,.77-.76,1.13,.82-.44,2.19-1.19,3.11-1.7-.13,0-.26-.01-.38-.01Zm-3.29-1.45c-.33,.19-.53,.43-.63,.73-.19,.6,.08,1.37,.4,1.99l.23-2.72Z"/>
+          </svg>
+          <span class="wordmark">KOKOMO House</span>
+        </div>
+        <p class="footer-note">Zwei Menschen, ein Hund, 36&nbsp;m². <span class="hand">Komm auf einen Kaffee vorbei.</span></p>
+      </div>
+      <div class="footer-links">
+        <a href="#">RSS</a>
+        <a href="#">Impressum</a>
+        <a href="#">Glossar</a>
+        <a href="#newsletter">Newsletter</a>
+      </div>
+      <div class="footer-social">
+        <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"/></svg></a>
+        <a href="#" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2.5" y="5.5" width="19" height="13" rx="3.5"/><path d="M10 9.5v5l4.5-2.5L10 9.5Z" fill="currentColor" stroke="none"/></svg></a>
+        <a href="#" aria-label="RSS-Feed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg></a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 KOKOMO House — mit viel Herz auf 36&nbsp;m² geschrieben.</span>
+      <span>Weniger Raum, mehr Leben.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Theme-Toggle
+  document.getElementById('themeToggle').addEventListener('click', function () {
+    var root = document.documentElement;
+    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('kokomo-theme', next); } catch (e) {}
+  });
+
+  // Mobile-Menü
+  var menuBtn = document.getElementById('menuBtn');
+  var nav = document.getElementById('mainNav');
+  menuBtn.addEventListener('click', function () {
+    var open = nav.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+
+  // Sanfte Scroll-Reveals (nur ohne reduced motion)
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+  } else {
+    document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('in'); });
+  }
+</script>
+</body>
+</html>
