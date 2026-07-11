@@ -4,10 +4,9 @@ date: '2026-07-10'
 summary: 'Nach Jahren auf 36 m² wissen wir, welche Einrichtung im Tiny House wirklich funktioniert: fix statt faltbar, Höhe statt Fläche und nur die Möbel, die den Alltag tragen.'
 tags: ['einrichtung', 'platz', 'wohnideen', 'möbel', 'tiny house']
 authors: ['default']
-draft: true
+draft: false
 images: 'https://pub-29ede69a4da644b9b81fa3dd5f8e9d6a.r2.dev/tiny-house-einrichten-worauf-du-achten-solltest-titelbild.webp'
 ---
-
 Als wir unser Tiny House eingerichtet haben, war der Platz von Anfang an begrenzt — aber unsere Ansprüche an den Alltag nicht. Wir haben uns keine Regeln gesetzt und auch nicht nach den cleversten Pinterest-Lösungen gesucht. Stattdessen haben wir überlegt, was uns wirklich wichtig ist: eine Einrichtung, die funktioniert. Ohne Stress, ohne ständiges Umräumen. Hier teilen wir mit dir, was sich auf 36 m² über die Jahre bewährt hat — vielleicht hilft es dir beim Planen deines eigenen Tiny Houses.
 
 ## Erst der Alltag, dann die Möbel
@@ -63,3 +62,5 @@ Etwas davon ist rein praktisch: ein schlichter **IKEA-Schreibtisch**, der seinen
 Es lohnt sich, sehr genau zu überlegen, wie du auf wenig Platz leben willst. Welche Abläufe brauchst du täglich? Was stört dich? Was brauchst du wirklich? Wer hier ehrlich plant, spart sich später jeden Tag ein bisschen Energie — das ist die eigentliche Kunst beim [Leben mit weniger](/tiny-house/weniger-ist-mehr-im-tiny-house).
 
 Hol dir Inspiration, wo du kannst — aber arbeite mit einem Hersteller zusammen, der mitdenkt. Jemand, der nur „Ja" sagt, hilft dir nicht weiter. Du brauchst jemanden, der hinterfragt und auch mal sagt: So wird das nichts.
+
+<FluxActivity token="cN6Ip6p4xChM6e5y1bdvIBiW" variant="map" />
