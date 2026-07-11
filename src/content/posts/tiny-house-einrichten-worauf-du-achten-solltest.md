@@ -63,4 +63,4 @@ Es lohnt sich, sehr genau zu überlegen, wie du auf wenig Platz leben willst. We
 
 Hol dir Inspiration, wo du kannst — aber arbeite mit einem Hersteller zusammen, der mitdenkt. Jemand, der nur „Ja" sagt, hilft dir nicht weiter. Du brauchst jemanden, der hinterfragt und auch mal sagt: So wird das nichts.
 
-<FluxActivity token="cN6Ip6p4xChM6e5y1bdvIBiW" variant="map" />
+<FluxActivity token="PHlN1blTcEucLL4a3LKLvK66" variant="map" />
