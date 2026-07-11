@@ -1,0 +1,101 @@
+---
+/**
+ * Bettet eine einzelne Flux-Aktivität als Widget ein.
+ *
+ * Flux liefert unter /embed/activity/<token> ein rahmenbares Widget
+ * (öffentlich via Share-Token, kein Login). Die Höhe wird per postMessage
+ * gemeldet und hier automatisch gesetzt — kein innerer Scrollbalken.
+ *
+ * Beispiel:
+ *   <FluxActivity token="AbC123" variant="map" />
+ *
+ * Voraussetzung: In Flux muss das Teilen für die Aktivität aktiviert sein
+ * (erzeugt den Share-Token). Denselben Token hier verwenden.
+ */
+interface Props {
+  /** Share-Token der Aktivität aus Flux. */
+  token: string
+  /** Widget-Variante: kompakte Kachel, mit Karte, oder volle Mini-Detailansicht. */
+  variant?: 'card' | 'map' | 'full'
+  /** Flux-Origin überschreiben (Default: PUBLIC_FLUX_URL). */
+  origin?: string
+  /** Titel für Screenreader / iframe title. */
+  title?: string
+}
+
+const {
+  token,
+  variant = 'card',
+  origin = import.meta.env.PUBLIC_FLUX_URL ?? 'https://flux.mauch.rocks',
+  title = 'Flux Aktivität',
+} = Astro.props
+
+const base = origin.replace(/\/$/, '')
+const src = `${base}/embed/activity/${encodeURIComponent(token)}?variant=${variant}`
+// Startwert je Variante — vermeidet einen Layout-Sprung, bis die echte
+// Höhe per postMessage eintrifft.
+const initialHeight = variant === 'full' ? 900 : variant === 'map' ? 520 : 260
+---
+
+<div class="flux-activity my-8">
+  <iframe
+    src={src}
+    title={title}
+    loading="lazy"
+    scrolling="no"
+    style={`width:100%;height:${initialHeight}px;border:0;`}
+    allow="fullscreen"
+  ></iframe>
+</div>
+
+<style>
+  .flux-activity {
+    border-radius: 1rem;
+    overflow: hidden;
+    background: #000;
+  }
+  .flux-activity iframe {
+    display: block;
+    color-scheme: dark;
+  }
+</style>
+
+<script>
+  // Ein einziger Listener für alle Flux-Widgets auf der Seite. Der passende
+  // iframe wird über das absendende Fenster (event.source) ermittelt — so
+  // funktioniert es auch, wenn dieselbe Aktivität mehrfach eingebettet ist.
+  interface FluxHeightMessage {
+    type: 'flux-embed-height'
+    height: number
+  }
+
+  function isFluxMessage(data: unknown): data is FluxHeightMessage {
+    return (
+      typeof data === 'object' &&
+      data !== null &&
+      (data as { type?: unknown }).type === 'flux-embed-height' &&
+      typeof (data as { height?: unknown }).height === 'number'
+    )
+  }
+
+  window.addEventListener('message', (event: MessageEvent) => {
+    if (!isFluxMessage(event.data)) return
+    const { height } = event.data
+    if (height <= 0) return
+    const iframes =
+      document.querySelectorAll<HTMLIFrameElement>('.flux-activity iframe')
+    for (const iframe of iframes) {
+      if (iframe.contentWindow !== event.source) continue
+      // Nur Nachrichten vom eingebetteten Flux-Origin akzeptieren.
+      let expectedOrigin: string
+      try {
+        expectedOrigin = new URL(iframe.src).origin
+      } catch {
+        return
+      }
+      if (event.origin !== expectedOrigin) return
+      iframe.style.height = `${height}px`
+      return
+    }
+  })
+</script>
