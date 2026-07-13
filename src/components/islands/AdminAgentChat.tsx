@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, type FormEvent } from 'react'
+import { LoginForm } from './AdminUI'
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -16,73 +17,6 @@ interface ToolEvent {
 
 type Phase = 'checking' | 'login' | 'chat'
 
-// ─── Login Form ──────────────────────────────────────────────
-
-function LoginForm({ onLogin }: { onLogin: () => void }) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-    try {
-      const res = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      })
-      if (res.ok) {
-        onLogin()
-      } else {
-        const data = await res.json()
-        setError(data.error || 'Login fehlgeschlagen.')
-      }
-    } catch {
-      setError('Verbindung fehlgeschlagen.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <div className="mx-auto max-w-md">
-      <div className="admin-card p-8">
-        <h2 className="mb-6 text-center text-xl font-semibold text-[var(--text)]">Admin Login</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="E-Mail"
-            required
-            disabled={loading}
-            className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2.5 text-sm text-[var(--text)] placeholder-slate-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-400/30 disabled:opacity-50 dark:placeholder-slate-500 dark:focus:border-primary-500 dark:focus:ring-primary-500/30"
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Passwort"
-            required
-            disabled={loading}
-            className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2.5 text-sm text-[var(--text)] placeholder-slate-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-400/30 disabled:opacity-50 dark:placeholder-slate-500 dark:focus:border-primary-500 dark:focus:ring-primary-500/30"
-          />
-          {error && <p className="text-center text-sm text-red-500">{error}</p>}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-primary-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
-          >
-            {loading ? 'Anmelden...' : 'Anmelden'}
-          </button>
-        </form>
-      </div>
-    </div>
-  )
-}
 
 // ─── Markdown Renderer (simple) ──────────────────────────────
 

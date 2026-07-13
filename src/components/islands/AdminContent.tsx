@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, type FormEvent } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+import { LoginForm, ToastStack, useToasts } from './AdminUI'
 import { compressImage } from '../../lib/compress-image'
 
 // ─── Types ───────────────────────────────────────────────────
@@ -31,77 +32,6 @@ interface PublishResult {
 
 type Phase = 'checking' | 'login' | 'idle' | 'suggesting' | 'suggestions' | 'generating' | 'editor' | 'publishing' | 'published'
 
-// ─── Login Form ──────────────────────────────────────────────
-
-function LoginForm({ onLogin }: { onLogin: () => void }) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-    try {
-      const res = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      })
-      if (res.ok) {
-        onLogin()
-      } else {
-        const data = await res.json()
-        setError(data.error || 'Login fehlgeschlagen.')
-      }
-    } catch {
-      setError('Verbindung fehlgeschlagen.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <div className="mx-auto max-w-md">
-      <div className="admin-card p-8">
-        <h2 className="mb-6 text-center text-xl font-semibold text-[var(--text)]">Admin Login</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="E-Mail"
-            required
-            disabled={loading}
-            className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2.5 text-sm text-[var(--text)] placeholder-slate-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-400/30 disabled:opacity-50 dark:placeholder-slate-500 dark:focus:border-primary-500 dark:focus:ring-primary-500/30"
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Passwort"
-            required
-            disabled={loading}
-            className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2.5 text-sm text-[var(--text)] placeholder-slate-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-400/30 disabled:opacity-50 dark:placeholder-slate-500 dark:focus:border-primary-500 dark:focus:ring-primary-500/30"
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-primary-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
-          >
-            {loading ? 'Wird angemeldet…' : 'Anmelden'}
-          </button>
-        </form>
-        {error && (
-          <div className="mt-4 rounded-xl border border-red-200/50 bg-red-50/60 px-4 py-3 text-center text-sm text-red-700 dark:border-red-800/50 dark:bg-red-900/20 dark:text-red-300">
-            {error}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
 
 // ─── Suggestion Card ─────────────────────────────────────────
 
@@ -160,9 +90,11 @@ function PostEditor({
   const wordCount = draft.body.trim().split(/\s+/).filter(Boolean).length
   const summaryLen = draft.summary.length
   const isInRange = wordCount >= targetWordCount * 0.9 && wordCount <= targetWordCount * 1.1
+  const { toasts, push, dismiss } = useToasts()
 
   return (
     <div className="space-y-5">
+      <ToastStack toasts={toasts} onDismiss={dismiss} />
       <div className="flex items-center gap-3">
         <button
           onClick={onBack}
@@ -256,7 +188,7 @@ function PostEditor({
                   const dataUrl = await compressImage(file)
                   onChange({ ...draft, photo_base64: dataUrl })
                 } catch (err: any) {
-                  alert(err.message || 'Foto konnte nicht geladen werden')
+                  push(err.message || 'Foto konnte nicht geladen werden', 'error')
                 }
                 e.target.value = ''
               }}

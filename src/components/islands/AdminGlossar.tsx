@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { ToastStack, useToasts } from './AdminUI'
 
 interface GlossaryStat {
   term: string
@@ -22,6 +23,7 @@ export default function AdminGlossar() {
   const [editingTerm, setEditingTerm] = useState<string | null>(null)
   const [editBoost, setEditBoost] = useState('')
   const [saving, setSaving] = useState(false)
+  const { toasts, push, dismiss } = useToasts()
 
   useEffect(() => {
     loadStats()
@@ -62,7 +64,7 @@ export default function AdminGlossar() {
       )
       setEditingTerm(null)
     } catch (err: any) {
-      alert(err.message || 'Fehler beim Speichern')
+      push(err.message || 'Fehler beim Speichern', 'error')
     } finally {
       setSaving(false)
     }
@@ -216,6 +218,8 @@ export default function AdminGlossar() {
           </table>
         </div>
       )}
+
+      <ToastStack toasts={toasts} onDismiss={dismiss} />
     </div>
   )
 }

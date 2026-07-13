@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, type FormEvent } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { LoginForm, ConfirmDialog, ToastStack, useToasts } from './AdminUI'
 import { compressImage } from '../../lib/compress-image'
 
 // ─── Types ──────────────────────────────────────────────────
@@ -45,77 +46,6 @@ const PLATFORMS: { key: Platform; label: string; color: string; maxChars: number
   { key: 'whatsapp', label: 'WhatsApp', color: '#25D366', maxChars: 700 },
 ]
 
-// ─── Login Form ─────────────────────────────────────────────
-
-function LoginForm({ onLogin }: { onLogin: () => void }) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-    try {
-      const res = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      })
-      if (res.ok) {
-        onLogin()
-      } else {
-        const data = await res.json()
-        setError(data.error || 'Login fehlgeschlagen.')
-      }
-    } catch {
-      setError('Verbindung fehlgeschlagen.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <div className="mx-auto max-w-md">
-      <div className="admin-card p-8">
-        <h2 className="mb-6 text-center text-xl font-semibold text-[var(--text)]">Admin Login</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="E-Mail"
-            required
-            disabled={loading}
-            className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2.5 text-sm text-[var(--text)] placeholder-slate-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-400/30 disabled:opacity-50 dark:placeholder-slate-500 dark:focus:border-primary-500 dark:focus:ring-primary-500/30"
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Passwort"
-            required
-            disabled={loading}
-            className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2.5 text-sm text-[var(--text)] placeholder-slate-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-400/30 disabled:opacity-50 dark:placeholder-slate-500 dark:focus:border-primary-500 dark:focus:ring-primary-500/30"
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-primary-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
-          >
-            {loading ? 'Wird angemeldet…' : 'Anmelden'}
-          </button>
-        </form>
-        {error && (
-          <div className="mt-4 rounded-xl border border-red-200/50 bg-red-50/60 px-4 py-3 text-center text-sm text-red-700 dark:border-red-800/50 dark:bg-red-900/20 dark:text-red-300">
-            {error}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
 
 // ─── Platform Panel ─────────────────────────────────────────
 
@@ -421,7 +351,7 @@ function TabInhalt({
         markDirty()
       }
     } catch (err: any) {
-      alert(err.message || 'Bild-Upload fehlgeschlagen')
+      setSaveMsg(`Fehler: ${err.message || 'Bild-Upload fehlgeschlagen'}`)
     } finally {
       setUploadingImage(false)
     }
@@ -556,7 +486,8 @@ function TabTitelbild({
       setImageStatus('idle')
       setImageError('')
     } catch (err: any) {
-      alert(err.message || 'Foto konnte nicht geladen werden')
+      setImageStatus('error')
+      setImageError(err.message || 'Foto konnte nicht geladen werden')
     }
     e.target.value = ''
   }
@@ -1004,6 +935,9 @@ export default function AdminPostDetail({ slug }: { slug: string }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [deleting, setDeleting] = useState(false)
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
+  const [pendingTab, setPendingTab] = useState<Tab | null>(null)
+  const { toasts, push, dismiss } = useToasts()
 
   // Tab from hash
   function getTabFromHash(): Tab {
@@ -1028,8 +962,16 @@ export default function AdminPostDetail({ slug }: { slug: string }) {
     // Check for unsaved changes in Inhalt tab
     if (activeTab === 'inhalt' && tab !== 'inhalt') {
       const isDirty = (window as any).__inhaltDirty
-      if (isDirty && isDirty() && !confirm('Ungespeicherte Änderungen verwerfen?')) return
+      if (isDirty && isDirty()) {
+        setPendingTab(tab)
+        return
+      }
     }
+    doSwitchTab(tab)
+  }
+
+  function doSwitchTab(tab: Tab) {
+    setPendingTab(null)
     setActiveTab(tab)
     window.history.replaceState(null, '', tab === 'inhalt' ? window.location.pathname : `#${tab}`)
   }
@@ -1097,7 +1039,6 @@ export default function AdminPostDetail({ slug }: { slug: string }) {
 
   async function handleDelete() {
     if (!post) return
-    if (!confirm(`Post "${post.title}" unwiderruflich löschen?`)) return
     setDeleting(true)
     try {
       const res = await fetch('/api/admin/posts', {
@@ -1112,7 +1053,8 @@ export default function AdminPostDetail({ slug }: { slug: string }) {
       }
       window.location.href = '/admin/posts'
     } catch (err: any) {
-      alert(err.message || 'Löschen fehlgeschlagen')
+      setConfirmDeleteOpen(false)
+      push(err.message || 'Löschen fehlgeschlagen', 'error')
       setDeleting(false)
     }
   }
@@ -1196,7 +1138,7 @@ export default function AdminPostDetail({ slug }: { slug: string }) {
             Vorschau ↗
           </a>
           <button
-            onClick={handleDelete}
+            onClick={() => setConfirmDeleteOpen(true)}
             disabled={deleting}
             title="Post löschen"
             className="cursor-pointer rounded-full border border-red-200 px-3 py-1.5 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 disabled:opacity-50 dark:border-red-800/50 dark:hover:bg-red-900/20"
@@ -1236,6 +1178,33 @@ export default function AdminPostDetail({ slug }: { slug: string }) {
         )}
         {activeTab === 'repurpose' && <TabRepurpose slug={post.slug} />}
       </div>
+
+      <ConfirmDialog
+        open={confirmDeleteOpen}
+        title="Post löschen"
+        message={
+          <>
+            Post <strong>«{post.title}»</strong> unwiderruflich löschen?
+          </>
+        }
+        confirmLabel="Löschen"
+        danger
+        busy={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmDeleteOpen(false)}
+      />
+
+      <ConfirmDialog
+        open={pendingTab !== null}
+        title="Ungespeicherte Änderungen"
+        message="Ungespeicherte Änderungen verwerfen?"
+        confirmLabel="Verwerfen"
+        danger
+        onConfirm={() => pendingTab && doSwitchTab(pendingTab)}
+        onCancel={() => setPendingTab(null)}
+      />
+
+      <ToastStack toasts={toasts} onDismiss={dismiss} />
     </div>
   )
 }

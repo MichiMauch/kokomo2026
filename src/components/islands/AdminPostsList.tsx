@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo, type FormEvent } from 'react'
+import { useState, useEffect, useMemo } from 'react'
+import { LoginForm, ConfirmDialog, ToastStack, useToasts } from './AdminUI'
 
 interface PostInfo {
   slug: string
@@ -20,78 +21,6 @@ const PLATFORMS: { key: Platform; label: string; color: string }[] = [
   { key: 'whatsapp', label: 'WhatsApp', color: '#25D366' },
 ]
 
-// ─── Login Form ──────────────────────────────────────────────
-
-function LoginForm({ onLogin }: { onLogin: () => void }) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-    try {
-      const res = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      })
-      if (res.ok) {
-        onLogin()
-      } else {
-        const data = await res.json()
-        setError(data.error || 'Login fehlgeschlagen.')
-      }
-    } catch {
-      setError('Verbindung fehlgeschlagen.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <div className="mx-auto max-w-md">
-      <div className="admin-card p-8">
-        <h2 className="mb-6 text-center text-xl font-semibold text-[var(--text)]">Admin Login</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="E-Mail"
-            required
-            disabled={loading}
-            className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2.5 text-sm text-[var(--text)] placeholder-slate-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-400/30 disabled:opacity-50 dark:placeholder-slate-500 dark:focus:border-primary-500 dark:focus:ring-primary-500/30"
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Passwort"
-            required
-            disabled={loading}
-            className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2.5 text-sm text-[var(--text)] placeholder-slate-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-400/30 disabled:opacity-50 dark:placeholder-slate-500 dark:focus:border-primary-500 dark:focus:ring-primary-500/30"
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-primary-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
-          >
-            {loading ? 'Wird angemeldet…' : 'Anmelden'}
-          </button>
-        </form>
-        {error && (
-          <div className="mt-4 rounded-xl border border-red-200/50 bg-red-50/60 px-4 py-3 text-center text-sm text-red-700 dark:border-red-800/50 dark:bg-red-900/20 dark:text-red-300">
-            {error}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
 // ─── Post Card ──────────────────────────────────────────────
 
 function PostCard({
@@ -99,18 +28,18 @@ function PostCard({
   hasTexts,
   shareStatus,
   onDeleted,
+  onError,
 }: {
   post: PostInfo
   hasTexts: boolean
   shareStatus: Record<string, string>
   onDeleted: (slug: string) => void
+  onError: (message: string) => void
 }) {
   const [deleting, setDeleting] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
-  async function handleDelete(e: React.MouseEvent) {
-    e.preventDefault()
-    e.stopPropagation()
-    if (!confirm(`Post "${post.title}" unwiderruflich löschen?`)) return
+  async function handleDelete() {
     setDeleting(true)
     try {
       const res = await fetch('/api/admin/posts', {
@@ -123,9 +52,11 @@ function PostCard({
         const data = await res.json()
         throw new Error(data.error || 'Löschen fehlgeschlagen')
       }
+      setConfirmOpen(false)
       onDeleted(post.slug)
     } catch (err: any) {
-      alert(err.message || 'Löschen fehlgeschlagen')
+      setConfirmOpen(false)
+      onError(err.message || 'Löschen fehlgeschlagen')
       setDeleting(false)
     }
   }
@@ -202,7 +133,7 @@ function PostCard({
             Bearbeiten
           </a>
         <button
-          onClick={handleDelete}
+          onClick={() => setConfirmOpen(true)}
           disabled={deleting}
           title="Post löschen"
           className="rounded-md border border-red-200 p-1.5 text-red-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-50 dark:border-red-800/50 dark:hover:bg-red-900/20 dark:hover:text-red-400"
@@ -212,6 +143,21 @@ function PostCard({
           </svg>
         </button>
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Post löschen"
+        message={
+          <>
+            Post <strong>«{post.title}»</strong> unwiderruflich löschen?
+          </>
+        }
+        confirmLabel="Löschen"
+        danger
+        busy={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   )
 }
@@ -226,6 +172,7 @@ export default function AdminPostsList() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
+  const { toasts, push, dismiss } = useToasts()
 
   // Auth-Gate über den DB-freien Login-Endpoint (nicht Turso-abhängig).
   useEffect(() => {
@@ -332,6 +279,7 @@ export default function AdminPostsList() {
               hasTexts={slugsWithTexts.has(post.slug)}
               shareStatus={shareOverview[post.slug] ?? {}}
               onDeleted={handlePostDeleted}
+              onError={(m) => push(m, 'error')}
             />
           ))}
           {filtered.length === 0 && !loading && (
@@ -339,6 +287,8 @@ export default function AdminPostsList() {
           )}
         </div>
       )}
+
+      <ToastStack toasts={toasts} onDismiss={dismiss} />
     </div>
   )
 }
