@@ -1,15 +1,11 @@
 ---
 export const prerender = false
-import BaseLayout from '../../../layouts/BaseLayout.astro'
-import AdminNav from '../../../components/AdminNav.astro'
+import AdminLayout from '../../../layouts/AdminLayout.astro'
 import AdminPostDetail from '../../../components/islands/AdminPostDetail'
 
 const { slug } = Astro.params
 ---
 
-<BaseLayout title="Post bearbeiten" noIndex>
-  <div class="py-12">
-    <AdminNav title="Post bearbeiten" />
-    <AdminPostDetail client:load slug={slug!} />
-  </div>
-</BaseLayout>
+<AdminLayout title="Post bearbeiten">
+  <AdminPostDetail client:load slug={slug!} />
+</AdminLayout>

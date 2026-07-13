@@ -1,13 +1,9 @@
 ---
 export const prerender = false
-import BaseLayout from '../../../layouts/BaseLayout.astro'
-import AdminNav from '../../../components/AdminNav.astro'
+import AdminLayout from '../../../layouts/AdminLayout.astro'
 import AdminPostsList from '../../../components/islands/AdminPostsList'
 ---
 
-<BaseLayout title="Posts" noIndex>
-  <div class="py-12">
-    <AdminNav title="Posts" />
-    <AdminPostsList client:load />
-  </div>
-</BaseLayout>
+<AdminLayout title="Posts">
+  <AdminPostsList client:load />
+</AdminLayout>

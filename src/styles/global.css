@@ -665,3 +665,40 @@ html {
   background-clip: text;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15)) drop-shadow(0 0 1px rgba(0, 0, 0, 0.1));
 }
+
+/* ===== Admin Area (neutral-funktional) ===== */
+.admin-shell {
+  --admin-bg: #f8fafc;
+  --admin-surface: #ffffff;
+  --admin-surface-2: #f1f5f9;
+  --admin-border: #e2e8f0;
+  --admin-sidebar-bg: #0f172a;
+
+  /* Semantische Vars neutralisieren, damit alle Islands automatisch passen */
+  --bg: var(--admin-bg);
+  --bg-secondary: var(--admin-surface-2);
+  --border: var(--admin-border);
+}
+
+.dark .admin-shell {
+  --admin-bg: #0b1220;
+  --admin-surface: #111a2c;
+  --admin-surface-2: #1e293b;
+  --admin-border: #1f2b41;
+}
+
+/* Glass-Cards werden im Admin zu flachen, neutralen Karten */
+.admin-shell .glass-card {
+  background: var(--admin-surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid var(--admin-border);
+  border-radius: 0.75rem;
+  box-shadow: none;
+}
+
+.admin-card {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 0.75rem;
+}

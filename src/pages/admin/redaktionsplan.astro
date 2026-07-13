@@ -1,13 +1,9 @@
 ---
 export const prerender = false
-import BaseLayout from '../../layouts/BaseLayout.astro'
-import AdminNav from '../../components/AdminNav.astro'
+import AdminLayout from '../../layouts/AdminLayout.astro'
 import AdminRedaktionsplan from '../../components/islands/AdminRedaktionsplan'
 ---
 
-<BaseLayout title="Redaktionsplan" noIndex>
-  <div class="py-12">
-    <AdminNav title="Redaktionsplan" />
-    <AdminRedaktionsplan client:load />
-  </div>
-</BaseLayout>
+<AdminLayout title="Redaktionsplan">
+  <AdminRedaktionsplan client:load />
+</AdminLayout>

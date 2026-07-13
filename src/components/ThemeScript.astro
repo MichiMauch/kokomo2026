@@ -1,0 +1,16 @@
+---
+// Dark-Mode Anti-Flash: setzt .dark auf <html> vor dem ersten Paint.
+// Wird in BaseLayout UND AdminLayout verwendet — eine Quelle, kein Drift.
+---
+
+<script is:inline>
+  ;(function () {
+    const theme = localStorage.getItem('theme')
+    if (
+      theme === 'dark' ||
+      (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    ) {
+      document.documentElement.classList.add('dark')
+    }
+  })()
+</script>

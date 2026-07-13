@@ -64,7 +64,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
 
   return (
     <div className="mx-auto max-w-md">
-      <div className="glass-card rounded-2xl p-8 shadow-lg">
+      <div className="admin-card p-8">
         <h2 className="mb-6 text-center text-xl font-semibold text-[var(--text)]">Admin Login</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -74,7 +74,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
             placeholder="E-Mail"
             required
             disabled={loading}
-            className="w-full rounded-full border border-slate-300 bg-white/70 px-5 py-3 text-sm text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-400/30 disabled:opacity-50 dark:border-slate-600/50 dark:bg-slate-800/50 dark:text-white dark:placeholder-slate-500 dark:focus:border-primary-500 dark:focus:ring-primary-500/30"
+            className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2.5 text-sm text-[var(--text)] placeholder-slate-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-400/30 disabled:opacity-50 dark:placeholder-slate-500 dark:focus:border-primary-500 dark:focus:ring-primary-500/30"
           />
           <input
             type="password"
@@ -83,12 +83,12 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
             placeholder="Passwort"
             required
             disabled={loading}
-            className="w-full rounded-full border border-slate-300 bg-white/70 px-5 py-3 text-sm text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-400/30 disabled:opacity-50 dark:border-slate-600/50 dark:bg-slate-800/50 dark:text-white dark:placeholder-slate-500 dark:focus:border-primary-500 dark:focus:ring-primary-500/30"
+            className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2.5 text-sm text-[var(--text)] placeholder-slate-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-400/30 disabled:opacity-50 dark:placeholder-slate-500 dark:focus:border-primary-500 dark:focus:ring-primary-500/30"
           />
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-full bg-primary-700px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md disabled:opacity-50 dark:bg-primary-600 dark:hover:bg-primary-500"
+            className="w-full rounded-lg bg-primary-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
           >
             {loading ? 'Wird angemeldet…' : 'Anmelden'}
           </button>
@@ -132,7 +132,7 @@ function SuggestionCard({
       <button
         onClick={onSelect}
         disabled={disabled}
-        className="rounded-full bg-primary-700px-5 py-2 text-xs font-medium text-white transition-colors hover:bg-primary-800 disabled:opacity-50"
+        className="rounded-full bg-primary-700 px-5 py-2 text-xs font-medium text-white transition-colors hover:bg-primary-800 disabled:opacity-50"
       >
         Ausarbeiten
       </button>
@@ -592,7 +592,7 @@ export default function AdminContent() {
             <h2 className="mb-4 text-lg font-semibold text-[var(--text)]">Neuen Blogpost erstellen</h2>
             <button
               onClick={handleSuggest}
-              className="rounded-full bg-primary-700px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md"
+              className="rounded-full bg-primary-700 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md"
             >
               Themen vorschlagen
             </button>
@@ -638,7 +638,7 @@ export default function AdminContent() {
             <button
               onClick={() => handleGenerate()}
               disabled={!customTopic.trim()}
-              className="rounded-full bg-primary-700px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md disabled:opacity-50"
+              className="rounded-full bg-primary-700 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md disabled:opacity-50"
             >
               Post generieren
             </button>
@@ -695,7 +695,7 @@ export default function AdminContent() {
                   <div className="flex gap-3">
                     <button
                       onClick={() => handleGenerate(selectedSuggestion)}
-                      className="rounded-full bg-primary-700px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md"
+                      className="rounded-full bg-primary-700 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md"
                     >
                       Post generieren
                     </button>
@@ -793,7 +793,7 @@ export default function AdminContent() {
           </div>
           <button
             onClick={handleReset}
-            className="rounded-full bg-primary-700px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md"
+            className="rounded-full bg-primary-700 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-800 hover:shadow-md"
           >
             Neuen Post erstellen
           </button>

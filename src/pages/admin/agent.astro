@@ -1,13 +1,9 @@
 ---
 export const prerender = false
-import BaseLayout from '../../layouts/BaseLayout.astro'
-import AdminNav from '../../components/AdminNav.astro'
+import AdminLayout from '../../layouts/AdminLayout.astro'
 import AdminAgentChat from '../../components/islands/AdminAgentChat'
 ---
 
-<BaseLayout title="Blog-Agent" noIndex>
-  <div class="py-12">
-    <AdminNav title="Content Agent" />
-    <AdminAgentChat client:load />
-  </div>
-</BaseLayout>
+<AdminLayout title="Content Agent">
+  <AdminAgentChat client:load />
+</AdminLayout>

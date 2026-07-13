@@ -1,0 +1,136 @@
+---
+/**
+ * Admin-Sidebar: feste Navigation links, dunkles Slate in beiden Modes.
+ * Mobile: Drawer via Checkbox-Pattern (#admin-nav-toggle liegt im AdminLayout
+ * als vorangehendes Sibling — peer-checked steuert Ein-/Ausblenden).
+ */
+interface NavItem {
+  href: string
+  label: string
+  icon: string
+  external?: boolean
+}
+
+const links: NavItem[] = [
+  { href: '/admin', label: 'Dashboard', icon: 'dashboard' },
+  { href: '/admin/redaktionsplan', label: 'Redaktionsplan', icon: 'calendar' },
+  { href: '/admin/posts', label: 'Posts', icon: 'file-text' },
+  { href: '/admin/content', label: 'Blog-Content', icon: 'folder' },
+  { href: '/admin/agent', label: 'Content Agent', icon: 'bot' },
+  { href: '/admin/comments', label: 'Kommentare', icon: 'message-square' },
+  { href: '/admin/glossar', label: 'Glossar', icon: 'book-open' },
+  { href: '/admin/quiz', label: 'Quiz', icon: 'help-circle' },
+  { href: '/admin/newsletter', label: 'Newsletter', icon: 'mail', external: true },
+]
+
+// Lucide-Pfade (24x24, stroke-basiert) — inline, keine Dependency
+const icons: Record<string, string> = {
+  dashboard:
+    '<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
+  calendar:
+    '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+  'file-text':
+    '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+  folder:
+    '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>',
+  bot:
+    '<rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="15" x2="8" y2="17"/><line x1="16" y1="15" x2="16" y2="17"/>',
+  'message-square':
+    '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  'book-open':
+    '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+  'help-circle':
+    '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  mail:
+    '<rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/>',
+  'external-link':
+    '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>',
+  globe:
+    '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
+}
+
+const current = Astro.url.pathname.replace(/\/+$/, '') || '/admin'
+function isActive(href: string): boolean {
+  if (href === '/admin') return current === '/admin'
+  return current === href || current.startsWith(href + '/')
+}
+---
+
+<!-- Backdrop (Mobile, schliesst den Drawer) -->
+<label
+  for="admin-nav-toggle"
+  class="fixed inset-0 z-40 hidden bg-black/50 peer-checked:block lg:peer-checked:hidden"
+  aria-hidden="true"></label>
+
+<aside
+  class="fixed inset-y-0 left-0 z-50 flex w-60 -translate-x-full flex-col bg-[var(--admin-sidebar-bg)] text-slate-300 transition-transform duration-200 peer-checked:translate-x-0 lg:translate-x-0"
+>
+  <!-- Brand -->
+  <a href="/admin" class="flex items-center gap-3 px-5 py-5">
+    <img src="/static/images/kokomo-bildmarke.svg" alt="" class="h-8 w-8" />
+    <span class="font-sans text-sm font-bold tracking-wide text-white">
+      KOKOMO <span class="font-normal text-slate-400">Admin</span>
+    </span>
+  </a>
+
+  <!-- Navigation -->
+  <nav class="flex-1 space-y-0.5 overflow-y-auto px-3 py-2" aria-label="Admin-Navigation">
+    {
+      links.map((l) => (
+        <a
+          href={l.href}
+          aria-current={isActive(l.href) ? 'page' : undefined}
+          class={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+            isActive(l.href)
+              ? 'bg-primary-500/15 text-primary-400'
+              : 'text-slate-400 hover:bg-white/5 hover:text-slate-100'
+          }`}
+        >
+          <svg
+            class="h-4.5 w-4.5 shrink-0"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            set:html={icons[l.icon]}
+          />
+          <span class="flex-1">{l.label}</span>
+          {l.external && (
+            <svg
+              class="h-3.5 w-3.5 shrink-0 opacity-60"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              set:html={icons['external-link']}
+            />
+          )}
+        </a>
+      ))
+    }
+  </nav>
+
+  <!-- Footer -->
+  <div class="border-t border-white/10 px-3 py-3">
+    <a
+      href="/"
+      class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-slate-100"
+    >
+      <svg
+        class="h-4.5 w-4.5 shrink-0"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        set:html={icons['globe']}
+      />
+      Zur Website
+    </a>
+  </div>
+</aside>

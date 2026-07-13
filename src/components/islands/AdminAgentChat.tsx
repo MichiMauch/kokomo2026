@@ -49,7 +49,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
 
   return (
     <div className="mx-auto max-w-md">
-      <div className="glass-card rounded-2xl p-8 shadow-lg">
+      <div className="admin-card p-8">
         <h2 className="mb-6 text-center text-xl font-semibold text-[var(--text)]">Admin Login</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -59,7 +59,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
             placeholder="E-Mail"
             required
             disabled={loading}
-            className="w-full rounded-full border border-slate-300 bg-white/70 px-5 py-3 text-sm text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-400/30 disabled:opacity-50 dark:border-slate-600/50 dark:bg-slate-800/50 dark:text-white dark:placeholder-slate-500 dark:focus:border-primary-500 dark:focus:ring-primary-500/30"
+            className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2.5 text-sm text-[var(--text)] placeholder-slate-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-400/30 disabled:opacity-50 dark:placeholder-slate-500 dark:focus:border-primary-500 dark:focus:ring-primary-500/30"
           />
           <input
             type="password"
@@ -68,13 +68,13 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
             placeholder="Passwort"
             required
             disabled={loading}
-            className="w-full rounded-full border border-slate-300 bg-white/70 px-5 py-3 text-sm text-slate-900 placeholder-slate-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-400/30 disabled:opacity-50 dark:border-slate-600/50 dark:bg-slate-800/50 dark:text-white dark:placeholder-slate-500 dark:focus:border-primary-500 dark:focus:ring-primary-500/30"
+            className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2.5 text-sm text-[var(--text)] placeholder-slate-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-400/30 disabled:opacity-50 dark:placeholder-slate-500 dark:focus:border-primary-500 dark:focus:ring-primary-500/30"
           />
           {error && <p className="text-center text-sm text-red-500">{error}</p>}
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-full bg-primary-700px-6 py-3 text-sm font-medium text-white transition-all hover:bg-primary-800 disabled:opacity-50"
+            className="w-full rounded-lg bg-primary-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-50"
           >
             {loading ? 'Anmelden...' : 'Anmelden'}
           </button>
@@ -112,7 +112,7 @@ function ChatMessage({ msg }: { msg: Message }) {
   if (msg.role === 'user') {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[75%] rounded-2xl rounded-br-md bg-primary-700px-4 py-3 text-sm text-white shadow-sm">
+        <div className="max-w-[75%] rounded-2xl rounded-br-md bg-primary-700 px-4 py-3 text-sm text-white shadow-sm">
           {msg.content}
         </div>
       </div>
@@ -407,7 +407,7 @@ export default function AdminAgentChat() {
                 <button
                   type="submit"
                   disabled={isStreaming || !input.trim()}
-                  className="rounded-full bg-primary-700px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-primary-800 disabled:opacity-50"
+                  className="rounded-full bg-primary-700 px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-primary-800 disabled:opacity-50"
                 >
                   Senden
                 </button>

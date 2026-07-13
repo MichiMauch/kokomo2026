@@ -1,13 +1,9 @@
 ---
 export const prerender = false
-import BaseLayout from '../../layouts/BaseLayout.astro'
-import AdminNav from '../../components/AdminNav.astro'
+import AdminLayout from '../../layouts/AdminLayout.astro'
 import AdminGlossar from '../../components/islands/AdminGlossar'
 ---
 
-<BaseLayout title="Glossar-Statistiken" noIndex>
-  <div class="py-12">
-    <AdminNav title="Glossar-Statistiken" />
-    <AdminGlossar client:load />
-  </div>
-</BaseLayout>
+<AdminLayout title="Glossar">
+  <AdminGlossar client:load />
+</AdminLayout>
