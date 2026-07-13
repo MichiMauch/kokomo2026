@@ -1,3 +1,10 @@
+> ## ⚠️ Stillgelegt / Deprecated
+>
+> Dieses Repo ist **nicht mehr aktiv**. Die Weiterentwicklung von kokomo.house
+> läuft ausschliesslich in **[kokomo-relaunch](https://github.com/MichiMauch/kokomo-relaunch)**.
+> Der Content-Workflow (Skills `kokomo-*`, `content-config/`, `pipeline/new-post.ts`)
+> wurde dorthin übernommen. Bitte hier nichts Neues committen.
+
 # Astro Starter Kit: Minimal
 
 ```sh
